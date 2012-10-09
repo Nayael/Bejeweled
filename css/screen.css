@@ -1,0 +1,17 @@
+@charset "UTF-8";
+
+html, body{
+	margin: 0px;
+	padding: 0px;
+}
+
+#content{
+	width: 1200px;
+	margin: auto;
+}
+
+#content p{
+	font-family: 'Segoe UI', 'Arial', 'Helvetica', 'Trebuchet MS', sans-serif;
+	font-size: 14px;
+	text-align: justify;
+}
