@@ -1,7 +1,9 @@
-/*
-	Developed by Robert Nyman, http://www.robertnyman.com
-	Code/licensing: http://code.google.com/p/getelementsbyclassname/
-*/	
+/**
+ *	Assures the compatibility with IE
+ *
+ *	Developed by Robert Nyman, http://www.robertnyman.com
+ *	Code/licensing: http://code.google.com/p/getelementsbyclassname/
+ */	
 var getElementsByClassName = function (className, tag, elm){
 	if (document.getElementsByClassName) {
 		getElementsByClassName = function (className, tag, elm) {
