@@ -8,15 +8,17 @@ var game = {
 	 */
 	createItem: function(i, j, tile) {
 		var item, left, top;
-		left = ((60 * j) + 2 * (j + 1)) + 'px';
-		top = ((60 * i) + 2 * (i + 1)) +'px';
+		left = ((60 * j) + 5 * (j + 1)) + 'px';
+		top = ((60 * i) + 5 * (i + 1)) +'px';
 
 		item = document.createElement('span');
 		item.className = 'item';
 		item.id = 'tile' + i + '_' + j;
 		item.style.top = top;
 		item.style.left = left;
-		item.style.backgroundColor = '#' + (tile * 7) + '00000';
+		item.style.backgroundImage = 'url("../images/sprites/' + tile + '.png")';
+		item.style.backgroundRepeat = 'no-repeat';
+		item.style.backgroundPosition = 'top center';
 		return item;
 	},
 
