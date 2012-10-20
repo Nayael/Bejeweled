@@ -33,3 +33,13 @@ function addEvent(element, event, func) {
 	else
 		element.addEventListener(event, func, true);
 }
+
+/**
+ * Removes an event listener (handles IE compatibility)
+ */
+function removeEvent(element, event, func) {
+	if (element.detachEvent)
+		element.detachEvent('on' + event, func);
+	else
+		element.removeEventListener(event, func, true);
+}
