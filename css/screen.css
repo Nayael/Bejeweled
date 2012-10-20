@@ -5,6 +5,10 @@ html, body{
 	padding: 0px;
 }
 
+body{
+	background: #EEF;
+}
+
 #content{
 	width: 1200px;
 	margin: auto;
@@ -15,3 +19,35 @@ html, body{
 	font-size: 14px;
 	text-align: justify;
 }
+
+#game_content{
+	width: 800px;
+	height: 700px;
+	margin: auto;
+	margin-top: 30px;
+	border: 1px solid #000;
+}
+
+#grid{
+	width: 540px;
+	height: 540px;
+	margin-left: 50px;
+	margin-top: 50px;
+	border: 1px solid black;
+	position: relative;
+}
+
+.item{
+	position: absolute;
+	width: 60px;
+	height: 60px;
+}
+
+#rules{
+	display: none;
+}
+
+/*footer{
+	position: fixed;
+	bottom: 15px;
+}*/

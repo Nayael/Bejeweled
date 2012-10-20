@@ -3,21 +3,22 @@
 <head>
 	<meta charset="utf-8" />
 	
-	<title>Bejeweled forever !</title>
+	<title>Mineraled</title>
 
 	<link rel="icon" type="image/x-icon" href="images/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="css/screen.css" />
 </head>
 <body>
 	<div id="content">
-		<div id="game_content"></div>
+		<div id="game_content"><div id="grid"></div></div>
 
 		<p id="rules">The objective of this game is to swap one gem with an adjacent gem to form a horizontal or vertical chain of three or more gems. Bonus points are given when more than three identical gems are formed or forms two lines of identical gems in one swap. Gems disappear when chains are formed and gems fall from the top to fill in gaps. Sometimes chain reactions, called cascades, are triggered, where chains are formed by the falling gems. Cascades are awarded with bonus points. There are two variations of the game to choose from.</p>
 
 		<footer>Conception et développement - 2012 Nicolas Vannier</footer>
 	</div>
 
-	<script type="text/javascript" src="js/getElementsByClassName.js"></script>
-	<script type="text/javascript" src="js/utils.js"></script>
+	<script type="text/javascript" src="js/util/utils.js"></script>
+	<script type="text/javascript" src="js/levels/levels.js"></script>
+	<script type="text/javascript" src="js/main.js"></script><!-- The main game script -->
 </body>
 </html>
