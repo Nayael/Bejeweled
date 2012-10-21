@@ -36,6 +36,15 @@ var game = {
 	},
 
 	/**
+	 * Removes an item from the map
+	 */
+	removeItem: function(item) {
+		// TODO animation
+		// console.log('item: ', item);
+		get('#grid').removeChild(item);
+	},
+
+	/**
 	 * Creates the grid for the level
 	 */
 	init: function() {
@@ -103,9 +112,9 @@ var game = {
 			}
 		}
 
-		if (game.checkStreak()){
+		if (game.checkStreak(game.item.sprite)){
 			game.removeStreak();
-		}else{
+		}else {
 			if (game.hovered != null) {
 				game.item.x = game.hovered.style.left;
 				game.item.y = game.hovered.style.top;
@@ -172,74 +181,136 @@ var game = {
 	/**
 	 * Searches for the presence of an item streak
 	 */
-	checkStreak: function() {
-		var x = parseInt(game.item.sprite.id.substr(6, 1)),
-			y = parseInt(game.item.sprite.id.substr(4, 1)),
-			map = game.level.map,
-			value = map[y][x],
+	checkStreak: function(item) {
+		var x = parseInt(item.id.substr(6, 1)),
+			y = parseInt(item.id.substr(4, 1)),
 			row = [],
 			column = [];
 
 		// Checking in the row
-		if (x > 0) {
-			for (var i = x - 1; i > -1; i--) {	// Checking the items on the left
-				if (map[y][i] == value)						// If the read item's value is the same as the adjacent item's value
-				    row.push(get('#tile' + y + '_' + i));	// We add it to the items to remove
-				else	// Otherwise
-					break;	// We stop looking for a streak
-			}
-		}
-		if (x < 7) {   
-			for (i = x + 1; i < 8; i++) {	// Checking the items on the right
-				if (map[y][i] == value)						// If the read item's value is the same as the adjacent item's value
-				    row.push(get('#tile' + y + '_' + i));	// We add it to the items to remove
-				else	// Otherwise
-					break;	// We stop looking for a streak
-			}
-		}
+		row = game.checkRow(item, x, y);
 
 		// Checking in the column
-		if (y > 0) {
-			for (var j = y - 1; j > -1; j--) {	// Checking the items on the left
-				if (map[j][x] == value)						// If the read item's value is the same as the adjacent item's value
-				    row.push(get('#tile' + j + '_' + x));	// We add it to the items to remove
-				else	// Otherwise
-					break;	// We stop looking for a streak
-			}
-		}
-		if (y < 7) {   
-			for (j = y + 1; j < 8; j++) {	// Checking the items on the right
-				if (map[j][x] == value)						// If the read item's value is the same as the adjacent item's value
-				    row.push(get('#tile' + j + '_' + x));	// We add it to the items to remove
-				else	// Otherwise
-					break;	// We stop looking for a streak
-			}
-		}
+		column = game.checkColumn(item, x, y);
 
 		// If we have a row of three identical items
 		if (row.length > 1) {
-		    for (var i = 0; i < row.length; i++) {
-		    	game.itemsToRemove.push(row[i]);	// We will remove the items from the row
-		    }
+			for (var i = 0; i < row.length; i++) {
+				if (game.itemsToRemove.indexOf(row[i]) == -1)
+					game.itemsToRemove.push(row[i]);	// We will remove the items from the row
+			}
 		}
 
 		// If we have a column of three identical items
 		if (column.length > 1) {
-		    for (var i = 0; i < column.length; i++) {
-		    	game.itemsToRemove.push(column[i]);	// We will remove the items from the column
-		    }
+			for (var i = 0; i < column.length; i++) {
+				if (game.itemsToRemove.indexOf(column[i]) == -1)
+					game.itemsToRemove.push(column[i]);	// We will remove the items from the column
+			}
 		}
 
 		// If we have a row or a column of three identical items
-		if (row.length > 1 || column.length > 1) {
-		    game.itemsToRemove.push(game.item.sprite);	// We know the moved item will be removed
+		if ((row.length > 1 || column.length > 1) && item == game.item.sprite) {
+			game.itemsToRemove.push(item);	// We know the moved item will be removed
 			return true;	// We allow the removing
 		}
 		return false;
 	},
 
+	/**
+	 * Checks for a streak in the item's column
+	 */
+	checkColumn: function(item, x, y) {
+		var column = [],
+			currentItem,
+			currentItemRow = [],
+			map = game.level.map,
+			value = map[y][x];
+		
+		// Checking the items on top
+		if (y > 0) {
+			for (var j = y - 1; j > -1; j--) {
+				currentItem = get('#tile' + j + '_' + x);
+				if (map[j][x] == value && currentItem != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
+					if (column.indexOf(currentItem) == -1)	// And the item was not already detected
+						column.push(currentItem);	// We add it to the items to remove
+
+					currentItemRow = game.checkRow(currentItem, x, j);	// We check for its adjacent items
+					for (var i = 0; i < currentItemRow.length; i++)		// If there are, we add them to the items to remove too
+						column.push(currentItemRow[i]);
+				}else
+					break;	// We stop looking for a streak
+			}
+		}
+
+		// Checking the items on bottom
+		if (y < 7) {
+			for (j = y + 1; j < 8; j++) {
+				currentItem = get('#tile' + j + '_' + x);
+				if (map[j][x] == value && currentItem != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
+					if (column.indexOf(currentItem) == -1)	// And the item was not already detected
+						column.push(currentItem);	// We add it to the items to remove
+
+					currentItemRow = game.checkRow(currentItem, x, j);	// We check for its adjacent items
+					for (var i = 0; i < currentItemRow.length; i++)		// If there are, we add them to the items to remove too
+						column.push(currentItemRow[i]);
+				}else
+					break;	// We stop looking for a streak
+			}
+		}
+		return column;
+	},
+
+	/**
+	 * Checks for a streak in the item's row
+	 */
+	checkRow: function(item, x, y) {
+		var row = [],
+			currentItem,
+			currentItemColumn = [],
+			map = game.level.map,
+			value = map[y][x];
+		
+		// Checking the items on the left
+		if (x > 0) {
+			for (var i = x - 1; i > -1; i--) {
+				currentItem = get('#tile' + y + '_' + i);
+				if (map[y][i] == value && currentItem != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
+					if (row.indexOf(currentItem) == -1)	// And the item was not already detected
+						row.push(currentItem);	// We add it to the items to remove
+
+					currentItemColumn = game.checkColumn(currentItem, i, y);	// We check for its adjacent items
+					for (var j = 0; j < currentItemColumn.length; j++)		// If there are, we add them to the items to remove too
+						row.push(currentItemColumn[j]);
+				}else
+					break;	// We stop looking for a streak
+			}
+		}
+
+		// Checking the items on the right
+		if (x < 7) {
+			for (i = x + 1; i < 8; i++) {
+				currentItem = get('#tile' + y + '_' + i);
+				if (map[y][i] == value && currentItem != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
+					if (row.indexOf(currentItem) == -1)	// And the item was not already detected
+						row.push(currentItem);	// We add it to the items to remove
+
+					currentItemColumn = game.checkColumn(currentItem, i, y);	// We check for its adjacent items
+					for (var j = 0; j < currentItemColumn.length; j++)		// If there are, we add them to the items to remove too
+						row.push(currentItemColumn[j]);
+				}else
+					break;	// We stop looking for a streak
+			}
+		}
+		return row;
+	},
+
+	/**
+	 * Removes all the items that form a streak (line or row, or both)
+	 */
 	removeStreak: function() {
-		console.log('game.itemsToRemove: ', game.itemsToRemove);
+		for (var i = 0; i < game.itemsToRemove.length; i++)
+			game.removeItem(game.itemsToRemove[i]);
 	}
 };
 
