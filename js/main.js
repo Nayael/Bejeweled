@@ -1,8 +1,8 @@
 // This variable represents the instance of the game
 var game = {
 	lvl: 0,				// The current level index
-	level: levels[0],		// The current level object
-	hovered: null,
+	level: levels[0],	// The current level object
+	hovered: null,		// The hovered item to swap with
 	item: {
 		sprite: null,	// The selected sprite
 		x: null,		// The source sprite's x
@@ -10,7 +10,7 @@ var game = {
 	},
 
 	/**
-	 * Create an item from its coordinates and tile value
+	 * Creates an item from its coordinates and tile value
 	 */
 	createItem: function(i, j, tile) {
 		var item, left, top;
@@ -99,7 +99,7 @@ var game = {
 			}
 		}
 
-		// If checkLine(), faire disparaitre les trucs, combos, etc.
+		// If checkStreak(), faire disparaitre les trucs, combos, etc.
 
 		// Else
 		// if (game.hovered != null) {
@@ -163,7 +163,10 @@ var game = {
 		};
 	},
 
-	checkLine: function() {
+	/**
+	 * Searches for the presence of an item streak
+	 */
+	checkStreak: function() {
 		
 	}
 };
