@@ -2,11 +2,11 @@
 var game = {
 	lvl: 0,				// The current level index
 	level: levels[0],		// The current level object
-
+	hovered: null,
 	item: {
-		sprite: null,
-		offsetX: null,
-		offsetY: null
+		sprite: null,	// The selected sprite
+		x: null,		// The source sprite's x
+		y: null			// The source sprite's y
 	},
 
 	/**
@@ -50,7 +50,6 @@ var game = {
 	 * Initializes the dragging of the clicked item
 	 */
 	startDrag: function(e) {
-		console.log('startDrag');
 		var target = e.target || e.srcElement,
 			x = parseInt(target.id.substr(4, 1)),
 			y = parseInt(target.id.substr(6, 1)),
@@ -60,13 +59,17 @@ var game = {
 
 		addEvent(document, 'mouseup', game.stopDrag);	// We allow the moving to the adjacent items
 
+		game.item.sprite = target;
+		game.item.x = target.style.left;
+		game.item.y = target.style.top;
+
 		// We run through the item's row (the 2 adjacent items)
 		for (var i = ((x > 0) ? x - 1 : 0); i <= ((x < 7) ? x + 1 : 7); i++) {
 			itemValue = game.level.map[i][y],	// The value (sprite) of the item
 			item = get('#tile' + i + '_' + y);	// The item <span>
 
 			if (item != target) {	// On the adjacent items, if the player moves his mouse over them, the selected item moves
-				addEvent(item, 'mouseover', game.switchItems);
+				addEvent(item, 'mouseover', game.moveItem);
 			}
 		}
 
@@ -76,79 +79,92 @@ var game = {
 			item = get('#tile' + x + '_' + j);	// The item <span>
 
 			if (item != target) {	// On the adjacent items, if the player moves his mouse over them, the selected item moves
-				addEvent(item, 'mouseover', game.switchItems);	// We allow the moving to the adjacent items
+				addEvent(item, 'mouseover', game.moveItem);	// We allow the moving to the adjacent items
 			}
 		}
-
-		game.item.sprite = target;
-		game.item.x = target.style.left;
-		game.item.y = target.style.top;
 	},
 
 	/**
 	 * Stops the dragging of the selected item
 	 */
 	stopDrag: function(e) {
-		console.log('stopDrag');
 		var map = game.level.map, item;
-
-		// We reset the selected item
-		game.item = {
-			sprite: null,
-			offsetX: null,
-			offsetY: null
-		};
 
 		// We remove the mouse event listeners
 		removeEvent(document, 'mouseup', game.stopDrag);
 		for (var i = 0; i < 8; i++) {
 			for (var j = 0; j < 8; j++) {
 				item = get('#tile' + i + '_' + j);	// The item <span>
-				removeEvent(item, 'mouseover', game.switchItems);
+				removeEvent(item, 'mouseover', game.moveItem);
 			}
 		}
+
+		// If checkLine(), faire disparaitre les trucs, combos, etc.
+
+		// Else
+		// if (game.hovered != null) {
+		// 	game.item.x = game.hovered.style.left;
+		// 	game.item.y = game.hovered.style.top;
+		// 	game.swapItems(game.hovered, game.item.sprite);	// We re-swap the items to their respective original positions
+		// }
+
+		// We reset the swapped items information
+		game.hovered = null;
+		game.item = {
+			sprite: null,
+			offsetX: null,
+			offsetY: null
+		};
 	},
 
 	/**
 	 * Moves the dragged item to the hovered item's position
 	 */
-	switchItems: function(e) {
-		var selected = game.item.sprite,
-			hovered = e.target || e.srcElement,
-			selectedX = parseInt(selected.id.substr(4, 1)),
-			selectedY = parseInt(selected.id.substr(6, 1)),
-			selectedValue = parseInt(selected.className.substr(10, 1)),
-			hoveredX = parseInt(hovered.id.substr(4, 1)),
-			hoveredY = parseInt(hovered.id.substr(6, 1)),
-			hoveredValue = parseInt(hovered.className.substr(10, 1)),
+	moveItem: function(e) {
+		game.hovered = e.target || e.srcElement;
+		game.swapItems(game.item.sprite, game.hovered);
+	},
+
+	/**
+	 * Swaps two items
+	 */
+	swapItems: function(source, dest) {
+		var sourceX = parseInt(source.id.substr(4, 1)),
+			sourceY = parseInt(source.id.substr(6, 1)),
+			sourceValue = parseInt(source.className.substr(10, 1)),
+			destX = parseInt(dest.id.substr(4, 1)),
+			destY = parseInt(dest.id.substr(6, 1)),
+			destValue = parseInt(dest.className.substr(10, 1)),
 			items = get('.item'),
 			map = game.level.map;
 
-		// IF CHECK LINE, FAIRE CE QU'IL Y A EN DESSOUS
+	// TODO animation
+		// We move the source sprite to its new position
+		source.style.left = dest.style.left;
+		source.style.top = dest.style.top;
+		source.id = 'tile' + destX + '_' + destY;
 
-		// We move the selected sprite to its new position
-		selected.style.left = hovered.style.left
-		selected.style.top = hovered.style.top;
-		selected.id = 'tile' + hoveredX + '_' + hoveredY;
+	// TODO animation
+		// We move the dest sprite to its new position
+		dest.style.left = game.item.x;
+		dest.style.top = game.item.y;
+		dest.id = 'tile' + sourceX + '_' + sourceY;
 
-		// We move the hovered sprite to its new position
-		hovered.style.left = game.item.x;
-		hovered.style.top = game.item.y;
-		hovered.id = 'tile' + selectedX + '_' + selectedY;
-
-		game.item.x = selected.style.left;
-		game.item.y = selected.style.top;
+		game.item.x = source.style.left;
+		game.item.y = source.style.top;
 
 		// We replace their values in the map
-		map[selectedY][selectedX] = hoveredValue;
-		map[hoveredY][hoveredX] = selectedValue;
+		map[sourceY][sourceX] = destValue;
+		map[destY][destX] = sourceValue;
 
 		// Once moved, the item cannot be moved again
 		for (var i = 0; i < items.length; i++) {
-			removeEvent(items[i], 'mouseover', game.switchItems);
+			removeEvent(items[i], 'mouseover', game.moveItem);
 		};
+	},
 
-		// FAIRE DISPARAITRE LES ITEMS, PUIS COMBO, ETC.
+	checkLine: function() {
+		
 	}
 };
 game.init();
