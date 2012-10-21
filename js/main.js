@@ -2,12 +2,16 @@
 var game = {
 	lvl: 0,				// The current level index
 	level: levels[0],	// The current level object
+
 	hovered: null,		// The hovered item to swap with
+
 	item: {
 		sprite: null,	// The selected sprite
 		x: null,		// The source sprite's x
 		y: null			// The source sprite's y
 	},
+
+	itemsToRemove: [],
 
 	/**
 	 * Creates an item from its coordinates and tile value
@@ -19,7 +23,7 @@ var game = {
 
 		item = document.createElement('span');
 		item.className = 'item tile_' + tile;
-		item.id = 'tile' + j + '_' + i;
+		item.id = 'tile' + i + '_' + j;
 		item.style.top = top;
 		item.style.left = left;
 		item.style.backgroundImage = 'url("../images/sprites/' + tile + '.png")';
@@ -51,9 +55,9 @@ var game = {
 	 */
 	startDrag: function(e) {
 		var target = e.target || e.srcElement,
-			x = parseInt(target.id.substr(4, 1)),
-			y = parseInt(target.id.substr(6, 1)),
-			targetValue = game.level.map[x][y],
+			x = parseInt(target.id.substr(6, 1)),
+			y = parseInt(target.id.substr(4, 1)),
+			targetValue = game.level.map[y][x],
 			itemValue,
 			item;
 
@@ -65,8 +69,8 @@ var game = {
 
 		// We run through the item's row (the 2 adjacent items)
 		for (var i = ((x > 0) ? x - 1 : 0); i <= ((x < 7) ? x + 1 : 7); i++) {
-			itemValue = game.level.map[i][y],	// The value (sprite) of the item
-			item = get('#tile' + i + '_' + y);	// The item <span>
+			itemValue = game.level.map[y][i],	// The value (sprite) of the item
+			item = get('#tile' + y + '_' + i);	// The item <span>
 
 			if (item != target) {	// On the adjacent items, if the player moves his mouse over them, the selected item moves
 				addEvent(item, 'mouseover', game.moveItem);
@@ -75,8 +79,8 @@ var game = {
 
 		// We run through the item's column (the 2 adjacent items)
 		for (var j = ((y > 0) ? y - 1 : 0); j <= ((y < 7) ? y + 1 : 7); j++) {
-			itemValue = game.level.map[x][j],	// The value (sprite) of the item
-			item = get('#tile' + x + '_' + j);	// The item <span>
+			itemValue = game.level.map[j][x],	// The value (sprite) of the item
+			item = get('#tile' + j + '_' + x);	// The item <span>
 
 			if (item != target) {	// On the adjacent items, if the player moves his mouse over them, the selected item moves
 				addEvent(item, 'mouseover', game.moveItem);	// We allow the moving to the adjacent items
@@ -99,14 +103,15 @@ var game = {
 			}
 		}
 
-		// If checkStreak(), faire disparaitre les trucs, combos, etc.
-
-		// Else
-		// if (game.hovered != null) {
-		// 	game.item.x = game.hovered.style.left;
-		// 	game.item.y = game.hovered.style.top;
-		// 	game.swapItems(game.hovered, game.item.sprite);	// We re-swap the items to their respective original positions
-		// }
+		if (game.checkStreak()){
+			game.removeStreak();
+		}else{
+			if (game.hovered != null) {
+				game.item.x = game.hovered.style.left;
+				game.item.y = game.hovered.style.top;
+				game.swapItems(game.hovered, game.item.sprite);	// We re-swap the items to their respective original positions
+			}
+		}
 
 		// We reset the swapped items information
 		game.hovered = null;
@@ -115,6 +120,7 @@ var game = {
 			offsetX: null,
 			offsetY: null
 		};
+		game.itemsToRemove = [];
 	},
 
 	/**
@@ -129,11 +135,11 @@ var game = {
 	 * Swaps two items
 	 */
 	swapItems: function(source, dest) {
-		var sourceX = parseInt(source.id.substr(4, 1)),
-			sourceY = parseInt(source.id.substr(6, 1)),
+		var sourceX = parseInt(source.id.substr(6, 1)),
+			sourceY = parseInt(source.id.substr(4, 1)),
 			sourceValue = parseInt(source.className.substr(10, 1)),
-			destX = parseInt(dest.id.substr(4, 1)),
-			destY = parseInt(dest.id.substr(6, 1)),
+			destX = parseInt(dest.id.substr(6, 1)),
+			destY = parseInt(dest.id.substr(4, 1)),
 			destValue = parseInt(dest.className.substr(10, 1)),
 			items = get('.item'),
 			map = game.level.map;
@@ -142,13 +148,13 @@ var game = {
 		// We move the source sprite to its new position
 		source.style.left = dest.style.left;
 		source.style.top = dest.style.top;
-		source.id = 'tile' + destX + '_' + destY;
+		source.id = 'tile' + destY + '_' + destX;
 
 	// TODO animation
 		// We move the dest sprite to its new position
 		dest.style.left = game.item.x;
 		dest.style.top = game.item.y;
-		dest.id = 'tile' + sourceX + '_' + sourceY;
+		dest.id = 'tile' + sourceY + '_' + sourceX;
 
 		game.item.x = source.style.left;
 		game.item.y = source.style.top;
@@ -160,14 +166,81 @@ var game = {
 		// Once moved, the item cannot be moved again
 		for (var i = 0; i < items.length; i++) {
 			removeEvent(items[i], 'mouseover', game.moveItem);
-		};
+		}
 	},
 
 	/**
 	 * Searches for the presence of an item streak
 	 */
 	checkStreak: function() {
-		
+		var x = parseInt(game.item.sprite.id.substr(6, 1)),
+			y = parseInt(game.item.sprite.id.substr(4, 1)),
+			map = game.level.map,
+			value = map[y][x],
+			row = [],
+			column = [];
+
+		// Checking in the row
+		if (x > 0) {
+			for (var i = x - 1; i > -1; i--) {	// Checking the items on the left
+				if (map[y][i] == value)						// If the read item's value is the same as the adjacent item's value
+				    row.push(get('#tile' + y + '_' + i));	// We add it to the items to remove
+				else	// Otherwise
+					break;	// We stop looking for a streak
+			}
+		}
+		if (x < 7) {   
+			for (i = x + 1; i < 8; i++) {	// Checking the items on the right
+				if (map[y][i] == value)						// If the read item's value is the same as the adjacent item's value
+				    row.push(get('#tile' + y + '_' + i));	// We add it to the items to remove
+				else	// Otherwise
+					break;	// We stop looking for a streak
+			}
+		}
+
+		// Checking in the column
+		if (y > 0) {
+			for (var j = y - 1; j > -1; j--) {	// Checking the items on the left
+				if (map[j][x] == value)						// If the read item's value is the same as the adjacent item's value
+				    row.push(get('#tile' + j + '_' + x));	// We add it to the items to remove
+				else	// Otherwise
+					break;	// We stop looking for a streak
+			}
+		}
+		if (y < 7) {   
+			for (j = y + 1; j < 8; j++) {	// Checking the items on the right
+				if (map[j][x] == value)						// If the read item's value is the same as the adjacent item's value
+				    row.push(get('#tile' + j + '_' + x));	// We add it to the items to remove
+				else	// Otherwise
+					break;	// We stop looking for a streak
+			}
+		}
+
+		// If we have a row of three identical items
+		if (row.length > 1) {
+		    for (var i = 0; i < row.length; i++) {
+		    	game.itemsToRemove.push(row[i]);	// We will remove the items from the row
+		    }
+		}
+
+		// If we have a column of three identical items
+		if (column.length > 1) {
+		    for (var i = 0; i < column.length; i++) {
+		    	game.itemsToRemove.push(column[i]);	// We will remove the items from the column
+		    }
+		}
+
+		// If we have a row or a column of three identical items
+		if (row.length > 1 || column.length > 1) {
+		    game.itemsToRemove.push(game.item.sprite);	// We know the moved item will be removed
+			return true;	// We allow the removing
+		}
+		return false;
+	},
+
+	removeStreak: function() {
+		console.log('game.itemsToRemove: ', game.itemsToRemove);
 	}
 };
-game.init();
+
+window.onload = game.init();
