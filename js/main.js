@@ -16,14 +16,14 @@ var game = {
 	/**
 	 * Creates an item from its coordinates and tile value
 	 */
-	createItem: function(i, j, tile) {
+	createItem: function(y, x, tile) {
 		var item, left, top;
-		left = ((60 * j) + 5 * (j + 1)) + 'px';
-		top = ((60 * i) + 5 * (i + 1)) +'px';
+		left = ((60 * x) + 5 * (x + 1)) + 'px';
+		top = ((60 * y) + 5 * (y + 1)) +'px';
 
 		item = document.createElement('span');
 		item.className = 'item tile_' + tile;
-		item.id = 'tile' + i + '_' + j;
+		item.id = 'tile' + y + '_' + x;
 		item.style.top = top;
 		item.style.left = left;
 		item.style.backgroundImage = 'url("../images/sprites/' + tile + '.png")';
@@ -31,7 +31,6 @@ var game = {
 		item.style.backgroundPosition = 'top center';
 		item.style.border = 'solid 3px #000';
 
-		addEvent(item, 'mousedown', game.startDrag);
 		return item;
 	},
 
@@ -52,9 +51,11 @@ var game = {
 
 		for (var i = 0; i < 8; i++) {
 			row = game.level.map[i];
-			for (var j = 0; j < 8; j++) {
+			for (var j = 0, item; j < 8; j++) {
 				tile = row[j];
-				grid.appendChild(game.createItem(i, j, tile));	// Adding the new tile on the grid
+				item = game.createItem(i, j, tile);
+				addEvent(item, 'mousedown', game.startDrag);
+				grid.appendChild(item);	// Adding the new tile on the grid
 			}
 		}
 	},
@@ -135,7 +136,10 @@ var game = {
 			y: null
 		};
 
-		if (item1Streak || item2Streak) {    
+		if (item1Streak || item2Streak) {
+			// We generate random new items above the grid
+			game.generateItems();
+
 			// We make the remaining items fall
 			game.itemsFall();
 		}
@@ -400,7 +404,7 @@ var game = {
 			yMin = (columns.yMin[i] > 0 ? columns.yMin[i] - 1 : columns.yMin[i]);
 			yMax = columns.yMax[i];
 
-			for (var j = yMin, item, top, newY; j >= 0; j--) {	// We run through the items, from the lowest to the 0
+			for (var j = yMin, item, top, newY; j >= 0 - (yMax - yMin); j--) {	// We run through the items, from the lowest to the 0
 				item = get('#tile' + j + '_' + columns.indexes[i]);
 				if (item != null) {
 					top = item.style.top;
@@ -415,6 +419,27 @@ var game = {
 					item.id = 'tile' + newY + '_' + columns.indexes[i];	// Setting the new position on the id property
 				}
 			}
+		}
+	},
+
+	/**
+	 * Generates random items above the grid after a streak disappeared
+	 */
+	generateItems: function() {
+		var i = 0,
+			item,
+			x,
+			y = -1,
+			tile;
+
+		for (i; i < game.streak.length; i++) {
+			x = parseInt(game.streak[i].id.substr(6, 1));
+			tile = parseInt(Math.random() * game.level.range);
+
+			item = game.createItem(y, x, tile);
+			addEvent(item, 'mousedown', game.startDrag);
+			grid.appendChild(item);	// Adding the new tile on the grid
+			item.id = 'tile' + y + '_' + x;	// Setting the new position on the id property
 		}
 	}
 };
