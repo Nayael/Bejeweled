@@ -25,6 +25,13 @@ function get(id) {
 }
 
 /**
+ * Removes an element from the page
+ */
+function remove (elem) {
+	elem.parentNode.removeChild(elem);
+}
+
+/**
  * Adds an event listener (handles IE compatibility)
  */
 function addEvent(element, event, func) {
