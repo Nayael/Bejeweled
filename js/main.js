@@ -40,7 +40,6 @@ var game = {
 	 */
 	removeItem: function(item) {
 		// TODO animation
-		// console.log('item: ', item);
 		get('#grid').removeChild(item);
 	},
 
@@ -193,25 +192,49 @@ var game = {
 		// Checking in the column
 		column = game.checkColumn(item, x, y);
 
-		// If we have a row or a column of three identical items
-		if ((row.length > 1 || column.length > 1)) {
-			// Rows
+		// If we have a row of three identical items
+		if (row.length > 1) {
 			for (var i = 0; i < row.length; i++) {
 				if (game.itemsToRemove.indexOf(row[i]) == -1)
 					game.itemsToRemove.push(row[i]);	// We will remove the items from the row
 			}
-			
-			// Columns
+		}
+
+		// If we have a column of three identical items
+		if (column.length > 1) {
 			for (var i = 0; i < column.length; i++) {
 				if (game.itemsToRemove.indexOf(column[i]) == -1)
 					game.itemsToRemove.push(column[i]);	// We will remove the items from the column
 			}
-
-			// The moved item
-			if (item == game.item.sprite)
-				game.itemsToRemove.push(item);	// We know the moved item will be removed
+		}
+ 
+		// If we have a row or a column of three identical items
+		if ((row.length > 1 || column.length > 1) && item == game.item.sprite) {
+			game.itemsToRemove.push(item);	// We know the moved item will be removed
 			return true;	// We allow the removing
 		}
+
+
+		/*** Remove comment if we want streaks with rows and lines ***/
+		// If we have a row or a column of three identical items
+		// if ((row.length > 1 || column.length > 1)) {
+		// 	// Rows
+		// 	for (var i = 0; i < row.length; i++) {
+		// 		if (game.itemsToRemove.indexOf(row[i]) == -1)
+		// 			game.itemsToRemove.push(row[i]);	// We will remove the items from the row
+		// 	}
+			
+		// 	// Columns
+		// 	for (var i = 0; i < column.length; i++) {
+		// 		if (game.itemsToRemove.indexOf(column[i]) == -1)
+		// 			game.itemsToRemove.push(column[i]);	// We will remove the items from the column
+		// 	}
+
+		// 	// The moved item
+		// 	if (item == game.item.sprite)
+		// 		game.itemsToRemove.push(item);	// We know the moved item will be removed
+		// 	return true;	// We allow the removing
+		// }
 		return false;
 	},
 
@@ -220,6 +243,7 @@ var game = {
 	 */
 	checkColumn: function(item, x, y) {
 		var column = [],
+			siblingCheck,
 			currentItem,
 			currentItemRow = [],
 			map = game.level.map,
@@ -229,15 +253,11 @@ var game = {
 		if (y > 0) {
 			for (var j = y - 1; j > -1; j--) {
 				currentItem = get('#tile' + j + '_' + x);
-				if (map[j][x] == value && currentItem != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
-					if (column.indexOf(currentItem) == -1)	// And the item was not already detected
-						column.push(currentItem);	// We add it to the items to remove
-
-					currentItemRow = game.checkRow(currentItem, x, j);	// We check for its adjacent items
-					for (var i = 0; i < currentItemRow.length; i++)		// If there are, we add them to the items to remove too
-						column.push(currentItemRow[i]);
-				}else
-					break;	// We stop looking for a streak
+				siblingCheck = game.siblingCheck(currentItem, column, x, j, value, true);
+				if (siblingCheck != false) 
+				    column = siblingCheck;
+				else
+					break;
 			}
 		}
 
@@ -245,15 +265,11 @@ var game = {
 		if (y < 7) {
 			for (j = y + 1; j < 8; j++) {
 				currentItem = get('#tile' + j + '_' + x);
-				if (map[j][x] == value && currentItem != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
-					if (column.indexOf(currentItem) == -1)	// And the item was not already detected
-						column.push(currentItem);	// We add it to the items to remove
-
-					currentItemRow = game.checkRow(currentItem, x, j);	// We check for its adjacent items
-					for (var i = 0; i < currentItemRow.length; i++)		// If there are, we add them to the items to remove too
-						column.push(currentItemRow[i]);
-				}else
-					break;	// We stop looking for a streak
+				siblingCheck = game.siblingCheck(currentItem, column, x, j, value, true);
+				if (siblingCheck != false) 
+				    column = siblingCheck;
+				else
+					break;
 			}
 		}
 		return column;
@@ -273,15 +289,11 @@ var game = {
 		if (x > 0) {
 			for (var i = x - 1; i > -1; i--) {
 				currentItem = get('#tile' + y + '_' + i);
-				if (map[y][i] == value && currentItem != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
-					if (row.indexOf(currentItem) == -1)	// And the item was not already detected
-						row.push(currentItem);	// We add it to the items to remove
-
-					currentItemColumn = game.checkColumn(currentItem, i, y);	// We check for its adjacent items
-					for (var j = 0; j < currentItemColumn.length; j++)		// If there are, we add them to the items to remove too
-						row.push(currentItemColumn[j]);
-				}else
-					break;	// We stop looking for a streak
+				siblingCheck = game.siblingCheck(currentItem, row, i, y, value, false);
+				if (siblingCheck != false) 
+				    row = siblingCheck;
+				else
+					break;
 			}
 		}
 
@@ -289,18 +301,31 @@ var game = {
 		if (x < 7) {
 			for (i = x + 1; i < 8; i++) {
 				currentItem = get('#tile' + y + '_' + i);
-				if (map[y][i] == value && currentItem != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
-					if (row.indexOf(currentItem) == -1)	// And the item was not already detected
-						row.push(currentItem);	// We add it to the items to remove
-
-					currentItemColumn = game.checkColumn(currentItem, i, y);	// We check for its adjacent items
-					for (var j = 0; j < currentItemColumn.length; j++)		// If there are, we add them to the items to remove too
-						row.push(currentItemColumn[j]);
-				}else
-					break;	// We stop looking for a streak
+				siblingCheck = game.siblingCheck(currentItem, row, i, y, value, false);
+				if (siblingCheck != false) 
+				    row = siblingCheck;
+				else
+					break;
 			}
 		}
 		return row;
+	},
+
+	/**
+	 * Check if the adjacent item of a given item is identical (vertically or horizontally)
+	 */
+	siblingCheck: function(item, line, x, y, value, vertical) {
+		if (game.level.map[y][x] == value && item != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
+			if (line.indexOf(item) == -1)	// And the item was not already detected
+				line.push(item);	// We add it to the items to remove
+			
+			/*** Remove comment if we want streaks with rows and lines ***/
+			// var currentItemLine = vertical ? game.checkRow(item, x, y) : game.checkColumn(item, x, y);	// We check for its adjacent items
+			// for (var i = 0; i < currentItemLine.length; i++)		// If there are, we add them to the items to remove too
+			// 	line.push(currentItemLine[i]);
+			return line;
+		}
+		return false;	// We stop looking for a streak
 	},
 
 	/**
