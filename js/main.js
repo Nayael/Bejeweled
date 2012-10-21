@@ -116,7 +116,7 @@ var game = {
 		// We look for an item streak
 		var item1Streak = game.checkStreak(game.item.sprite),
 			item2Streak = game.hovered ? game.checkStreak(game.hovered) : false;
-		
+
 		if (item1Streak || item2Streak) {
 			game.removeStreak();
 		}else {
@@ -284,9 +284,13 @@ var game = {
 			}
 		}
 
-		if (itemsNb > 1)	    
+		if (item == game.item.sprite || item == game.hovered) {
+			if (itemsNb > 1)
+				return column;
+			return [];
+		}else{
 			return column;
-		return [];
+		}
 	},
 
 	/**
@@ -328,9 +332,13 @@ var game = {
 			}
 		}
 
-		if (itemsNb > 1)	    
+		if (item == game.item.sprite || item == game.hovered) {
+			if (itemsNb > 1)
+				return row;
+			return [];
+		}else{
 			return row;
-		return [];
+		}
 	},
 
 	/**
