@@ -50,11 +50,3 @@ function removeEvent(element, event, func) {
 	else
 		element.removeEventListener(event, func, true);
 }
-
-Array.max = function(array) {
-    return Math.max.apply(Math, array);
-}
-
-Array.min = function(array) {
-    return Math.min.apply(Math, array);
-}
