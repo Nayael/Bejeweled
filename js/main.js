@@ -48,10 +48,10 @@ var game = {
 	 * Creates the grid for the level
 	 */
 	init: function() {
-		var map = game.level.map, grid = get('#grid'), row, tile;
+		var grid = get('#grid'), row, tile;
 
 		for (var i = 0; i < 8; i++) {
-			row = map[i];
+			row = game.level.map[i];
 			for (var j = 0; j < 8; j++) {
 				tile = row[j];
 				grid.appendChild(game.createItem(i, j, tile));	// Adding the new tile on the grid
@@ -66,7 +66,7 @@ var game = {
 		var target = e.target || e.srcElement,
 			x = parseInt(target.id.substr(6, 1)),
 			y = parseInt(target.id.substr(4, 1)),
-			targetValue = game.level.map[y][x],
+			targetValue = parseInt(target.className.substr(10, 1)),
 			itemValue,
 			item;
 
@@ -78,20 +78,20 @@ var game = {
 
 		// We run through the item's row (the 2 adjacent items)
 		for (var i = ((x > 0) ? x - 1 : 0); i <= ((x < 7) ? x + 1 : 7); i++) {
-			itemValue = game.level.map[y][i],	// The value (sprite) of the item
 			item = get('#tile' + y + '_' + i);	// The item <span>
+			itemValue = parseInt(item.className.substr(10, 1));	// The value (sprite) of the item
 
-			if (item != target) {	// On the adjacent items, if the player moves his mouse over them, the selected item moves
+			if (item != target && item != null) {	// On the adjacent items, if the player moves his mouse over them, the selected item moves
 				addEvent(item, 'mouseover', game.moveItem);
 			}
 		}
 
 		// We run through the item's column (the 2 adjacent items)
 		for (var j = ((y > 0) ? y - 1 : 0); j <= ((y < 7) ? y + 1 : 7); j++) {
-			itemValue = game.level.map[j][x],	// The value (sprite) of the item
 			item = get('#tile' + j + '_' + x);	// The item <span>
+			itemValue = parseInt(item.className.substr(10, 1));	// The value (sprite) of the item
 
-			if (item != target) {	// On the adjacent items, if the player moves his mouse over them, the selected item moves
+			if (item != target && item != null) {	// On the adjacent items, if the player moves his mouse over them, the selected item moves
 				addEvent(item, 'mouseover', game.moveItem);	// We allow the moving to the adjacent items
 			}
 		}
@@ -101,7 +101,7 @@ var game = {
 	 * Stops the dragging of the selected item
 	 */
 	stopDrag: function(e) {
-		var map = game.level.map, item;
+		var item;
 
 		// We remove the mouse event listeners
 		removeEvent(document, 'mouseup', game.stopDrag);
@@ -116,6 +116,7 @@ var game = {
 		// We look for an item streak
 		var item1Streak = game.checkStreak(game.item.sprite),
 			item2Streak = game.hovered ? game.checkStreak(game.hovered) : false;
+		
 		if (item1Streak || item2Streak) {
 			game.removeStreak();
 		}else {
@@ -160,8 +161,7 @@ var game = {
 			destX = parseInt(dest.id.substr(6, 1)),
 			destY = parseInt(dest.id.substr(4, 1)),
 			destValue = parseInt(dest.className.substr(10, 1)),
-			items = get('.item'),
-			map = game.level.map;
+			items = get('.item');
 
 	// TODO animation
 		// We move the source sprite to its new position
@@ -177,10 +177,6 @@ var game = {
 
 		game.item.x = source.style.left;
 		game.item.y = source.style.top;
-
-		// We replace their values in the map
-		map[sourceY][sourceX] = destValue;
-		map[destY][destX] = sourceValue;
 
 		// Once moved, the item cannot be moved again
 		for (var i = 0; i < items.length; i++) {
@@ -204,48 +200,48 @@ var game = {
 		column = game.checkColumn(item, x, y);
 
 		// If we have a row of three identical items
-		if (row.length > 1) {
-			for (var i = 0; i < row.length; i++) {
-				if (game.streak.indexOf(row[i]) == -1)
-					game.streak.push(row[i]);	// We will remove the items from the row
-			}
-		}
-
-		// If we have a column of three identical items
-		if (column.length > 1) {
-			for (var i = 0; i < column.length; i++) {
-				if (game.streak.indexOf(column[i]) == -1)
-					game.streak.push(column[i]);	// We will remove the items from the column
-			}
-		}
- 
-		// If we have a row or a column of three identical items
-		if ((row.length > 1 || column.length > 1) && game.streak.indexOf(item) == -1) {
-			game.streak.push(item);	// We know the moved item will be removed
-			return true;	// We allow the removing
-		}
-
-
-		/*** Remove comment if we want additionnal streaks with rows and lines ***/
-		// If we have a row or a column of three identical items
-		// if ((row.length > 1 || column.length > 1)) {
-		// 	// Rows
+		// if (row.length > 1) {
 		// 	for (var i = 0; i < row.length; i++) {
 		// 		if (game.streak.indexOf(row[i]) == -1)
 		// 			game.streak.push(row[i]);	// We will remove the items from the row
 		// 	}
-			
-		// 	// Columns
+		// }
+
+		// // If we have a column of three identical items
+		// if (column.length > 1) {
 		// 	for (var i = 0; i < column.length; i++) {
 		// 		if (game.streak.indexOf(column[i]) == -1)
 		// 			game.streak.push(column[i]);	// We will remove the items from the column
 		// 	}
-
-		// 	// The moved item
-		// 	if (game.streak.indexOf(item) == -1)
-		// 		game.streak.push(item);	// We know the moved item will be removed
+		// }
+ 
+		// // If we have a row or a column of three identical items
+		// if ((row.length > 1 || column.length > 1) && game.streak.indexOf(item) == -1) {
+		// 	game.streak.push(item);	// We know the moved item will be removed
 		// 	return true;	// We allow the removing
 		// }
+
+
+		/*** Remove comment if we want additionnal streaks with rows and lines ***/
+		// If we have a row or a column of three identical items
+		if ((row.length > 1 || column.length > 1)) {
+			// Rows
+			for (var i = 0; i < row.length; i++) {
+				if (game.streak.indexOf(row[i]) == -1)
+					game.streak.push(row[i]);	// We will remove the items from the row
+			}
+			
+			// Columns
+			for (var i = 0; i < column.length; i++) {
+				if (game.streak.indexOf(column[i]) == -1)
+					game.streak.push(column[i]);	// We will remove the items from the column
+			}
+
+			// The moved item
+			if (game.streak.indexOf(item) == -1)
+				game.streak.push(item);	// We know the moved item will be removed
+			return true;	// We allow the removing
+		}
 		return false;
 	},
 
@@ -254,11 +250,11 @@ var game = {
 	 */
 	checkColumn: function(item, x, y) {
 		var column = [],
+			itemsNb = 0,
 			siblingCheck,
 			currentItem,
 			currentItemRow = [],
-			map = game.level.map,
-			value = map[y][x];
+			value = parseInt(item.className.substr(10, 1));	// The value (sprite) of the item
 		
 		// Checking the items on top
 		if (y > 0) {
@@ -269,6 +265,8 @@ var game = {
 				    column = siblingCheck;
 				else
 					break;
+				
+				itemsNb++;
 			}
 		}
 
@@ -281,9 +279,14 @@ var game = {
 				    column = siblingCheck;
 				else
 					break;
+				
+				itemsNb++;
 			}
 		}
-		return column;
+
+		if (itemsNb > 1)	    
+			return column;
+		return [];
 	},
 
 	/**
@@ -291,11 +294,11 @@ var game = {
 	 */
 	checkRow: function(item, x, y) {
 		var row = [],
+			itemsNb = 0,
+			siblingCheck,
 			currentItem,
 			currentItemColumn = [],
-			map = game.level.map,
-			value = map[y][x];
-		
+			value = parseInt(item.className.substr(10, 1));	// The value (sprite) of the item
 		// Checking the items on the left
 		if (x > 0) {
 			for (var i = x - 1; i > -1; i--) {
@@ -305,8 +308,11 @@ var game = {
 				    row = siblingCheck;
 				else
 					break;
+
+				itemsNb++;
 			}
 		}
+
 
 		// Checking the items on the right
 		if (x < 7) {
@@ -317,23 +323,28 @@ var game = {
 				    row = siblingCheck;
 				else
 					break;
+
+				itemsNb++;
 			}
 		}
-		return row;
+
+		if (itemsNb > 1)	    
+			return row;
+		return [];
 	},
 
 	/**
 	 * Check if the adjacent item of a given item is identical (vertically or horizontally)
 	 */
 	siblingCheck: function(item, line, x, y, value, vertical) {
-		if (game.level.map[y][x] == value && item != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
+		if (parseInt(item.className.substr(10, 1)) == value && item != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
 			if (line.indexOf(item) == -1)	// And the item was not already detected
 				line.push(item);	// We add it to the items to remove
 			
 			/*** Remove comment if we want additionnal streaks with rows and lines ***/
-			// var currentItemLine = vertical ? game.checkRow(item, x, y) : game.checkColumn(item, x, y);	// We check for its adjacent items
-			// for (var i = 0; i < currentItemLine.length; i++)		// If there are, we add them to the items to remove too
-			// 	line.push(currentItemLine[i]);
+			var currentItemLine = vertical ? game.checkRow(item, x, y) : game.checkColumn(item, x, y);	// We check for its adjacent items
+			for (var i = 0; i < currentItemLine.length; i++)		// If there are, we add them to the items to remove too
+				line.push(currentItemLine[i]);
 			return line;
 		}
 		return false;	// We stop looking for a streak
@@ -351,16 +362,13 @@ var game = {
 	 * Makes the remaining items fall after a streak disappeared
 	 */	
 	itemsFall: function() {
-		var columns = {
+		var columns = {	// The columns which contain items that must fall
 				indexes: [],
 				yMin : [],
 				yMax : []
-			},	// The columns which contain items that must fall
-			x,
-			y,
-			newY; // top = ((60 * i) + 5 * (i + 1)) +'px'
+			};
 
-		for (var i = 0; i < game.streak.length; i++) {
+		for (var i = 0, x, y; i < game.streak.length; i++) {
 			x = parseInt(game.streak[i].id.substr(6, 1));
 			y = parseInt(game.streak[i].id.substr(4, 1));
 
@@ -379,15 +387,21 @@ var game = {
 		for (var i = 0, yMin, yMax; i < columns.indexes.length; i++) {
 			yMin = (columns.yMin[i] > 0 ? columns.yMin[i] - 1 : columns.yMin[i]);
 			yMax = columns.yMax[i];
-			for (var j = yMin, item, top; j >= 0; j--) {	// We runs through the items, from the lowest to the 0
-				item = get('#tile' + j + '_' + columns.indexes[i]);
-				top = item.style.top;
-				top = parseInt(top.substring(0, top.length - 2));
-				top += 60 * (yMax - yMin) + 5 * (yMax - yMin);
-				top += 'px';
 
-				// TODO animation
-				item.style.top = top;
+			for (var j = yMin, item, top, newY; j >= 0; j--) {	// We run through the items, from the lowest to the 0
+				item = get('#tile' + j + '_' + columns.indexes[i]);
+				if (item != null) {
+					top = item.style.top;
+					top = parseInt(top.substring(0, top.length - 2));
+					top += 60 * (yMax - yMin) + 5 * (yMax - yMin);
+					top += 'px';
+
+					// TODO animation
+					item.style.top = top;	// We move the item to its new position
+
+					newY = j + (yMax - yMin);
+					item.id = 'tile' + newY + '_' + columns.indexes[i];	// Setting the new position on the id property
+				}
 			}
 		}
 	}
