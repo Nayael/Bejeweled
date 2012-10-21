@@ -41,6 +41,7 @@ var game = {
 	removeItem: function(item) {
 		// TODO animation
 		get('#grid').removeChild(item);
+		removeEvent(item, 'mousedown', game.startDrag);
 	},
 
 	/**
@@ -107,11 +108,13 @@ var game = {
 		for (var i = 0; i < 8; i++) {
 			for (var j = 0; j < 8; j++) {
 				item = get('#tile' + i + '_' + j);	// The item <span>
-				removeEvent(item, 'mouseover', game.moveItem);
+				if (item != null)
+					removeEvent(item, 'mouseover', game.moveItem);
 			}
 		}
 
 		if (game.checkStreak(game.item.sprite)){
+			game.checkStreak(game.hovered);
 			game.removeStreak();
 		}else {
 			if (game.hovered != null) {
@@ -209,13 +212,13 @@ var game = {
 		}
  
 		// If we have a row or a column of three identical items
-		if ((row.length > 1 || column.length > 1) && item == game.item.sprite) {
+		if ((row.length > 1 || column.length > 1) && game.itemsToRemove.indexOf(item) == -1) {
 			game.itemsToRemove.push(item);	// We know the moved item will be removed
 			return true;	// We allow the removing
 		}
 
 
-		/*** Remove comment if we want streaks with rows and lines ***/
+		/*** Remove comment if we want additionnal streaks with rows and lines ***/
 		// If we have a row or a column of three identical items
 		// if ((row.length > 1 || column.length > 1)) {
 		// 	// Rows
@@ -231,7 +234,7 @@ var game = {
 		// 	}
 
 		// 	// The moved item
-		// 	if (item == game.item.sprite)
+		// 	if (game.itemsToRemove.indexOf(item) == -1)
 		// 		game.itemsToRemove.push(item);	// We know the moved item will be removed
 		// 	return true;	// We allow the removing
 		// }
@@ -319,7 +322,7 @@ var game = {
 			if (line.indexOf(item) == -1)	// And the item was not already detected
 				line.push(item);	// We add it to the items to remove
 			
-			/*** Remove comment if we want streaks with rows and lines ***/
+			/*** Remove comment if we want additionnal streaks with rows and lines ***/
 			// var currentItemLine = vertical ? game.checkRow(item, x, y) : game.checkColumn(item, x, y);	// We check for its adjacent items
 			// for (var i = 0; i < currentItemLine.length; i++)		// If there are, we add them to the items to remove too
 			// 	line.push(currentItemLine[i]);
