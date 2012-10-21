@@ -193,25 +193,23 @@ var game = {
 		// Checking in the column
 		column = game.checkColumn(item, x, y);
 
-		// If we have a row of three identical items
-		if (row.length > 1) {
+		// If we have a row or a column of three identical items
+		if ((row.length > 1 || column.length > 1)) {
+			// Rows
 			for (var i = 0; i < row.length; i++) {
 				if (game.itemsToRemove.indexOf(row[i]) == -1)
 					game.itemsToRemove.push(row[i]);	// We will remove the items from the row
 			}
-		}
-
-		// If we have a column of three identical items
-		if (column.length > 1) {
+			
+			// Columns
 			for (var i = 0; i < column.length; i++) {
 				if (game.itemsToRemove.indexOf(column[i]) == -1)
 					game.itemsToRemove.push(column[i]);	// We will remove the items from the column
 			}
-		}
 
-		// If we have a row or a column of three identical items
-		if ((row.length > 1 || column.length > 1) && item == game.item.sprite) {
-			game.itemsToRemove.push(item);	// We know the moved item will be removed
+			// The moved item
+			if (item == game.item.sprite)
+				game.itemsToRemove.push(item);	// We know the moved item will be removed
 			return true;	// We allow the removing
 		}
 		return false;
