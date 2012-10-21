@@ -113,8 +113,8 @@ var game = {
 			}
 		}
 
-		if (game.checkStreak(game.item.sprite)){
-			game.checkStreak(game.hovered);
+		// We look for an item streak
+		if (game.checkStreak(game.item.sprite) || game.checkStreak(game.hovered)){
 			game.removeStreak();
 		}else {
 			if (game.hovered != null) {
@@ -124,13 +124,16 @@ var game = {
 			}
 		}
 
-		// We reset the swapped items information
+		// We reset the items information
 		game.hovered = null;
 		game.item = {
 			sprite: null,
-			offsetX: null,
-			offsetY: null
+			x: null,
+			y: null
 		};
+
+
+
 		game.itemsToRemove = [];
 	},
 
