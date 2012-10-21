@@ -11,7 +11,7 @@ var game = {
 		y: null			// The source sprite's y
 	},
 
-	itemsToRemove: [],
+	streak: [],
 
 	/**
 	 * Creates an item from its coordinates and tile value
@@ -114,7 +114,9 @@ var game = {
 		}
 
 		// We look for an item streak
-		if (game.checkStreak(game.item.sprite) || game.checkStreak(game.hovered)){
+		var item1Streak = game.checkStreak(game.item.sprite),
+			item2Streak = game.hovered ? game.checkStreak(game.hovered) : false;
+		if (item1Streak || item2Streak) {
 			game.removeStreak();
 		}else {
 			if (game.hovered != null) {
@@ -132,9 +134,12 @@ var game = {
 			y: null
 		};
 
+		if (item1Streak || item2Streak) {    
+			// We make the remaining items fall
+			game.itemsFall();
+		}
 
-
-		game.itemsToRemove = [];
+		game.streak = [];
 	},
 
 	/**
@@ -201,22 +206,22 @@ var game = {
 		// If we have a row of three identical items
 		if (row.length > 1) {
 			for (var i = 0; i < row.length; i++) {
-				if (game.itemsToRemove.indexOf(row[i]) == -1)
-					game.itemsToRemove.push(row[i]);	// We will remove the items from the row
+				if (game.streak.indexOf(row[i]) == -1)
+					game.streak.push(row[i]);	// We will remove the items from the row
 			}
 		}
 
 		// If we have a column of three identical items
 		if (column.length > 1) {
 			for (var i = 0; i < column.length; i++) {
-				if (game.itemsToRemove.indexOf(column[i]) == -1)
-					game.itemsToRemove.push(column[i]);	// We will remove the items from the column
+				if (game.streak.indexOf(column[i]) == -1)
+					game.streak.push(column[i]);	// We will remove the items from the column
 			}
 		}
  
 		// If we have a row or a column of three identical items
-		if ((row.length > 1 || column.length > 1) && game.itemsToRemove.indexOf(item) == -1) {
-			game.itemsToRemove.push(item);	// We know the moved item will be removed
+		if ((row.length > 1 || column.length > 1) && game.streak.indexOf(item) == -1) {
+			game.streak.push(item);	// We know the moved item will be removed
 			return true;	// We allow the removing
 		}
 
@@ -226,19 +231,19 @@ var game = {
 		// if ((row.length > 1 || column.length > 1)) {
 		// 	// Rows
 		// 	for (var i = 0; i < row.length; i++) {
-		// 		if (game.itemsToRemove.indexOf(row[i]) == -1)
-		// 			game.itemsToRemove.push(row[i]);	// We will remove the items from the row
+		// 		if (game.streak.indexOf(row[i]) == -1)
+		// 			game.streak.push(row[i]);	// We will remove the items from the row
 		// 	}
 			
 		// 	// Columns
 		// 	for (var i = 0; i < column.length; i++) {
-		// 		if (game.itemsToRemove.indexOf(column[i]) == -1)
-		// 			game.itemsToRemove.push(column[i]);	// We will remove the items from the column
+		// 		if (game.streak.indexOf(column[i]) == -1)
+		// 			game.streak.push(column[i]);	// We will remove the items from the column
 		// 	}
 
 		// 	// The moved item
-		// 	if (game.itemsToRemove.indexOf(item) == -1)
-		// 		game.itemsToRemove.push(item);	// We know the moved item will be removed
+		// 	if (game.streak.indexOf(item) == -1)
+		// 		game.streak.push(item);	// We know the moved item will be removed
 		// 	return true;	// We allow the removing
 		// }
 		return false;
@@ -338,8 +343,53 @@ var game = {
 	 * Removes all the items that form a streak (line or row, or both)
 	 */
 	removeStreak: function() {
-		for (var i = 0; i < game.itemsToRemove.length; i++)
-			game.removeItem(game.itemsToRemove[i]);
+		for (var i = 0; i < game.streak.length; i++)
+			game.removeItem(game.streak[i]);
+	},
+
+	/**
+	 * Makes the remaining items fall after a streak disappeared
+	 */	
+	itemsFall: function() {
+		var columns = {
+				indexes: [],
+				yMin : [],
+				yMax : []
+			},	// The columns which contain items that must fall
+			x,
+			y,
+			newY; // top = ((60 * i) + 5 * (i + 1)) +'px'
+
+		for (var i = 0; i < game.streak.length; i++) {
+			x = parseInt(game.streak[i].id.substr(6, 1));
+			y = parseInt(game.streak[i].id.substr(4, 1));
+
+			if (columns.indexes.indexOf(x) == -1){
+				columns.indexes.push(x);
+				columns.yMin.push(8);
+				columns.yMax.push(0);
+			}
+
+			if (y < columns.yMin[columns.yMin.length - 1])	// If the current item's y is inferior to the y coordinate from all the other items in its column
+				columns.yMin[columns.yMin.length - 1] = y;
+			if (y > columns.yMax[columns.yMax.length - 1])	// If the current item's y is inferior to the y coordinate from all the other items in its column
+				columns.yMax[columns.yMax.length - 1] = y;
+		}
+
+		for (var i = 0, yMin, yMax; i < columns.indexes.length; i++) {
+			yMin = (columns.yMin[i] > 0 ? columns.yMin[i] - 1 : columns.yMin[i]);
+			yMax = columns.yMax[i];
+			for (var j = yMin, item, top; j >= 0; j--) {	// We runs through the items, from the lowest to the 0
+				item = get('#tile' + j + '_' + columns.indexes[i]);
+				top = item.style.top;
+				top = parseInt(top.substring(0, top.length - 2));
+				top += 60 * (yMax - yMin) + 5 * (yMax - yMin);
+				top += 'px';
+
+				// TODO animation
+				item.style.top = top;
+			}
+		}
 	}
 };
 
