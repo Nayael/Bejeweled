@@ -200,49 +200,49 @@ var game = {
 		column = game.checkColumn(item, x, y);
 
 		// If we have a row of three identical items
-		// if (row.length > 1) {
-		// 	for (var i = 0; i < row.length; i++) {
-		// 		if (game.streak.indexOf(row[i]) == -1)
-		// 			game.streak.push(row[i]);	// We will remove the items from the row
-		// 	}
-		// }
-
-		// // If we have a column of three identical items
-		// if (column.length > 1) {
-		// 	for (var i = 0; i < column.length; i++) {
-		// 		if (game.streak.indexOf(column[i]) == -1)
-		// 			game.streak.push(column[i]);	// We will remove the items from the column
-		// 	}
-		// }
- 
-		// // If we have a row or a column of three identical items
-		// if ((row.length > 1 || column.length > 1) && game.streak.indexOf(item) == -1) {
-		// 	game.streak.push(item);	// We know the moved item will be removed
-		// 	return true;	// We allow the removing
-		// }
-
-
-		/*** Remove comment if we want additionnal streaks with rows and lines ***/
-		// If we have a row or a column of three identical items
-		if ((row.length > 1 || column.length > 1)) {
-			// Rows
+		if (row.length > 1) {
 			for (var i = 0; i < row.length; i++) {
 				if (game.streak.indexOf(row[i]) == -1)
 					game.streak.push(row[i]);	// We will remove the items from the row
 			}
-			
-			// Columns
+		}
+
+		// If we have a column of three identical items
+		if (column.length > 1) {
 			for (var i = 0; i < column.length; i++) {
 				if (game.streak.indexOf(column[i]) == -1)
 					game.streak.push(column[i]);	// We will remove the items from the column
 			}
-
-			// The moved item
-			if (game.streak.indexOf(item) == -1)
-				game.streak.push(item);	// We know the moved item will be removed
+		}
+ 
+		// If we have a row or a column of three identical items
+		if ((row.length > 1 || column.length > 1) && game.streak.indexOf(item) == -1) {
+			game.streak.push(item);	// We know the moved item will be removed
 			return true;	// We allow the removing
 		}
-		return false;
+
+
+		/*** Remove comment if we want additionnal streaks with rows and lines ***/
+		// If we have a row or a column of three identical items
+		// if ((row.length > 1 || column.length > 1)) {
+		// 	// Rows
+		// 	for (var i = 0; i < row.length; i++) {
+		// 		if (game.streak.indexOf(row[i]) == -1)
+		// 			game.streak.push(row[i]);	// We will remove the items from the row
+		// 	}
+			
+		// 	// Columns
+		// 	for (var i = 0; i < column.length; i++) {
+		// 		if (game.streak.indexOf(column[i]) == -1)
+		// 			game.streak.push(column[i]);	// We will remove the items from the column
+		// 	}
+
+		// 	// The moved item
+		// 	if (game.streak.indexOf(item) == -1)
+		// 		game.streak.push(item);	// We know the moved item will be removed
+		// 	return true;	// We allow the removing
+		// }
+		// return false;
 	},
 
 	/**
@@ -284,13 +284,15 @@ var game = {
 			}
 		}
 
-		if (item == game.item.sprite || item == game.hovered) {
-			if (itemsNb > 1)
-				return column;
-			return [];
-		}else{
-			return column;
-		}
+		/*** Remove comment if we want additionnal streaks with rows and lines ***/
+		// if (item == game.item.sprite || item == game.hovered) {
+		// 	if (itemsNb > 1)
+		// 		return column;
+		// 	return [];
+		// }else{
+		// 	return column;
+		// }
+		return column;
 	},
 
 	/**
@@ -332,13 +334,15 @@ var game = {
 			}
 		}
 
-		if (item == game.item.sprite || item == game.hovered) {
-			if (itemsNb > 1)
-				return row;
-			return [];
-		}else{
-			return row;
-		}
+		/*** Remove comment if we want additionnal streaks with rows and lines ***/
+		// if (item == game.item.sprite || item == game.hovered) {	// If this is the 'main' row check
+		// 	if (itemsNb > 1)	// We only consider rows that have more than 1 items in them
+		// 		return row;
+		// 	return [];
+		// }else {
+		// 	return row;
+		// }
+		return row;
 	},
 
 	/**
@@ -350,9 +354,9 @@ var game = {
 				line.push(item);	// We add it to the items to remove
 			
 			/*** Remove comment if we want additionnal streaks with rows and lines ***/
-			var currentItemLine = vertical ? game.checkRow(item, x, y) : game.checkColumn(item, x, y);	// We check for its adjacent items
-			for (var i = 0; i < currentItemLine.length; i++)		// If there are, we add them to the items to remove too
-				line.push(currentItemLine[i]);
+			// var currentItemLine = vertical ? game.checkRow(item, x, y) : game.checkColumn(item, x, y);	// We check for its adjacent items
+			// for (var i = 0; i < currentItemLine.length; i++)		// If there are, we add them to the items to remove too
+			// 	line.push(currentItemLine[i]);
 			return line;
 		}
 		return false;	// We stop looking for a streak
