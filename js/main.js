@@ -13,6 +13,7 @@ var game = {
 
 	streak: [],
 	newItems: [],
+	animations: [],		// Contains the animations that are being performed
 
 	/**
 	 * Creates an item from its coordinates and tile value
@@ -103,7 +104,11 @@ var game = {
 	 * Stops the dragging of the selected item
 	 */
 	stopDrag: function(e) {
-		var item;
+		var item,
+			dragged = game.item.sprite,
+			hovered = game.hovered,
+			x = parseInt(dragged.id.substr(6, 1)),
+			y = parseInt(dragged.id.substr(4, 1));
 
 		// We remove the mouse event listeners
 		removeEvent(document, 'mouseup', game.stopDrag);
@@ -115,38 +120,71 @@ var game = {
 			}
 		}
 
+		// We manually complete the animations
+		if (hovered != undefined) {
+			for (var i = 0; i < game.animations.length; i++)
+				clearInterval(game.animations[i]);
+			dragged.style.left = ((60 * x) + 5 * (x + 1)) + 'px';
+			dragged.style.top = ((60 * y) + 5 * (y + 1)) +'px';
+			x = parseInt(hovered.id.substr(6, 1));
+			y = parseInt(hovered.id.substr(4, 1));
+			hovered.style.left = ((60 * x) + 5 * (x + 1)) + 'px';
+			hovered.style.top = ((60 * y) + 5 * (y + 1)) +'px';
+		}
+
 		// We look for an item streak
 		var item1Streak = game.checkStreak(game.item.sprite),
 			item2Streak = game.hovered ? game.checkStreak(game.hovered) : false;
 
 		if (item1Streak || item2Streak) {
-			game.removeStreak();
+			// TODO animation des disparitions
+			setTimeout(function() {
+				// We make the streak disappear
+				game.removeStreak();
+
+				// We generate random new items above the grid
+				game.generateItems();
+
+				// We make the remaining items fall
+				game.itemsFall();
+
+				// We reset the items information
+				game.hovered = null;
+				game.item = {
+					sprite: null,
+					x: null,
+					y: null
+				};
+
+				game.streak = [];
+				game.newItems = [];
+			}, 500);
+			// // We make the streak disappear
+			// game.removeStreak();
+
+			// // We generate random new items above the grid
+			// game.generateItems();
+
+			// // We make the remaining items fall
+			// game.itemsFall();
 		}else {
 			if (game.hovered != null) {
 				game.item.x = game.hovered.style.left;
 				game.item.y = game.hovered.style.top;
 				game.swapItems(game.hovered, game.item.sprite);	// We re-swap the items to their respective original positions
 			}
+			// We reset the items information
+			game.hovered = null;
+			game.item = {
+				sprite: null,
+				x: null,
+				y: null
+			};
+
+			game.streak = [];
+			game.newItems = [];
 		}
 
-		// We reset the items information
-		game.hovered = null;
-		game.item = {
-			sprite: null,
-			x: null,
-			y: null
-		};
-
-		if (item1Streak || item2Streak) {
-			// We generate random new items above the grid
-			game.generateItems();
-
-			// We make the remaining items fall
-			game.itemsFall();
-		}
-
-		game.streak = [];
-		game.newItems = [];
 	},
 
 	/**
@@ -169,16 +207,16 @@ var game = {
 			destValue = parseInt(dest.className.substr(10, 1)),
 			items = get('.item');
 
-	// TODO animation
-		// We move the source sprite to its new position
-		source.style.left = dest.style.left;
-		source.style.top = dest.style.top;
+		if (source.style.left != dest.style.left) {
+			game.animations.push(animate(source, 'left', source.style.left, dest.style.left, 8));	// We move the source sprite to its new position
+			game.animations.push(animate(dest, 'left', dest.style.left, source.style.left, 8));	// We move the dest sprite to its new position
+		}
+		if (source.style.top != dest.style.top){
+			game.animations.push(animate(source, 'top', source.style.top, dest.style.top, 8));	// We move the source sprite to its new position
+			game.animations.push(animate(dest, 'top', dest.style.top, source.style.top, 8));	// We move the dest sprite to its new position
+		}
+		
 		source.id = 'tile' + destY + '_' + destX;
-
-	// TODO animation
-		// We move the dest sprite to its new position
-		dest.style.left = game.item.x;
-		dest.style.top = game.item.y;
 		dest.id = 'tile' + sourceY + '_' + sourceX;
 
 		game.item.x = source.style.left;
@@ -428,8 +466,7 @@ var game = {
 					top += 'px';
 
 					// TODO animation
-					animate(item, 'top', item.style.top, top);	// We move the item to its new position
-					// item.style.top = top;	// We move the item to its new position
+					animate(item, 'top', item.style.top, top, 4);	// We move the item to its new position
 
 					newY = j + nbItems;
 					item.id = 'tile' + newY + '_' + keys[i];	// Setting the new position on the id property
