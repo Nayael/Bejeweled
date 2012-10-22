@@ -122,8 +122,12 @@ var game = {
 
 		// We manually complete the animations
 		if (hovered != undefined) {
-			for (var i = 0; i < game.animations.length; i++)
+			for (var i = 0; i < game.animations.length; i++){
 				clearInterval(game.animations[i]);
+				console.log('game.animations[i]: ', game.animations[i]);
+			}
+			game.animations = [];	// We stop their animations
+
 			dragged.style.left = ((60 * x) + 5 * (x + 1)) + 'px';
 			dragged.style.top = ((60 * y) + 5 * (y + 1)) +'px';
 			x = parseInt(hovered.id.substr(6, 1));
@@ -138,6 +142,10 @@ var game = {
 
 		if (item1Streak || item2Streak) {
 			// TODO animation des disparitions
+			var items = get('.item')
+			for (var i = 0; i < items.length; i++) {
+				removeEvent(items[i], 'mousedown', game.startDrag);
+			}
 			setTimeout(function() {
 				// We make the streak disappear
 				game.removeStreak();
@@ -158,15 +166,11 @@ var game = {
 
 				game.streak = [];
 				game.newItems = [];
+
+				for (var i = 0; i < items.length; i++) {
+					addEvent(items[i], 'mousedown', game.startDrag);
+				}
 			}, 500);
-			// // We make the streak disappear
-			// game.removeStreak();
-
-			// // We generate random new items above the grid
-			// game.generateItems();
-
-			// // We make the remaining items fall
-			// game.itemsFall();
 		}else {
 			if (game.hovered != null) {
 				game.item.x = game.hovered.style.left;
