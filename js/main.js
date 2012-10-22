@@ -12,6 +12,7 @@ var game = {
 	},
 
 	streak: [],
+	newItems: [],
 
 	/**
 	 * Creates an item from its coordinates and tile value
@@ -145,6 +146,7 @@ var game = {
 		}
 
 		game.streak = [];
+		game.newItems = [];
 	},
 
 	/**
@@ -221,7 +223,11 @@ var game = {
  
 		// If we have a row or a column of three identical items
 		if ((row.length > 1 || column.length > 1) && game.streak.indexOf(item) == -1) {
-			game.streak.push(item);	// We know the moved item will be removed
+			game.streak.push({
+				sprite: item,
+				'x': x,
+				'y': y
+			});	// We know the moved item will be removed
 			return true;	// We allow the removing
 		}
 
@@ -243,7 +249,11 @@ var game = {
 
 		// 	// The moved item
 		// 	if (game.streak.indexOf(item) == -1)
-		// 		game.streak.push(item);	// We know the moved item will be removed
+		// 		game.streak.push({
+		// 			sprite: item,
+		// 			x: x,
+		// 			y: y
+		// 		});	// We know the moved item will be removed
 		// 	return true;	// We allow the removing
 		// }
 		// return false;
@@ -352,13 +362,17 @@ var game = {
 	/**
 	 * Check if the adjacent item of a given item is identical (vertically or horizontally)
 	 */
-	siblingCheck: function(item, line, x, y, value, vertical) {
+	siblingCheck: function(item, line, i, j, value, vertical) {
 		if (parseInt(item.className.substr(10, 1)) == value && item != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
 			if (line.indexOf(item) == -1)	// And the item was not already detected
-				line.push(item);	// We add it to the items to remove
+				line.push({
+					sprite: item,
+					x: i,
+					y: j
+				});	// We add it to the items to remove
 			
 			/*** Remove comment if we want additionnal streaks with rows and lines ***/
-			// var currentItemLine = vertical ? game.checkRow(item, x, y) : game.checkColumn(item, x, y);	// We check for its adjacent items
+			// var currentItemLine = vertical ? game.checkRow(item, i, j) : game.checkColumn(item, i, j);	// We check for its adjacent items
 			// for (var i = 0; i < currentItemLine.length; i++)		// If there are, we add them to the items to remove too
 			// 	line.push(currentItemLine[i]);
 			return line;
@@ -371,7 +385,7 @@ var game = {
 	 */
 	removeStreak: function() {
 		for (var i = 0; i < game.streak.length; i++)
-			game.removeItem(game.streak[i]);
+			game.removeItem(game.streak[i].sprite);
 	},
 
 	/**
@@ -379,44 +393,45 @@ var game = {
 	 */	
 	itemsFall: function() {
 		var columns = {	// The columns which contain items that must fall
-				indexes: [],
-				yMin : [],
-				yMax : []
-			};
-
+			indexes: {},
+		};
+		
 		for (var i = 0, x, y; i < game.streak.length; i++) {
-			x = parseInt(game.streak[i].id.substr(6, 1));
-			y = parseInt(game.streak[i].id.substr(4, 1));
+			x = game.streak[i].x;
+			y = game.streak[i].y;
 
-			if (columns.indexes.indexOf(x) == -1){
-				columns.indexes.push(x);
-				columns.yMin.push(8);
-				columns.yMax.push(0);
+			if (!columns.indexes.hasOwnProperty(x)){
+				columns.indexes[x] = 1;
+				columns['yMin' + x] = 8;
+				columns['yMax' + x] = 0;
+			}else if (game.newItems.indexOf(game.streak[i]) == -1) {	// We only count the items that were removed, not the new ones
+				columns.indexes[x]++;
 			}
-
-			if (y < columns.yMin[columns.yMin.length - 1])	// If the current item's y is inferior to the y coordinate from all the other items in its column
-				columns.yMin[columns.yMin.length - 1] = y;
-			if (y > columns.yMax[columns.yMax.length - 1])	// If the current item's y is inferior to the y coordinate from all the other items in its column
-				columns.yMax[columns.yMax.length - 1] = y;
+			
+			if (y < columns['yMin' + x])	// If the current item's y is inferior to the y coordinate from all the other items in its column
+				columns['yMin' + x] = y;
+			if (y > columns['yMax' + x])	// If the current item's y is inferior to the y coordinate from all the other items in its column
+				columns['yMax' + x] = y;
 		}
 
-		for (var i = 0, yMin, yMax; i < columns.indexes.length; i++) {
-			yMin = (columns.yMin[i] > 0 ? columns.yMin[i] - 1 : columns.yMin[i]);
-			yMax = columns.yMax[i];
+		for (var i = 0, yMin, yMax; i < Object.getLength(columns.indexes); i++) {
+			var item, top, newY, keys = Object.getKeys(columns.indexes), nbItems = columns.indexes[keys[i]];
+			yMin = columns['yMin' + keys[i]];
+			yMax = columns['yMax' + keys[i]];
 
-			for (var j = yMin, item, top, newY; j >= 0 - (yMax - yMin); j--) {	// We run through the items, from the lowest to the 0
-				item = get('#tile' + j + '_' + columns.indexes[i]);
+			for (var j = (yMax - nbItems); j >= yMin; j--) {	// We run through the items
+				item = get('#tile' + j + '_' + keys[i]);
 				if (item != null) {
 					top = item.style.top;
 					top = parseInt(top.substring(0, top.length - 2));
-					top += 60 * (yMax - yMin) + 5 * (yMax - yMin);
+					top += 60 * nbItems + 5 * nbItems;
 					top += 'px';
 
 					// TODO animation
 					item.style.top = top;	// We move the item to its new position
 
-					newY = j + (yMax - yMin);
-					item.id = 'tile' + newY + '_' + columns.indexes[i];	// Setting the new position on the id property
+					newY = j + nbItems;
+					item.id = 'tile' + newY + '_' + keys[i];	// Setting the new position on the id property
 				}
 			}
 		}
@@ -426,20 +441,31 @@ var game = {
 	 * Generates random items above the grid after a streak disappeared
 	 */
 	generateItems: function() {
-		var i = 0,
-			item,
-			x,
-			y = -1,
-			tile;
+		var i, item, y, tile, itemsNb = game.streak.length, columns = {}, newItem;
 
-		for (i; i < game.streak.length; i++) {
-			x = parseInt(game.streak[i].id.substr(6, 1));
+		for (i = 0; i < itemsNb; i++) {
+			x = game.streak[i].x;
+
+			if (!columns.hasOwnProperty('column' + x)) 	// If the items from this column have not been counted yet
+				columns['column' + x] = 1;	// We start to count
+			else	// Otherwise
+				columns['column' + x]++;	// We add this item to the count
+
+			y = 0 - columns['column' + x];	// And then we calculate the necessary shift on the Y axis
 			tile = parseInt(Math.random() * game.level.range);
 
 			item = game.createItem(y, x, tile);
 			addEvent(item, 'mousedown', game.startDrag);
 			grid.appendChild(item);	// Adding the new tile on the grid
 			item.id = 'tile' + y + '_' + x;	// Setting the new position on the id property
+
+			newItem = {
+				sprite: item,
+				'x': x,
+				'y': y
+			};
+			game.streak.push(newItem);
+			game.newItems.push(newItem)
 		}
 	}
 };
