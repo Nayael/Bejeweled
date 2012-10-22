@@ -428,7 +428,8 @@ var game = {
 					top += 'px';
 
 					// TODO animation
-					item.style.top = top;	// We move the item to its new position
+					animate(item, 'top', item.style.top, top);	// We move the item to its new position
+					// item.style.top = top;	// We move the item to its new position
 
 					newY = j + nbItems;
 					item.id = 'tile' + newY + '_' + keys[i];	// Setting the new position on the id property

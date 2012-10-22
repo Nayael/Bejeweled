@@ -52,6 +52,36 @@ function removeEvent(element, event, func) {
 }
 
 /**
+ * Animates an elements CSS property from start value to end value (only values in pixels)
+ */
+function animate (elem, property, start, end) {
+	elem.style[property] = start;
+	if (start.indexOf('px') != -1)
+		start = parseInt(start.substr(0, start.length - 2));
+	if (end.indexOf('px') != -1)
+		end = parseInt(end.substr(0, end.length - 2));
+
+	var doAnimation = function(elem, start, end, direction) {
+		// If the property has reached the end value
+		for (var i = 0; i < 4; i++) {	
+			if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
+				clearInterval(timer);
+				return;
+			}
+			start += direction;
+			elem.style[property] = start + 'px';
+		}
+		return start;
+	};
+
+	var direction = (end - start > 0) ? 1 : -1,
+		timer = setInterval(function(){
+			start = doAnimation(elem, start, end, direction);
+		}, 30);
+
+}
+
+/**
  * Returns the length of an object (associative array)
  */
 Object.getLength = function(obj) {
