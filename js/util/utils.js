@@ -50,3 +50,25 @@ function removeEvent(element, event, func) {
 	else
 		element.removeEventListener(event, func, true);
 }
+
+/**
+ * Returns the length of an object (associative array)
+ */
+Object.getLength = function(obj) {
+	var getLength = 0, key;
+	for (key in obj) {	
+		if (obj.hasOwnProperty(key))
+			getLength++;
+	}
+	return getLength;
+};
+
+/**
+ * Returns all the keys of an object (associative array) in an array
+ */
+Object.getKeys = function(obj) {
+	var keys = [];
+	for(var key in obj)
+		keys.push(key);
+	return keys;
+};
