@@ -45,11 +45,8 @@ var game = {
 			itemValue,
 			item;
 
-		addEvent(document, 'mouseup', game.stopDrag);	// We allow the moving to the adjacent items
-
 		game.item = target;
-		game.item.left(target.style.left);
-		game.item.top(target.style.top);
+		addEvent(document, 'mouseup', game.stopDrag);	// We allow the moving to the adjacent items
 
 		// We run through the item's row (the 2 adjacent items)
 		for (var i = ((x > 0) ? x - 1 : 0); i <= ((x < 7) ? x + 1 : 7); i++) {
@@ -128,7 +125,7 @@ var game = {
 				game.itemsFall();
 
 				// We check for combos
-				// game.checkCombos();
+				game.checkCombos();
 
 				// We reset the items information
 				game.hovered = null;
