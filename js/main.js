@@ -27,7 +27,7 @@ var game = {
 			row = game.level.map[i];
 			for (var j = 0, item; j < 8; j++) {
 				tile = row[j];
-				item = new Item(i, j, tile);
+				item = new Item(j, i, tile);
 				addEvent(item, 'mousedown', game.startDrag);
 				grid.appendChild(item);	// Adding the new tile on the grid
 			}
@@ -423,7 +423,6 @@ var game = {
 					top += 'px';
 
 					animate(item, 'top', item.top(), top, 4);	// We move the item to its new position
-
 					newY = j + nbItems;
 					item.id = 'tile' + newY + '_' + keys[i];	// Setting the new position on the id property
 				}
@@ -447,7 +446,7 @@ var game = {
 			y = 0 - columns['column' + x];	// And then we calculate the necessary shift on the Y axis
 			tile = parseInt(Math.random() * game.level.range);
 
-			item = new Item(y, x, tile);
+			item = new Item(x, y, tile);
 			addEvent(item, 'mousedown', game.startDrag);
 			grid.appendChild(item);	// Adding the new tile on the grid
 			item.x(x);
