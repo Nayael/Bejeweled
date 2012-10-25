@@ -2,39 +2,11 @@
 var game = {
 	lvl: 0,				// The current level index
 	level: levels[0],	// The current level object
-
 	hovered: null,		// The hovered item to swap with
-
-	item: {
-		sprite: null,	// The selected sprite
-		x: null,		// The source sprite's x
-		y: null			// The source sprite's y
-	},
-
+	item: null,
 	streak: [],
 	newItems: [],
 	animations: [],		// Contains the animations that are being performed
-
-	/**
-	 * Creates an item from its coordinates and tile value
-	 */
-	createItem: function(y, x, tile) {
-		var item, left, top;
-		left = ((60 * x) + 5 * (x + 1)) + 'px';
-		top = ((60 * y) + 5 * (y + 1)) +'px';
-
-		item = document.createElement('span');
-		item.className = 'item tile_' + tile;
-		item.id = 'tile' + y + '_' + x;
-		item.style.top = top;
-		item.style.left = left;
-		item.style.backgroundImage = 'url("../images/sprites/' + tile + '.png")';
-		item.style.backgroundRepeat = 'no-repeat';
-		item.style.backgroundPosition = 'top center';
-		item.style.border = 'solid 3px #000';
-
-		return item;
-	},
 
 	/**
 	 * Removes an item from the map
@@ -55,7 +27,7 @@ var game = {
 			row = game.level.map[i];
 			for (var j = 0, item; j < 8; j++) {
 				tile = row[j];
-				item = game.createItem(i, j, tile);
+				item = new Item(i, j, tile);
 				addEvent(item, 'mousedown', game.startDrag);
 				grid.appendChild(item);	// Adding the new tile on the grid
 			}
@@ -67,17 +39,17 @@ var game = {
 	 */
 	startDrag: function(e) {
 		var target = e.target || e.srcElement,
-			x = parseInt(target.id.substr(6, 1)),
-			y = parseInt(target.id.substr(4, 1)),
+			x = target.x(),
+			y = target.y(),
 			targetValue = parseInt(target.className.substr(10, 1)),
 			itemValue,
 			item;
 
 		addEvent(document, 'mouseup', game.stopDrag);	// We allow the moving to the adjacent items
 
-		game.item.sprite = target;
-		game.item.x = target.style.left;
-		game.item.y = target.style.top;
+		game.item = target;
+		game.item.left(target.style.left);
+		game.item.top(target.style.top);
 
 		// We run through the item's row (the 2 adjacent items)
 		for (var i = ((x > 0) ? x - 1 : 0); i <= ((x < 7) ? x + 1 : 7); i++) {
@@ -105,10 +77,10 @@ var game = {
 	 */
 	stopDrag: function(e) {
 		var item,
-			dragged = game.item.sprite,
+			dragged = game.item,
 			hovered = game.hovered,
-			x = parseInt(dragged.id.substr(6, 1)),
-			y = parseInt(dragged.id.substr(4, 1));
+			x = dragged.x(),
+			y = dragged.y();
 
 		// We remove the mouse event listeners
 		removeEvent(document, 'mouseup', game.stopDrag);
@@ -124,20 +96,19 @@ var game = {
 		if (hovered != undefined) {
 			for (var i = 0; i < game.animations.length; i++){
 				clearInterval(game.animations[i]);
-				console.log('game.animations[i]: ', game.animations[i]);
 			}
 			game.animations = [];	// We stop their animations
 
-			dragged.style.left = ((60 * x) + 5 * (x + 1)) + 'px';
-			dragged.style.top = ((60 * y) + 5 * (y + 1)) +'px';
-			x = parseInt(hovered.id.substr(6, 1));
-			y = parseInt(hovered.id.substr(4, 1));
-			hovered.style.left = ((60 * x) + 5 * (x + 1)) + 'px';
-			hovered.style.top = ((60 * y) + 5 * (y + 1)) +'px';
+			dragged.left((60 * x) + 5 * (x + 1));
+			dragged.top((60 * y) + 5 * (y + 1));
+			x = hovered.x();
+			y = hovered.y();
+			hovered.left((60 * x) + 5 * (x + 1));
+			hovered.top((60 * y) + 5 * (y + 1));
 		}
 
 		// We look for an item streak
-		var item1Streak = game.checkStreak(game.item.sprite),
+		var item1Streak = game.checkStreak(game.item),
 			item2Streak = game.hovered ? game.checkStreak(game.hovered) : false;
 
 		if (item1Streak || item2Streak) {
@@ -156,13 +127,12 @@ var game = {
 				// We make the remaining items fall
 				game.itemsFall();
 
+				// We check for combos
+				// game.checkCombos();
+
 				// We reset the items information
 				game.hovered = null;
-				game.item = {
-					sprite: null,
-					x: null,
-					y: null
-				};
+				game.item = null;
 
 				game.streak = [];
 				game.newItems = [];
@@ -173,17 +143,12 @@ var game = {
 			}, 500);
 		}else {
 			if (game.hovered != null) {
-				game.item.x = game.hovered.style.left;
-				game.item.y = game.hovered.style.top;
-				game.swapItems(game.hovered, game.item.sprite);	// We re-swap the items to their respective original positions
+				game.swapItems(game.hovered, game.item);	// We re-swap the items to their respective original positions
 			}
+
 			// We reset the items information
 			game.hovered = null;
-			game.item = {
-				sprite: null,
-				x: null,
-				y: null
-			};
+			game.item = null;
 
 			game.streak = [];
 			game.newItems = [];
@@ -196,35 +161,35 @@ var game = {
 	 */
 	moveItem: function(e) {
 		game.hovered = e.target || e.srcElement;
-		game.swapItems(game.item.sprite, game.hovered);
+		game.swapItems(game.item, game.hovered);
 	},
 
 	/**
 	 * Swaps two items
 	 */
 	swapItems: function(source, dest) {
-		var sourceX = parseInt(source.id.substr(6, 1)),
-			sourceY = parseInt(source.id.substr(4, 1)),
+		var sourceX = source.x(),
+			sourceY = source.y(),
+			destX = dest.x(),
+			destY = dest.y(),
 			sourceValue = parseInt(source.className.substr(10, 1)),
-			destX = parseInt(dest.id.substr(6, 1)),
-			destY = parseInt(dest.id.substr(4, 1)),
 			destValue = parseInt(dest.className.substr(10, 1)),
 			items = get('.item');
 
-		if (source.style.left != dest.style.left) {
-			game.animations.push(animate(source, 'left', source.style.left, dest.style.left, 8));	// We move the source sprite to its new position
-			game.animations.push(animate(dest, 'left', dest.style.left, source.style.left, 8));	// We move the dest sprite to its new position
+		if (source.left() != dest.left()) {
+			game.animations.push(animate(source, 'left', source.left(), dest.left(), 8));	// We move the source sprite to its new position
+			game.animations.push(animate(dest, 'left', dest.left(), source.left(), 8));	// We move the dest sprite to its new position
 		}
-		if (source.style.top != dest.style.top){
-			game.animations.push(animate(source, 'top', source.style.top, dest.style.top, 8));	// We move the source sprite to its new position
-			game.animations.push(animate(dest, 'top', dest.style.top, source.style.top, 8));	// We move the dest sprite to its new position
+		if (source.top() != dest.top()) {
+			game.animations.push(animate(source, 'top', source.top(), dest.top(), 8));	// We move the source sprite to its new position
+			game.animations.push(animate(dest, 'top', dest.top(), source.top(), 8));	// We move the dest sprite to its new position
 		}
 		
-		source.id = 'tile' + destY + '_' + destX;
-		dest.id = 'tile' + sourceY + '_' + sourceX;
-
-		game.item.x = source.style.left;
-		game.item.y = source.style.top;
+		// We swap the x and y properties
+		source.x(destX);
+		source.y(destY);
+		dest.x(sourceX);
+		dest.y(sourceY);
 
 		// Once moved, the item cannot be moved again
 		for (var i = 0; i < items.length; i++) {
@@ -236,8 +201,8 @@ var game = {
 	 * Searches for the presence of an item streak
 	 */
 	checkStreak: function(item) {
-		var x = parseInt(item.id.substr(6, 1)),
-			y = parseInt(item.id.substr(4, 1)),
+		var x = item.x(),
+			y = item.y(),
 			row = [],
 			column = [];
 
@@ -265,11 +230,7 @@ var game = {
  
 		// If we have a row or a column of three identical items
 		if ((row.length > 1 || column.length > 1) && game.streak.indexOf(item) == -1) {
-			game.streak.push({
-				sprite: item,
-				'x': x,
-				'y': y
-			});	// We know the moved item will be removed
+			game.streak.push(item);	// We know the moved item will be removed
 			return true;	// We allow the removing
 		}
 
@@ -291,11 +252,7 @@ var game = {
 
 		// 	// The moved item
 		// 	if (game.streak.indexOf(item) == -1)
-		// 		game.streak.push({
-		// 			sprite: item,
-		// 			x: x,
-		// 			y: y
-		// 		});	// We know the moved item will be removed
+		// 		game.streak.push(item);	// We know the moved item will be removed
 		// 	return true;	// We allow the removing
 		// }
 		// return false;
@@ -341,7 +298,7 @@ var game = {
 		}
 
 		/*** Remove comment if we want additionnal streaks with rows and lines ***/
-		// if (item == game.item.sprite || item == game.hovered) {
+		// if (item == game.item || item == game.hovered) {
 		// 	if (itemsNb > 1)
 		// 		return column;
 		// 	return [];
@@ -370,7 +327,6 @@ var game = {
 				    row = siblingCheck;
 				else
 					break;
-
 				itemsNb++;
 			}
 		}
@@ -385,13 +341,12 @@ var game = {
 				    row = siblingCheck;
 				else
 					break;
-
 				itemsNb++;
 			}
 		}
 
 		/*** Remove comment if we want additionnal streaks with rows and lines ***/
-		// if (item == game.item.sprite || item == game.hovered) {	// If this is the 'main' row check
+		// if (item == game.item || item == game.hovered) {	// If this is the 'main' row check
 		// 	if (itemsNb > 1)	// We only consider rows that have more than 1 items in them
 		// 		return row;
 		// 	return [];
@@ -405,13 +360,9 @@ var game = {
 	 * Check if the adjacent item of a given item is identical (vertically or horizontally)
 	 */
 	siblingCheck: function(item, line, i, j, value, vertical) {
-		if (parseInt(item.className.substr(10, 1)) == value && item != game.item.sprite)	{		// If the read item's value is the same as the adjacent item's value
+		if (parseInt(item.className.substr(10, 1)) == value && item != game.item)	{		// If the read item's value is the same as the adjacent item's value
 			if (line.indexOf(item) == -1)	// And the item was not already detected
-				line.push({
-					sprite: item,
-					x: i,
-					y: j
-				});	// We add it to the items to remove
+				line.push(item);	// We add it to the items to remove
 			
 			/*** Remove comment if we want additionnal streaks with rows and lines ***/
 			// var currentItemLine = vertical ? game.checkRow(item, i, j) : game.checkColumn(item, i, j);	// We check for its adjacent items
@@ -422,12 +373,16 @@ var game = {
 		return false;	// We stop looking for a streak
 	},
 
+	checkCombos: function() {
+		
+	},
+
 	/**
 	 * Removes all the items that form a streak (line or row, or both)
 	 */
 	removeStreak: function() {
 		for (var i = 0; i < game.streak.length; i++)
-			game.removeItem(game.streak[i].sprite);
+			game.removeItem(game.streak[i]);
 	},
 
 	/**
@@ -437,10 +392,10 @@ var game = {
 		var columns = {	// The columns which contain items that must fall
 			indexes: {},
 		};
-		
 		for (var i = 0, x, y; i < game.streak.length; i++) {
-			x = game.streak[i].x;
-			y = game.streak[i].y;
+		console.log(game.streak[i].id);
+			x = game.streak[i].x();
+			y = game.streak[i].y();
 
 			if (!columns.indexes.hasOwnProperty(x)){
 				columns.indexes[x] = 1;
@@ -463,14 +418,14 @@ var game = {
 
 			for (var j = (yMax - nbItems); j >= yMin; j--) {	// We run through the items
 				item = get('#tile' + j + '_' + keys[i]);
+				console.log('item: ', item);
 				if (item != null) {
-					top = item.style.top;
+					top = item.top();
 					top = parseInt(top.substring(0, top.length - 2));
 					top += 60 * nbItems + 5 * nbItems;
 					top += 'px';
 
-					// TODO animation
-					animate(item, 'top', item.style.top, top, 4);	// We move the item to its new position
+					animate(item, 'top', item.top(), top, 4);	// We move the item to its new position
 
 					newY = j + nbItems;
 					item.id = 'tile' + newY + '_' + keys[i];	// Setting the new position on the id property
@@ -483,11 +438,10 @@ var game = {
 	 * Generates random items above the grid after a streak disappeared
 	 */
 	generateItems: function() {
-		var i, item, y, tile, itemsNb = game.streak.length, columns = {}, newItem;
+		var i, item, y, tile, itemsNb = game.streak.length, columns = {};
 
 		for (i = 0; i < itemsNb; i++) {
-			x = game.streak[i].x;
-
+			x = game.streak[i].x();
 			if (!columns.hasOwnProperty('column' + x)) 	// If the items from this column have not been counted yet
 				columns['column' + x] = 1;	// We start to count
 			else	// Otherwise
@@ -496,18 +450,14 @@ var game = {
 			y = 0 - columns['column' + x];	// And then we calculate the necessary shift on the Y axis
 			tile = parseInt(Math.random() * game.level.range);
 
-			item = game.createItem(y, x, tile);
+			item = new Item(y, x, tile);
 			addEvent(item, 'mousedown', game.startDrag);
 			grid.appendChild(item);	// Adding the new tile on the grid
-			item.id = 'tile' + y + '_' + x;	// Setting the new position on the id property
+			item.x(x);
+			item.y(y);
 
-			newItem = {
-				sprite: item,
-				'x': x,
-				'y': y
-			};
-			game.streak.push(newItem);
-			game.newItems.push(newItem)
+			game.streak.push(item);
+			game.newItems.push(item);
 		}
 	}
 };
