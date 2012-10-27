@@ -15,8 +15,9 @@ function addItemPropCapabilities (obj) {
 	 */
 	obj.y = function(value) {
 		if (value != undefined)
-			this.id = (this.id != '') ? (this.id.substring(0, 4) + value + this.id.substr(5)) : 'tile' + value + '_0';
-		if (this.id != '')			return parseInt(this.id.substring(4, this.id.indexOf('_')));
+			this.id = (this.id != '') ? (this.id.substring(0, 4) + value + this.id.substr(this.id.indexOf('_'))) : 'tile' + value + '_0';
+		if (this.id != '')
+			return parseInt(this.id.substring(4, this.id.indexOf('_')));
 		return null;
 	};
 
@@ -50,6 +51,7 @@ function addItemPropCapabilities (obj) {
 				if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
 					clearInterval(timer);
 					obj.animation = null;
+					obj.dispatch(FALL_COMPLETE);
 					return;
 				}
 				start += direction;

@@ -24,6 +24,8 @@ function Item(x, y, value) {
 	item.animation = false;
 
 	addItemPropCapabilities(item);	// We add useful functions relative to item objects
+	addEventsCapabilities(item);	// We add useful functions relative to events
+	item.addListener(FALL_COMPLETE, game.onFallComplete);	// We add the fall listener
 	return item;
 };
 

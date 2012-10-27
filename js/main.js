@@ -27,7 +27,7 @@ var game = {
 			for (var j = 0, item; j < 8; j++) {
 				value = row[j];
 				item = new Item(j, i, value);
-				addEvent(item, 'mousedown', game.startDrag);
+				addEvent(item, 'mousedown', game.startDrag);	// We add the mouse event listener
 				grid.appendChild(item);
 			}
 		}
@@ -110,12 +110,12 @@ var game = {
 			item2Streak = game.hovered ? game.checkStreak(game.hovered) : false;
 
 		if (item1Streak || item2Streak) {
-			// TODO animation des disparitions
 			var items = get('.item')
 			for (var i = 0; i < items.length; i++) {
 				removeEvent(items[i], 'mousedown', game.startDrag);
 			}
-			setTimeout(function() {
+
+			setTimeout(function() {	// We continue after the streak disappeared
 				game.removeStreak();
 				var newItems = game.generateItems();
 				game.itemsFall(newItems);
@@ -129,12 +129,11 @@ var game = {
 				for (var i = 0; i < items.length; i++) {
 					addEvent(items[i], 'mousedown', game.startDrag);
 				}
-			}, 500);
+			}, 300);
 		}else {
 			if (game.hovered != null) {
 				game.swapItems(game.hovered, game.item);	// We re-swap the items to their respective original positions
 			}
-
 			// We reset the items information
 			game.hovered = null;
 			game.item = null;
@@ -154,6 +153,8 @@ var game = {
 
 	/**
 	 * Swaps two items
+	 * @param source	The first item to swap
+	 * @param dest	The second item to swap with the first one
 	 */
 	swapItems: function(source, dest) {
 		var sourceX = source.x(),
@@ -197,10 +198,7 @@ var game = {
 			row = [],
 			column = [];
 
-		// Checking in the row
 		row = game.checkRow(item);
-
-		// Checking in the column
 		column = game.checkColumn(item);
 
 		// If we have a row of three identical items
@@ -268,7 +266,7 @@ var game = {
 		if (y > 0) {
 			for (var j = y - 1; j > -1; j--) {
 				currentItem = get('#tile' + j + '_' + x);
-				siblingCheck = game.siblingCheck(currentItem, column, x, j, value, true);
+				siblingCheck = game.siblingCheck(currentItem, column, value, true);
 				if (siblingCheck != false) 
 				    column = siblingCheck;
 				else
@@ -282,7 +280,7 @@ var game = {
 		if (y < 7) {
 			for (j = y + 1; j < 8; j++) {
 				currentItem = get('#tile' + j + '_' + x);
-				siblingCheck = game.siblingCheck(currentItem, column, x, j, value, true);
+				siblingCheck = game.siblingCheck(currentItem, column, value, true);
 				if (siblingCheck != false) 
 				    column = siblingCheck;
 				else
@@ -322,7 +320,7 @@ var game = {
 		if (x > 0) {
 			for (var i = x - 1; i > -1; i--) {
 				currentItem = get('#tile' + y + '_' + i);
-				siblingCheck = game.siblingCheck(currentItem, row, i, y, value, false);
+				siblingCheck = game.siblingCheck(currentItem, row, value, false);
 				if (siblingCheck != false) 
 				    row = siblingCheck;
 				else
@@ -336,7 +334,7 @@ var game = {
 		if (x < 7) {
 			for (i = x + 1; i < 8; i++) {
 				currentItem = get('#tile' + y + '_' + i);
-				siblingCheck = game.siblingCheck(currentItem, row, i, y, value, false);
+				siblingCheck = game.siblingCheck(currentItem, row, value, false);
 				if (siblingCheck != false) 
 				    row = siblingCheck;
 				else
@@ -358,9 +356,13 @@ var game = {
 
 	/**
 	 * Check if the adjacent item of a given item is identical (vertically or horizontally)
+	 * @param item	The item which siblings will be parsed
+	 * @param line	An array containing the siblings that we already know are in a streak
+	 * @param value	The value (sprite) of the source item
+	 * @param vertical	Should we check vertically or horizontally ?
 	 * @return An array containing the identical adjacent items | false if the array is empty
 	 */
-	siblingCheck: function(item, line, i, j, value, vertical) {
+	siblingCheck: function(item, line, value, vertical) {
 		if (item.value() == value && item != game.item)	{
 			if (line.indexOf(item) == -1)
 				line.push(item);	// We add it to the items to remove
@@ -413,7 +415,7 @@ var game = {
 		}
 
 		for (var i = 0, yMin, yMax; i < Object.getLength(columns.indexes); i++) {
-			var item, top, newY, keys = Object.getKeys(columns.indexes), nbItems = columns.indexes[keys[i]];
+			var item, top, keys = Object.getKeys(columns.indexes), nbItems = columns.indexes[keys[i]];
 			yMin = columns['yMin' + keys[i]];
 			yMax = columns['yMax' + keys[i]];
 
@@ -425,9 +427,9 @@ var game = {
 					top += 60 * nbItems + 5 * nbItems;
 					top += 'px';
 
-					item.animate('top', item.top(), top, 4);	// We move the item to its new position
-					newY = j + nbItems;
-					item.id = 'tile' + newY + '_' + keys[i];	// Setting the new position on the id property
+					item.animate('top', item.top(), top, 6);	// We move the item to its new position
+					item.x(keys[i]);
+					item.y(j + nbItems);
 				}
 			}
 		}
@@ -460,6 +462,13 @@ var game = {
 			newItems.push(item);
 		}
 		return newItems;
+	},
+
+	/**
+	 * Triggers evey time an item's fall is complete
+	 */
+	onFallComplete: function() {
+		console.log('fall complete', Math.random());
 	}
 };
 
