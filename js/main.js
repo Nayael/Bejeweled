@@ -11,8 +11,7 @@ var game = {
 	 * @param item	The item to remove
 	 */
 	removeItem: function(item) {
-		// TODO animation
-		get('#grid').removeChild(item);
+		item.explode();
 		removeEvent(item, 'mousedown', game.startDrag);
 	},
 
@@ -115,8 +114,8 @@ var game = {
 				removeEvent(items[i], 'mousedown', game.startDrag);
 			}
 
+			game.removeStreak();
 			setTimeout(function() {	// We continue after the streak disappeared
-				game.removeStreak();
 				var newItems = game.generateItems();
 				game.itemsFall(newItems);
 				game.checkCombos();
@@ -125,7 +124,7 @@ var game = {
 				game.hovered = null;
 				game.item = null;
 				game.streak = [];
-			}, 300);
+			}, 500);
 		}else {
 			if (game.hovered != null) {
 				game.swapItems(game.hovered, game.item);	// We re-swap the items to their respective original positions

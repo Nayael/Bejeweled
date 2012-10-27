@@ -68,4 +68,20 @@ function addItemPropCapabilities (obj) {
 		obj.animated = true;
 		return timer;
 	};
+
+	obj.explode = function(argument) {
+		var i = 0;
+		var animateExplosion = function () {
+			if (i >= 5) {
+				clearInterval(animateExplosion);
+				get('#grid').removeChild(obj);
+				return;
+			}
+			console.log('url("../images/sprites/' + obj.value() + 'explosion' + (i%2) + '.png")');
+			obj.style.backgroundImage = 'url("../images/sprites/' + obj.value() + '_explosion' + (i%2) + '.png")';
+			i++;	
+		};
+
+		setInterval(animateExplosion, 100);
+	};
 };
