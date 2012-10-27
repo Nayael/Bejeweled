@@ -94,8 +94,8 @@ var game = {
 		if (hovered != undefined) {
 			clearInterval(dragged);
 			clearInterval(hovered);
-			dragged.animation = null;
-			hovered.animation = null;
+			dragged.animated = false;
+			hovered.animated = false;
 
 			dragged.left((60 * x) + 5 * (x + 1));
 			dragged.top((60 * y) + 5 * (y + 1));
@@ -125,10 +125,6 @@ var game = {
 				game.hovered = null;
 				game.item = null;
 				game.streak = [];
-
-				for (var i = 0; i < items.length; i++) {
-					addEvent(items[i], 'mousedown', game.startDrag);
-				}
 			}, 300);
 		}else {
 			if (game.hovered != null) {
@@ -465,10 +461,19 @@ var game = {
 	},
 
 	/**
-	 * Triggers evey time an item's fall is complete
+	 * Triggers every time an item's fall is complete
+	 * Add the mouse event listeners to all the items, once all the animations are done
 	 */
 	onFallComplete: function() {
-		console.log('fall complete', Math.random());
+		for (var i = 0; i < game.streak.length; i++) {
+			if (game.streak[i].animated)	// If at least one item is still being animated
+				return;
+		}
+		// If all the animations are finished, we allow the player to move items again
+		var items = get('.item');
+		for (var i = 0; i < items.length; i++) {
+			addEvent(items[i], 'mousedown', game.startDrag);
+		}
 	}
 };
 

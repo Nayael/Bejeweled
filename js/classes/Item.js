@@ -20,8 +20,8 @@ function Item(x, y, value) {
 	item.style.backgroundRepeat = 'no-repeat';
 	item.style.backgroundPosition = 'top center';
 	item.style.border = 'solid 3px #000';
-
-	item.animation = false;
+	
+	item.animated = false;	// Is the element being animated ?
 
 	addItemPropCapabilities(item);	// We add useful functions relative to item objects
 	addEventsCapabilities(item);	// We add useful functions relative to events

@@ -50,8 +50,9 @@ function addItemPropCapabilities (obj) {
 				// If the property has reached the end value
 				if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
 					clearInterval(timer);
-					obj.animation = null;
-					obj.dispatch(FALL_COMPLETE);
+					obj.animated = false;
+					if (property === 'top')
+						obj.dispatch(FALL_COMPLETE);
 					return;
 				}
 				start += direction;
@@ -64,7 +65,7 @@ function addItemPropCapabilities (obj) {
 			timer = setInterval(function(){
 				start = doAnimation(start, end, direction, speed);
 			}, 30);
-		this.animation = timer;
+		obj.animated = true;
 		return timer;
 	};
 };
