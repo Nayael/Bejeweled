@@ -20,7 +20,7 @@ function get(id) {
 	// }
 	var elem = document.querySelectorAll(id);
 	if (elem.length < 2)
-		return document.querySelector(id);
+		return elem[0] || document.querySelector(id);
 	return elem;
 }
 
@@ -49,39 +49,6 @@ function removeEvent(element, event, func) {
 		element.detachEvent('on' + event, func);
 	else
 		element.removeEventListener(event, func, true);
-}
-
-/**
- * Animates an element's CSS property from start value to end value (only values in pixels)
- */
-function animate (elem, property, start, end, speed) {
-	if (start == end)
-		return;
-	
-	elem.style[property] = start;
-	if (start.indexOf('px') != -1)
-		start = parseInt(start.substr(0, start.length - 2));
-	if (end.indexOf('px') != -1)
-		end = parseInt(end.substr(0, end.length - 2));
-
-	var doAnimation = function(elem, start, end, direction, speed) {
-		// If the property has reached the end value
-		for (var i = 0; i < speed; i++) {	
-			if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
-				clearInterval(timer);
-				return;
-			}
-			start += direction;
-			elem.style[property] = start + 'px';
-		}
-		return start;
-	};
-
-	var direction = (end - start > 0) ? 1 : -1,
-		timer = setInterval(function(){
-			start = doAnimation(elem, start, end, direction, speed);
-		}, 30);
-	return timer;
 }
 
 /**
