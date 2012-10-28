@@ -22,6 +22,7 @@ function Item(x, y, value) {
 	item.style.border = 'solid 3px #000';
 	
 	item.animated = false;	// Is the element being animated ?
+	item.falling = false;	// Is the element falling ?
 
 	addItemPropCapabilities(item);	// We add useful functions relative to item objects
 	addEventsCapabilities(item);	// We add useful functions relative to events

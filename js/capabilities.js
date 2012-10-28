@@ -51,9 +51,10 @@ function addItemPropCapabilities (obj) {
 				if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
 					clearInterval(timer);
 					obj.animated = false;
-					if (property === 'top') {
-						obj.dispatch(FALL_COMPLETE);
+					if (property === 'top' && obj.falling) {
+						obj.dispatch(FALL_COMPLETE, obj);
 					}
+					obj.falling = false;
 					return;
 				}
 				start += direction;
