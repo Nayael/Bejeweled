@@ -49,7 +49,7 @@ function addItemPropCapabilities (obj) {
 			for (var i = 0; i < speed; i++) {	
 				// If the property has reached the end value
 				if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
-					clearInterval(timer);
+					clearInterval(obj.timer);
 					obj.animated = false;
 					if (property === 'top' && obj.falling) {
 						obj.dispatch(FALL_COMPLETE, obj);
@@ -63,12 +63,11 @@ function addItemPropCapabilities (obj) {
 			return start;
 		};
 
-		var direction = (end - start > 0) ? 1 : -1,
-			timer = setInterval(function(){
+		var direction = (end - start > 0) ? 1 : -1;
+		obj.timer = setInterval(function(){
 				start = doAnimation(start, end, direction, speed);
 			}, 30);
 		obj.animated = true;
-		return timer;
 	};
 
 	obj.explode = function(argument) {

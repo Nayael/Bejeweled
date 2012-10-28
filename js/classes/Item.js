@@ -23,6 +23,7 @@ function Item(x, y, value) {
 	
 	item.animated = false;	// Is the element being animated ?
 	item.falling = false;	// Is the element falling ?
+	item.timer = null;
 
 	addItemPropCapabilities(item);	// We add useful functions relative to item objects
 	addEventsCapabilities(item);	// We add useful functions relative to events

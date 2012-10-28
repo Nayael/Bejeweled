@@ -367,9 +367,20 @@ var game = {
 
 	/**
 	 * Checks if there is a streak among the new generated items
+	 * @param item	The item which siblings will be parsed
 	 */
-	checkCombos: function() {
-		console.log('check');
+	checkComboStreak: function(item) {
+		var streak = game.checkStreak(item, []);
+		if (streak.length > 0) {
+			game.removeStreak(streak);
+			setTimeout(function() {	// We continue after the streak disappeared
+				var itemsGenerated = game.generateItems(streak);
+				var newItems = itemsGenerated.newItems;
+				streak = itemsGenerated.streak;
+				console.log('newItems: ', newItems);
+				// game.itemsFall(newItems, streak);
+			}, 500);
+		}
 	},
 
 	/**
@@ -387,7 +398,7 @@ var game = {
 	 * @param streak	An array containing the items that are in a streak
 	 */	
 	itemsFall: function(newItems, streak) {
-		var columns = {	// The columns which contain items that must fall
+		var columns = {			// The columns which contain items that must fall
 			indexes: {},
 		};
 		for (var i = 0, x, y; i < streak.length; i++) {
@@ -470,16 +481,18 @@ var game = {
 	 */
 	onFallComplete: function(item) {
 		var items = get('.item');
+		
 		for (var i = 0; i < items.length; i++) {
 			if (items[i].animated)	// If at least one item is still being animated
 				return;
-		}
+		};
+
 		// If all the animations are finished, we allow the player to move items again
 		var items = get('.item');
 		for (var i = 0; i < items.length; i++) {
 			addEvent(items[i], 'mousedown', game.startDrag);
-		}
-		// game.checkStreak(item);
+			game.checkComboStreak(items[i]);	// And we check if there is a streak among his new neighbours
+		};
 	}
 };
 
