@@ -16,7 +16,7 @@ function Item(x, y, value) {
 
 	item.style.top = top;
 	item.style.left = left;
-	item.style.backgroundImage = 'url("../images/sprites/' + value + '.png")';
+	item.style.backgroundImage = 'url("./images/sprites/' + value + '.png")';
 	item.style.backgroundRepeat = 'no-repeat';
 	item.style.backgroundPosition = 'top center';
 	item.style.border = 'solid 3px #000';
@@ -25,7 +25,7 @@ function Item(x, y, value) {
 
 	addItemPropCapabilities(item);	// We add useful functions relative to item objects
 	addEventsCapabilities(item);	// We add useful functions relative to events
-	
+
 	item.addListener(FALL_COMPLETE, game.onFallComplete);	// We add the fall listener
 	return item;
 };

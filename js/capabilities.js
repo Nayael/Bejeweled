@@ -51,8 +51,9 @@ function addItemPropCapabilities (obj) {
 				if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
 					clearInterval(timer);
 					obj.animated = false;
-					if (property === 'top')
+					if (property === 'top') {
 						obj.dispatch(FALL_COMPLETE);
+					}
 					return;
 				}
 				start += direction;
@@ -70,18 +71,20 @@ function addItemPropCapabilities (obj) {
 	};
 
 	obj.explode = function(argument) {
-		var i = 0;
+		var i = 0, timer;
 		var animateExplosion = function () {
 			if (i >= 5) {
-				clearInterval(animateExplosion);
-				get('#grid').removeChild(obj);
+				clearInterval(timer);
+				if (obj.parentNode)
+					obj.parentNode.removeChild(obj);
 				return;
 			}
-			console.log('url("../images/sprites/' + obj.value() + 'explosion' + (i%2) + '.png")');
-			obj.style.backgroundImage = 'url("../images/sprites/' + obj.value() + '_explosion' + (i%2) + '.png")';
+			obj.style.backgroundImage = 'url("./images/sprites/' + obj.value() + '_explosion' + (i%2) + '.png")';
 			i++;	
 		};
 
-		setInterval(animateExplosion, 100);
+		timer = setInterval(function() {
+			animateExplosion();
+		}, 100);
 	};
 };
