@@ -83,6 +83,10 @@ var game = {
 
 		// We animate the items to their new positions
 		if (source.left() != dest.left() || source.top() != dest.top()) {
+			var items = get('.item');
+			for (var i = 0; i < items.length; i++) {
+				items[i].removeEventListener('click', game.onItemClick, false);	// We add the mouse event listener
+			};
 			if (check === true) {
 				source.addListener(MOVE_COMPLETE, game.checkStreak);// Once the animation is over, check for a streak around the item
 				dest.addListener(MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the item
@@ -96,13 +100,13 @@ var game = {
 				source.animate('top', source.top(), dest.top(), 8);	
 				dest.animate('top', dest.top(), source.top(), 8);
 			}
-		}
 		
-		// We swap the x and y properties
-		source.x(destX);
-		source.y(destY);
-		dest.x(sourceX);
-		dest.y(sourceY);
+			// We swap the x and y properties
+			source.x(destX);
+			source.y(destY);
+			dest.x(sourceX);
+			dest.y(sourceY);
+		}
 	},
 
 	/**
@@ -110,6 +114,7 @@ var game = {
 	 * @param item	The item wich neighbours will be checked for a streak
 	 */
 	checkStreak: function(item) {
+		
 		item.removeListener(MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the items
 		var items = get('.item'),
 			streak = [];
@@ -128,11 +133,13 @@ var game = {
 
 				game.deselectItem();
 			}, 500);
-		}else {
-			if (game.item != null && game.item.id !== item.id && !game.item.inStreak) {	// If there is a selected item, and it is not in a streak, we will have to reverse the swap
-				game.swapItems(item, game.item, false);		// We re-swap the items to their respective original positions
-				game.deselectItem();
-			}
+		}else if (game.item != null && game.item.id !== item.id && !game.item.inStreak) {	// If there is a selected item, and it is not in a streak, we will have to reverse the swap
+			game.swapItems(item, game.item, false);		// We re-swap the items to their respective original positions
+			game.deselectItem();
+			
+			for (var i = 0; i < items.length; i++) {
+				items[i].addEventListener('click', game.onItemClick, false);	// We add the mouse event listener
+			};
 		}
 	},
 
@@ -452,6 +459,7 @@ var game = {
 		var items = get('.item');
 		for (var i = 0; i < items.length; i++) {
 			game.checkComboStreak(items[i]);	// And we check if there is a streak among his new neighbours
+			items[i].addEventListener('click', game.onItemClick, false);	// We add the mouse event listener
 		};
 	}
 };
