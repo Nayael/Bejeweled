@@ -53,6 +53,7 @@ var game = {
 	 * @param item	The item to select
 	 */
 	selectItem: function (item) {
+		game.deselectItem();
 		if (game.item == null || item.id !== game.item.id) {
 			item.style.border = 'solid 3px #000';
 			game.item = item;
