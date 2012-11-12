@@ -25,124 +25,48 @@ var game = {
 			for (var j = 0, item; j < 8; j++) {
 				value = row[j];
 				item = new Item(j, i, value);
-				addEvent(item, 'mousedown', game.startDrag);	// We add the mouse event listener
+				item.addEventListener('click', game.onItemClick, false);	// We add the mouse event listener
 				grid.appendChild(item);
 			}
 		}
 	},
 
 	/**
-	 * Initializes the dragging of the clicked item
+	 * Triggers when an item is clicked (select it or proceed to the swap)
 	 * @param e	The mouse event
 	 */
-	startDrag: function(e) {
-		var target = e.target || e.srcElement,
-			x = target.x(),
-			y = target.y(),
-			targetValue = target.value(),
-			itemValue,
-			item;
-
-		game.item = target;
-		addEvent(document, 'mouseup', game.stopDrag);	// We allow the moving to the adjacent items
-
-		// We run through the item's row (the 2 adjacent items)
-		for (var i = ((x > 0) ? x - 1 : 0); i <= ((x < 7) ? x + 1 : 7); i++) {
-			item = get('#tile' + y + '_' + i);	// The item <span>
-			itemValue = item.value();
-
-			if (item != target && item != null) {
-				addEvent(item, 'mouseover', game.moveItem);
-			}
-		}
-
-		// We run through the item's column (the 2 adjacent items)
-		for (var j = ((y > 0) ? y - 1 : 0); j <= ((y < 7) ? y + 1 : 7); j++) {
-			item = get('#tile' + j + '_' + x);
-			itemValue = item.value();
-
-			if (item != target && item != null) {
-				addEvent(item, 'mouseover', game.moveItem);
-			}
-		}
-	},
-
-	/**
-	 * Stops the dragging of the selected item
-	 * @param e	The mouse event
-	 */
-	stopDrag: function(e) {
-		var item,
-			dragged = game.item,
-			hovered = game.hovered,
-			x = dragged.x(),
-			y = dragged.y(),
-			streak = [];
-
-		// We remove the mouse event listeners
-		removeEvent(document, 'mouseup', game.stopDrag);
-		for (var i = 0; i < 8; i++) {
-			for (var j = 0; j < 8; j++) {
-				item = get('#tile' + i + '_' + j);
-				if (item != null)
-					removeEvent(item, 'mouseover', game.moveItem);
-			}
-		}
-
-		// We manually complete the animations
-		if (hovered != undefined) {
-			clearInterval(dragged);
-			clearInterval(hovered);
-			dragged.animated = false;
-			hovered.animated = false;
-
-			dragged.left((60 * x) + 5 * (x + 1));
-			dragged.top((60 * y) + 5 * (y + 1));
-			x = hovered.x();
-			y = hovered.y();
-			hovered.left((60 * x) + 5 * (x + 1));
-			hovered.top((60 * y) + 5 * (y + 1));
-		}
-
-		// We look for an item streak
-		streak = game.checkStreak(game.item, streak);
-		streak = game.hovered ? game.checkStreak(game.hovered, streak) : streak;
-
-		if (streak.length > 0) {
-			var items = get('.item')
-			for (var i = 0; i < items.length; i++) {
-				removeEvent(items[i], 'mousedown', game.startDrag);
-			}
-
-			game.removeStreak(streak);
-			setTimeout(function() {	// We continue after the streak disappeared
-				var itemsGenerated = game.generateItems(streak);
-				var newItems = itemsGenerated.newItems;
-				streak = itemsGenerated.streak;
-				game.itemsFall(newItems, streak);
-
-				// We reset the items information
-				game.hovered = null;
-				game.item = null;
-			}, 500);
+	onItemClick: function (e) {
+		var target = e.srcElement || e.target;
+		if (game.item == null) {
+			game.selectItem(target);
 		}else {
-			if (game.hovered != null) {
-				game.swapItems(game.hovered, game.item);	// We re-swap the items to their respective original positions
+			if (target.isAdjacent(game.item)) {		// If the clicked item is adjacent to the first selected item
+				game.swapItems(game.item, target, true);	// We can swap them
+			}else {							// Otherwise
+				game.selectItem(target);	// We select the new one
 			}
-			// We reset the items information
-			game.hovered = null;
-			game.item = null;
 		}
-
 	},
 
 	/**
-	 * Moves the dragged item to the hovered item's position
-	 * @param e	The mouse event
+	 * Makes a given item the game's selected item
+	 * @param item	The item to select
 	 */
-	moveItem: function(e) {
-		game.hovered = e.target || e.srcElement;
-		game.swapItems(game.item, game.hovered);
+	selectItem: function (item) {
+		if (game.item == null || item.id !== game.item.id) {
+			item.style.border = 'solid 3px #000';
+			game.item = item;
+		}
+	},
+
+	/**
+	 * Deselects the game's selected item
+	 */
+	deselectItem: function () {
+		if (game.item != null) {
+			game.item.style.border = '';
+			game.item = null;   
+		}
 	},
 
 	/**
@@ -150,23 +74,27 @@ var game = {
 	 * @param source	The first item to swap
 	 * @param dest	The second item to swap with the first one
 	 */
-	swapItems: function(source, dest) {
+	swapItems: function(source, dest, check) {
 		var sourceX = source.x(),
 			sourceY = source.y(),
 			destX = dest.x(),
-			destY = dest.y(),
-			sourceValue = source.value(),
-			destValue = dest.value(),
-			items = get('.item');
+			destY = dest.y();
 
 		// We animate the items to their new positions
-		if (source.left() != dest.left()) {
-			source.animate('left', source.left(), dest.left(), 8);
-			dest.animate('left', dest.left(), source.left(), 8);
-		}
-		if (source.top() != dest.top()) {
-			source.animate('top', source.top(), dest.top(), 8);	
-			dest.animate('top', dest.top(), source.top(), 8);
+		if (source.left() != dest.left() || source.top() != dest.top()) {
+			if (check === true) {
+				source.addListener(MOVE_COMPLETE, game.checkStreak);// Once the animation is over, check for a streak around the item
+				dest.addListener(MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the item
+			}
+
+			if (source.left() != dest.left()) {
+				source.animate('left', source.left(), dest.left(), 8);
+				dest.animate('left', dest.left(), source.left(), 8);
+			}
+			if (source.top() != dest.top()) {
+				source.animate('top', source.top(), dest.top(), 8);	
+				dest.animate('top', dest.top(), source.top(), 8);
+			}
 		}
 		
 		// We swap the x and y properties
@@ -174,10 +102,36 @@ var game = {
 		source.y(destY);
 		dest.x(sourceX);
 		dest.y(sourceY);
+	},
 
-		// Once moved, the item cannot be moved again
-		for (var i = 0; i < items.length; i++) {
-			removeEvent(items[i], 'mouseover', game.moveItem);
+	/**
+	 * Looks for the presence and removes a streak around an item
+	 * @param item	The item wich neighbours will be checked for a streak
+	 */
+	checkStreak: function(item) {
+		item.removeListener(MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the items
+		var items = get('.item'),
+			streak = [];
+
+		// We look for an item streak
+		streak = game.getStreak(item);
+
+		if (streak.length > 0) {
+			item.inStreak = true;
+			game.removeStreak(streak);
+			setTimeout(function() {		// We continue after the streak disappeared
+				var itemsGenerated = game.generateItems(streak);
+				var newItems = itemsGenerated.newItems;
+				streak = itemsGenerated.streak;
+				game.itemsFall(newItems, streak);
+
+				game.deselectItem();
+			}, 500);
+		}else {
+			if (game.item != null && game.item.id !== item.id && !game.item.inStreak) {	// If there is a selected item, and it is not in a streak, we will have to reverse the swap
+				game.swapItems(item, game.item, false);		// We re-swap the items to their respective original positions
+				game.deselectItem();
+			}
 		}
 	},
 
@@ -185,13 +139,14 @@ var game = {
 	 * Searches for the presence of an item streak
 	 * @param item	The item which column and row will be parsed
 	 * @param streak	An array containing the items that are in a streak
-	 * @return True if there is a streak, false if there is not
+	 * @return The streak array with the streaked items in it
 	 */
-	checkStreak: function(item, streak) {
+	getStreak: function(item) {
 		var x = item.x(),
 			y = item.y(),
 			row = [],
-			column = [];
+			column = [],
+			streak = [];
 
 		row = game.checkRow(item);
 		column = game.checkColumn(item);
@@ -199,16 +154,20 @@ var game = {
 		// If we have a row of three identical items
 		if (row.length > 1) {
 			for (var i = 0; i < row.length; i++) {
-				if (streak.indexOf(row[i]) == -1)
+				if (streak.indexOf(row[i]) == -1) {
 					streak.push(row[i]);
+					row[i].inStreak = true;
+				}
 			}
 		}
 
 		// If we have a column of three identical items
 		if (column.length > 1) {
 			for (var i = 0; i < column.length; i++) {
-				if (streak.indexOf(column[i]) == -1)
+				if (streak.indexOf(column[i]) == -1) {
 					streak.push(column[i]);
+					column[i].inStreak = true;
+				}
 			}
 		}
  
@@ -261,7 +220,7 @@ var game = {
 				currentItem = get('#tile' + j + '_' + x);
 				siblingCheck = game.siblingCheck(currentItem, column, value, true);
 				if (siblingCheck != false) 
-				    column = siblingCheck;
+					column = siblingCheck;
 				else
 					break;
 				
@@ -275,7 +234,7 @@ var game = {
 				currentItem = get('#tile' + j + '_' + x);
 				siblingCheck = game.siblingCheck(currentItem, column, value, true);
 				if (siblingCheck != false) 
-				    column = siblingCheck;
+					column = siblingCheck;
 				else
 					break;
 				
@@ -313,7 +272,7 @@ var game = {
 				currentItem = get('#tile' + y + '_' + i);
 				siblingCheck = game.siblingCheck(currentItem, row, value, false);
 				if (siblingCheck != false) 
-				    row = siblingCheck;
+					row = siblingCheck;
 				else
 					break;
 				itemsNb++;
@@ -327,7 +286,7 @@ var game = {
 				currentItem = get('#tile' + y + '_' + i);
 				siblingCheck = game.siblingCheck(currentItem, row, value, false);
 				if (siblingCheck != false) 
-				    row = siblingCheck;
+					row = siblingCheck;
 				else
 					break;
 				itemsNb++;
@@ -370,7 +329,7 @@ var game = {
 	 * @param item	The item which siblings will be parsed
 	 */
 	checkComboStreak: function(item) {
-		var streak = game.checkStreak(item, []);
+		var streak = game.getStreak(item, []);
 		if (streak.length > 0) {
 			game.removeStreak(streak);
 			setTimeout(function() {	// We continue after the streak disappeared
@@ -460,7 +419,7 @@ var game = {
 			tile = parseInt(Math.random() * game.level.range);
 
 			item = new Item(x, y, tile);
-			addEvent(item, 'mousedown', game.startDrag);
+			item.addEventListener('click', game.onItemClick, false);	// We add the mouse event listener
 			grid.appendChild(item);
 			item.x(x);
 			item.y(y);
@@ -480,6 +439,7 @@ var game = {
 	 * @param item	The item which fall is complete
 	 */
 	onFallComplete: function(item) {
+		item.falling = false;
 		var items = get('.item');
 		
 		for (var i = 0; i < items.length; i++) {
@@ -490,7 +450,6 @@ var game = {
 		// If all the animations are finished, we allow the player to move items again
 		var items = get('.item');
 		for (var i = 0; i < items.length; i++) {
-			addEvent(items[i], 'mousedown', game.startDrag);
 			game.checkComboStreak(items[i]);	// And we check if there is a streak among his new neighbours
 		};
 	}
