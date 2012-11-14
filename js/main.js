@@ -114,7 +114,6 @@ var game = {
 	 * @param item	The item wich neighbours will be checked for a streak
 	 */
 	checkStreak: function(item) {
-		
 		item.removeListener(MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the items
 		var items = get('.item'),
 			streak = [];
@@ -156,8 +155,8 @@ var game = {
 			column = [],
 			streak = [];
 
-		row = game.checkRow(item);
-		column = game.checkColumn(item);
+		row = game.checkRow(item, true, true);
+		column = game.checkColumn(item, true, true);
 
 		// If we have a row of three identical items
 		if (row.length > 1) {
@@ -208,46 +207,57 @@ var game = {
 	},
 
 	/**
+	 * Searches for the presence of an item streak
+	 * @param item	The item which column and row will be parsed
+	 * @param vertical	bool	Check vertically or horizontally ?
+	 * @param step	int	(-1 OR 1) Check on one direction or another (left/right, top/bottom)
+	 * @return The streak array with the streaked items in it
+	 */
+	parseNeighbours: function (item, vertical, step) {
+		var line = [],
+			i = 0,
+			x = item.x(),
+			y = item.y(),
+			siblingCheck,
+			currentItem,
+			value = item.value();
+
+		// We run through the items in one direction. The step indicates if we go one way or another on the X or Y axis (the axis is defined by the 'vertical' parameter)
+		for (i = ((vertical ? y : x) + step); (step == -1) ? (i > -1) : (i < 8); i += step) {
+			if (vertical) {
+				currentItem = get('#tile' + i + '_' + x);	// The current parsed item
+			}else {
+				currentItem = get('#tile' + y + '_' + i);	// The current parsed item
+			}
+
+			siblingCheck = game.siblingCheck(currentItem, line, value, true);	// We check if this sibling is identical
+			if (siblingCheck != false) 
+				line = siblingCheck;
+			else
+				break;
+		}
+		return line;
+	},
+
+	/**
 	 * Checks for a streak in the item's column
 	 * @param item	The item which column will be parsed
 	 * @return An array containing the identical adjacent items in the column
 	 */
-	checkColumn: function(item) {
-		var column = [],
-			x = item.x(),
-			y = item.y(),
-			itemsNb = 0,
-			siblingCheck,
-			currentItem,
-			currentItemRow = [],
-			value = item.value();
+	checkColumn: function(item, top, bottom) {
+		if (top !== true && bottom !== true) {
+			return;
+		}
 		
-		// Checking the items on top
-		if (y > 0) {
-			for (var j = y - 1; j > -1; j--) {
-				currentItem = get('#tile' + j + '_' + x);
-				siblingCheck = game.siblingCheck(currentItem, column, value, true);
-				if (siblingCheck != false) 
-					column = siblingCheck;
-				else
-					break;
-				
-				itemsNb++;
-			}
+		var column = [];	
+		// Checking the items on top (if the item is at an extremity, don't check behind the border)
+		if (top && item.y() > 0) {
+			column = column.concat(game.parseNeighbours(item, true, -1));
 		}
 
-		// Checking the items on bottom
-		if (y < 7) {
-			for (j = y + 1; j < 8; j++) {
-				currentItem = get('#tile' + j + '_' + x);
-				siblingCheck = game.siblingCheck(currentItem, column, value, true);
-				if (siblingCheck != false) 
-					column = siblingCheck;
-				else
-					break;
-				
-				itemsNb++;
-			}
+		// Checking the items on bottom (if the item is at an extremity, don't check behind the border)
+		if (bottom && item.y() < 7) {
+			column = column.concat(game.parseNeighbours(item, true, 1));
 		}
 
 		/*** Remove comment if we want additionnal streaks with rows and lines ***/
@@ -264,41 +274,20 @@ var game = {
 	 * @param item	The item which row will be parsed
 	 * @return An array containing the identical adjacent items in the row
 	 */
-	checkRow: function(item) {
-		var row = [],
-			x = item.x(),
-			y = item.y(),
-			itemsNb = 0,
-			siblingCheck,
-			currentItem,
-			currentItemColumn = [],
-			value = item.value();
-
-		// Checking the items on the left
-		if (x > 0) {
-			for (var i = x - 1; i > -1; i--) {
-				currentItem = get('#tile' + y + '_' + i);
-				siblingCheck = game.siblingCheck(currentItem, row, value, false);
-				if (siblingCheck != false) 
-					row = siblingCheck;
-				else
-					break;
-				itemsNb++;
-			}
+	checkRow: function(item, left, right) {
+		if (left !== true && right !== true) {
+			return;
 		}
 
+		var row = [];
+		// Checking the items on the left
+		if (left && item.x() > 0) {
+			row = row.concat(game.parseNeighbours(item, false, -1));
+		}
 
 		// Checking the items on the right
-		if (x < 7) {
-			for (i = x + 1; i < 8; i++) {
-				currentItem = get('#tile' + y + '_' + i);
-				siblingCheck = game.siblingCheck(currentItem, row, value, false);
-				if (siblingCheck != false) 
-					row = siblingCheck;
-				else
-					break;
-				itemsNb++;
-			}
+		if (right && item.x() < 7) {
+			row = row.concat(game.parseNeighbours(item, false, 1));
 		}
 
 		/*** Remove comment if we want additionnal streaks with rows and lines ***/
