@@ -10,9 +10,11 @@ function Item(x, y, value) {
 	top = ((60 * y) + 5 * (y + 1)) + 'px';
 	item = document.createElement('span');
 
-	item.className = 'item tile_' + value;
-	if (y >= 0 && x >= 0)
+	item.className = 'item';
+	item.val = value;
+	if (y >= 0 && x >= 0) {
 		item.id = 'tile' + y + '_' + x;
+	}
 
 	item.style.top = top;
 	item.style.left = left;
@@ -92,9 +94,11 @@ function addItemCapabilities (obj) {
 	 */
 	obj.value = function(val) {
 		if (val != undefined)
-			this.className = 'item tile_' + val;
+			// this.className = 'item tile_' + val;
+			this.val = val;
 		if (this.className != '')
-			return parseInt(this.className.substr(10));
+			// return parseInt(this.className.substr(10));
+			return this.val;
 		return null;
 	};
 
@@ -130,6 +134,7 @@ function addItemCapabilities (obj) {
 		};
 
 		var direction = (end - start > 0) ? 1 : -1;
+		// We start the item's timer
 		obj.timer = setInterval(function() {
 			start = doAnimation(start, end, direction, speed);
 		}, 30);

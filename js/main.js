@@ -218,7 +218,7 @@ var game = {
 			i = 0,
 			x = item.x(),
 			y = item.y(),
-			siblingCheck,
+			siblingCompare,
 			currentItem,
 			value = item.value();
 
@@ -230,9 +230,9 @@ var game = {
 				currentItem = get('#tile' + y + '_' + i);	// The current parsed item
 			}
 
-			siblingCheck = game.siblingCheck(currentItem, line, value, true);	// We check if this sibling is identical
-			if (siblingCheck != false) 
-				line = siblingCheck;
+			siblingCompare = game.siblingCompare(currentItem, line, value, true);	// We check if this sibling is identical
+			if (siblingCompare != false) 
+				line = siblingCompare;
 			else
 				break;
 		}
@@ -307,7 +307,8 @@ var game = {
 	 * @param vertical	Should we check vertically or horizontally ?
 	 * @return An array containing the identical adjacent items | false if the array is empty
 	 */
-	siblingCheck: function(item, line, value, vertical) {
+	siblingCompare: function(item, line, value, vertical) {
+		// console.log('item: ', item);
 		if (item.value() == value && item != game.item)	{
 			if (line.indexOf(item) == -1 && !item.falling)
 				line.push(item);	// We add it to the items to remove
@@ -333,8 +334,8 @@ var game = {
 				var itemsGenerated = game.generateItems(streak);
 				var newItems = itemsGenerated.newItems;
 				streak = itemsGenerated.streak;
-				console.log('newItems: ', newItems);
-				// game.itemsFall(newItems, streak);
+				// console.log('newItems: ', newItems);
+				game.itemsFall(newItems, streak);
 			}, 500);
 		}
 	},
@@ -390,11 +391,33 @@ var game = {
 
 					item.falling = true;
 					item.animate('top', item.top(), top, 6);	// We move the item to its new position
+					console.log('item: ', item);
 					item.x(keys[i]);
 					item.y(j + nbItems);
 				}
 			}
 		}
+	},
+
+	/**
+	 * Triggers every time an item's fall is complete
+	 * Add the mouse event listeners to all the items, once all the animations are done
+	 * @param item	The item which fall is complete
+	 */
+	onFallComplete: function(item) {
+		item.falling = false;
+		var items = get('.item');
+		
+		for (var i = 0; i < items.length; i++) {
+			if (items[i].animated)	// If at least one item is still being animated
+				return;
+		};
+
+		// If all the animations are finished, we allow the player to move items again
+		for (var i = 0; i < items.length; i++) {
+			game.checkComboStreak(items[i]);	// And we check if there is a streak among his new neighbours
+			items[i].addEventListener('click', game.onItemClick, false);	// We add the mouse event listener
+		};
 	},
 
 	/**
@@ -415,6 +438,7 @@ var game = {
 			y = 0 - columns['column' + x];	// And then we calculate the necessary shift on the Y axis
 			tile = parseInt(Math.random() * game.level.range);
 
+		// PROBLEM : Items with the same ids are generated
 			item = new Item(x, y, tile);
 			item.addEventListener('click', game.onItemClick, false);	// We add the mouse event listener
 			grid.appendChild(item);
@@ -427,28 +451,6 @@ var game = {
 		return {
 			newItems: newItems,
 			streak: streak
-		};
-	},
-
-	/**
-	 * Triggers every time an item's fall is complete
-	 * Add the mouse event listeners to all the items, once all the animations are done
-	 * @param item	The item which fall is complete
-	 */
-	onFallComplete: function(item) {
-		item.falling = false;
-		var items = get('.item');
-		
-		for (var i = 0; i < items.length; i++) {
-			if (items[i].animated)	// If at least one item is still being animated
-				return;
-		};
-
-		// If all the animations are finished, we allow the player to move items again
-		var items = get('.item');
-		for (var i = 0; i < items.length; i++) {
-			game.checkComboStreak(items[i]);	// And we check if there is a streak among his new neighbours
-			items[i].addEventListener('click', game.onItemClick, false);	// We add the mouse event listener
 		};
 	}
 };
