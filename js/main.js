@@ -108,9 +108,7 @@ var game = {
 	checkStreak: function(gem) {
 		gem.removeListener(MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the gems
 		var gems = get('.gem');
-
-		// We look for a gem streak
-		var streak = game.getStreak(gem);
+		var streak = gem.getStreak();	// We look for a streak from the gem
 
 		if (streak.length > 0) {
 			gem.inStreak = true;
@@ -132,50 +130,6 @@ var game = {
 				gems[i].addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
 			};
 		}
-	},
-
-	/**
-	 * Searches for the presence of an gem streak
-	 * @param gem	The gem which column and row will be parsed
-	 * @param streak	An array containing the gems that are in a streak
-	 * @return The streak array with the streaked gems in it
-	 */
-	getStreak: function(gem) {
-		var x = gem.x(),
-			y = gem.y(),
-			row = [],
-			column = [],
-			streak = [];
-
-		row = gem.checkRow(true, true);
-		column = gem.checkColumn(true, true);
-
-		// If we have a row of three identical gems
-		if (row.length > 1) {
-			for (var i = 0; i < row.length; i++) {
-				// streak[row[i].x()] = [];
-				if (streak.indexOf(row[i]) == -1) {
-					streak.push(row[i]);
-					row[i].inStreak = true;
-				}
-			};
-		}
-
-		// If we have a column of three identical gems
-		if (column.length > 1) {
-			for (var i = 0; i < column.length; i++) {
-				if (streak.indexOf(column[i]) == -1) {
-					streak.push(column[i]);
-					column[i].inStreak = true;
-				}
-			};
-		}
- 
-		// If we have a row or a column of three identical gems
-		if ((row.length > 1 || column.length > 1) && streak.indexOf(gem) == -1) {
-			streak.push(gem);	// We know the moved gem will be removed
-		}
-		return streak;
 	},
 
 	/**

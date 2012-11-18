@@ -115,6 +115,49 @@ function addGemMethods (gem) {
 		return false;
 	};
 
+
+
+	/**
+	 * Searches for the presence of an gem streak
+	 * @return The streak array with the streaked gems in it
+	 */
+	gem.getStreak = function() {
+		var x = gem.x(),
+			y = gem.y(),
+			row = [],
+			column = [],
+			streak = [];
+
+		row = gem.checkRow(true, true);
+		column = gem.checkColumn(true, true);
+
+		// If we have a row of three identical gems
+		if (row.length > 1) {
+			for (var i = 0; i < row.length; i++) {
+				if (streak.indexOf(row[i]) == -1) {
+					streak.push(row[i]);
+					row[i].inStreak = true;
+				}
+			};
+		}
+
+		// If we have a column of three identical gems
+		if (column.length > 1) {
+			for (var i = 0; i < column.length; i++) {
+				if (streak.indexOf(column[i]) == -1) {
+					streak.push(column[i]);
+					column[i].inStreak = true;
+				}
+			};
+		}
+ 
+		// If we have a row or a column of three identical gems
+		if ((row.length > 1 || column.length > 1) && streak.indexOf(gem) == -1) {
+			streak.push(gem);	// We know the moved gem will be removed
+		}
+		return streak;
+	};
+
 	/**
 	 * Looks through an gem's neighbours in a given direction
 	 * @param vertical	bool	Check vertically or horizontally ?
