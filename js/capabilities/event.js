@@ -11,11 +11,13 @@ function addEventCapabilities(object) {
 	};
 
 	object.removeListener = function(eventName, callback) {
-		for (var i = 0; i < this.listenersFor[eventName].length; i++) {	// We run through the callbacks for the given event
-			if (this.listenersFor[eventName][i] === callback) {
-				this.listenersFor[eventName].splice(i, 1);	// We remove the given callback if we find it
-			}
-		};
+		if (this.listenersFor[eventName] != undefined) {	// If the event has at least one listener
+			for (var i = 0; i < this.listenersFor[eventName].length; i++) {	// We run through the callbacks for the given event
+				if (this.listenersFor[eventName][i] === callback) {
+					this.listenersFor[eventName].splice(i, 1);	// We remove the given callback if we find it
+				}
+			};
+		}
 	};
 	
 	object.dispatch = function () {

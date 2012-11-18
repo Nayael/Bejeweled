@@ -16,7 +16,7 @@ function Gem(x, y, value) {
 	if (y >= 0 && x >= 0) {
 		gem.id = 'tile' + y + '_' + x;
 	}
-	gem.innerHTML = x + '_' + y;
+	gem.innerHTML = y + '_' + x;
 	
 	gem.style.top = top;
 	gem.style.left = left;
@@ -99,12 +99,20 @@ function addGemMethods (obj) {
 	 */
 	obj.value = function(val) {
 		if (val != undefined)
-			// this.className = 'gem tile_' + val;
 			this.val = val;
 		if (this.className != '')
-			// return parseInt(this.className.substr(10));
 			return this.val;
 		return null;
+	};
+
+	/**
+	 * Compares a gem's value with this gem's value
+	 */
+	obj.equals = function(neighbour) {
+		if (neighbour.value() == obj.value() && neighbour != obj && !neighbour.falling)	{
+			return true;
+		}
+		return false;
 	};
 
 	/**

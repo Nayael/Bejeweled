@@ -2,17 +2,7 @@
 var game = {
 	lvlIndex: 0,		// The current level index
 	level: levels[0],	// The current level object
-	hovered: null,		// The hovered gem to swap with
 	gem: null,			// The selected gem
-
-	/**
-	 * Removes an gem from the map
-	 * @param gem	The gem to remove
-	 */
-	removeGem: function(gem) {
-		gem.explode();
-		removeEvent(gem, 'mousedown', game.startDrag);
-	},
 
 	/**
 	 * Creates the grid for the level
@@ -27,15 +17,15 @@ var game = {
 				gem = new Gem(j, i, value);
 				gem.addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
 				grid.appendChild(gem);
-			}
-		}
+			};
+		};
 	},
 
 	/**
 	 * Triggers when an gem is clicked (select it or proceed to the swap)
 	 * @param e	The mouse event
 	 */
-	onGemClick: function (e) {
+	onGemClick: function(e) {
 		var target = e.srcElement || e.target;
 		if (game.gem == null) {
 			game.selectGem(target);
@@ -52,7 +42,7 @@ var game = {
 	 * Makes a given gem the game's selected gem
 	 * @param gem	The gem to select
 	 */
-	selectGem: function (gem) {
+	selectGem: function(gem) {
 		game.deselectGem();
 		if (game.gem == null || gem.id !== game.gem.id) {
 			gem.style.border = 'solid 3px #000';
@@ -63,11 +53,20 @@ var game = {
 	/**
 	 * Deselects the game's selected gem
 	 */
-	deselectGem: function () {
+	deselectGem: function() {
 		if (game.gem != null) {
 			game.gem.style.border = '';
 			game.gem = null;   
 		}
+	},
+
+	/**
+	 * Removes an gem from the map
+	 * @param gem	The gem to remove
+	 */
+	removeGem: function(gem) {
+		gem.explode();
+		removeEvent(gem, 'mousedown', game.startDrag);
 	},
 
 	/**
@@ -85,8 +84,9 @@ var game = {
 		if (source.left() != dest.left() || source.top() != dest.top()) {
 			var gems = get('.gem');
 			for (var i = 0; i < gems.length; i++) {
-				gems[i].removeEventListener('click', game.onGemClick, false);	// We add the mouse event listener
+				gems[i].removeEventListener('click', game.onGemClick, false);	// We remove the mouse event listeners
 			};
+
 			if (check === true) {
 				source.addListener(MOVE_COMPLETE, game.checkStreak);// Once the animation is over, check for a streak around the gem
 				dest.addListener(MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the gem
@@ -96,6 +96,7 @@ var game = {
 				source.animate('left', source.left(), dest.left(), 8);
 				dest.animate('left', dest.left(), source.left(), 8);
 			}
+
 			if (source.top() != dest.top()) {
 				source.animate('top', source.top(), dest.top(), 8);	
 				dest.animate('top', dest.top(), source.top(), 8);
@@ -125,9 +126,10 @@ var game = {
 			gem.inStreak = true;
 			game.removeStreak(streak);
 			setTimeout(function() {		// We continue after the streak disappeared
-				var gemsGenerated = game.generateGems(streak);
-				var newGems = gemsGenerated.newGems;
-				streak = gemsGenerated.streak;
+				var generatedGems = game.generateGems(streak),
+					newGems = generatedGems.newGems;
+
+				streak = generatedGems.streak;
 				game.gemsFall(newGems, streak);
 
 				game.deselectGem();
@@ -165,7 +167,7 @@ var game = {
 					streak.push(row[i]);
 					row[i].inStreak = true;
 				}
-			}
+			};
 		}
 
 		// If we have a column of three identical gems
@@ -175,34 +177,13 @@ var game = {
 					streak.push(column[i]);
 					column[i].inStreak = true;
 				}
-			}
+			};
 		}
  
 		// If we have a row or a column of three identical gems
 		if ((row.length > 1 || column.length > 1) && streak.indexOf(gem) == -1) {
 			streak.push(gem);	// We know the moved gem will be removed
 		}
-
-
-		/*** Remove comment if we want additionnal streaks with rows and lines ***/
-		// If we have a row or a column of three identical gems
-		// if ((row.length > 1 || column.length > 1)) {
-		// 	// Rows
-		// 	for (var i = 0; i < row.length; i++) {
-		// 		if (streak.indexOf(row[i]) == -1)
-		// 			streak.push(row[i]);	// We will remove the gems from the row
-		// 	}
-			
-		// 	// Columns
-		// 	for (var i = 0; i < column.length; i++) {
-		// 		if (streak.indexOf(column[i]) == -1)
-		// 			streak.push(column[i]);	// We will remove the gems from the column
-		// 	}
-
-		// 	// The moved gem
-		// 	if (streak.indexOf(gem) == -1)
-		// 		streak.push(gem);	// We know the moved gem will be removed
-		// }
 		return streak;
 	},
 
@@ -213,12 +194,11 @@ var game = {
 	 * @param step	int	(-1 OR 1) Check on one direction or another (left/right, top/bottom)
 	 * @return The streak array with the streaked gems in it
 	 */
-	parseNeighbours: function (gem, vertical, step) {
+	parseNeighbours: function(gem, vertical, step) {
 		var line = [],
 			i = 0,
 			x = gem.x(),
 			y = gem.y(),
-			siblingCompare,
 			currentGem,
 			value = gem.value();
 
@@ -230,13 +210,12 @@ var game = {
 				currentGem = get('#tile' + y + '_' + i);	// The current parsed gem
 			}
 
-			siblingCompare = game.siblingCompare(currentGem, line, value, true);	// We check if this sibling is identical
-			if (siblingCompare != false) {				
-				line = siblingCompare;
+			if (line.indexOf(currentGem) == -1 && gem.equals(currentGem)) {
+				line = line.concat(currentGem);		
 			}else {
 				break;
 			}
-		}
+		};
 		return line;
 	},
 
@@ -255,18 +234,10 @@ var game = {
 		if (top && gem.y() > 0) {
 			column = column.concat(game.parseNeighbours(gem, true, -1));
 		}
-
 		// Checking the gems on bottom (if the gem is at an extremity, don't check behind the border)
 		if (bottom && gem.y() < 7) {
 			column = column.concat(game.parseNeighbours(gem, true, 1));
 		}
-
-		/*** Remove comment if we want additionnal streaks with rows and lines ***/
-		// if (gem == game.gem || gem == game.hovered) {
-		// 	if (gemsNb > 1)
-		// 		return column;
-		// 	return [];
-		// }
 		return column;
 	},
 
@@ -285,42 +256,11 @@ var game = {
 		if (left && gem.x() > 0) {
 			row = row.concat(game.parseNeighbours(gem, false, -1));
 		}
-
 		// Checking the gems on the right
 		if (right && gem.x() < 7) {
 			row = row.concat(game.parseNeighbours(gem, false, 1));
 		}
-
-		/*** Remove comment if we want additionnal streaks with rows and lines ***/
-		// if (gem == game.gem || gem == game.hovered) {	// If this is the 'main' row check
-		// 	if (gemsNb > 1)	// We only consider rows that have more than 1 gems in them
-		// 		return row;
-		// 	return [];
-		// }
 		return row;
-	},
-
-	/**
-	 * Check if the adjacent gem of a given gem is identical (vertically or horizontally)
-	 * @param gem	The gem which siblings will be parsed
-	 * @param line	An array containing the siblings that we already know are in a streak
-	 * @param value	The value (sprite) of the source gem
-	 * @param vertical	Should we check vertically or horizontally ?
-	 * @return An array containing the identical adjacent gems | false if the array is empty
-	 */
-	siblingCompare: function(gem, line, value, vertical) {
-		// console.log('gem: ', gem);
-		if (gem.value() == value && gem != game.gem)	{
-			if (line.indexOf(gem) == -1 && !gem.falling)
-				line.push(gem);	// We add it to the gems to remove
-			
-			/*** Remove comment if we want additionnal streaks with rows and lines ***/
-			// var currentGemLine = vertical ? game.checkRow(gem) : game.checkColumn(gem);	// We check for its adjacent gems
-			// for (var i = 0; i < currentGemLine.length; i++)
-			// 	line.push(currentGemLine[i]);
-			return line;
-		}
-		return false;	// We stop looking for a streak
 	},
 
 	/**
@@ -328,17 +268,17 @@ var game = {
 	 * @param gem	The gem which siblings will be parsed
 	 */
 	checkComboStreak: function(gem) {
-		var streak = game.getStreak(gem, []);
-		if (streak.length > 0) {
-			game.removeStreak(streak);
-			setTimeout(function() {	// We continue after the streak disappeared
-				var gemsGenerated = game.generateGems(streak);
-				var newGems = gemsGenerated.newGems;
-				streak = gemsGenerated.streak;
-				// console.log('newGems: ', newGems);
-				game.gemsFall(newGems, streak);
-			}, 500);
-		}
+		// var streak = game.getStreak(gem);
+		// if (streak.length > 0) {
+		// 	game.removeStreak(streak);
+		// 	setTimeout(function() {	// We continue after the streak disappeared
+		// 		var generatedGems = game.generateGems(streak);
+		// 		var newGems = generatedGems.newGems;
+		// 		streak = generatedGems.streak;
+		// 		// console.log('newGems: ', newGems);
+		// 		game.gemsFall(newGems, streak);
+		// 	}, 500);
+		// }
 	},
 
 	/**
@@ -360,11 +300,12 @@ var game = {
 		var columns = {			// The columns which contain gems that must fall
 			indexes: {},
 		};
+
 		for (var i = 0, x, y; i < streak.length; i++) {
 			x = streak[i].x();
 			y = streak[i].y();
 
-			if (!columns.indexes.hasOwnProperty(x)){
+			if (columns.indexes[x] == undefined){
 				columns.indexes[x] = 1;
 				columns['yMin' + x] = 8;
 				columns['yMax' + x] = 0;
@@ -372,16 +313,18 @@ var game = {
 				columns.indexes[x]++;
 			}
 			
-			if (y < columns['yMin' + x])
+			if (y < columns['yMin' + x]) {
 				columns['yMin' + x] = y;
-			if (y > columns['yMax' + x])
+			}
+			if (y > columns['yMax' + x]) {
 				columns['yMax' + x] = y;
-		}
+			}
+		};
 
-		for (var i = 0, yMin, yMax; i < Object.getLength(columns.indexes); i++) {
+		for (var i = 0; i < Object.getLength(columns.indexes); i++) {
 			var gem, top, keys = Object.getKeys(columns.indexes), nbGems = columns.indexes[keys[i]];
-			yMin = columns['yMin' + keys[i]];
-			yMax = columns['yMax' + keys[i]];
+			var yMin = columns['yMin' + keys[i]];
+			var yMax = columns['yMax' + keys[i]];
 
 			for (var j = (yMax - nbGems); j >= yMin; j--) {	// We run through the gems
 				gem = get('#tile' + j + '_' + keys[i]);
@@ -393,12 +336,11 @@ var game = {
 
 					gem.falling = true;
 					gem.animate('top', gem.top(), top, 6);	// We move the gem to its new position
-					console.log('gem: ', gem);
-					gem.x(j + nbGems);
-					gem.y(keys[i]);
+					gem.x(keys[i]);
+					gem.y(j + nbGems);
 				}
 			}
-		}
+		};
 	},
 
 	/**
@@ -407,6 +349,7 @@ var game = {
 	 * @param gem	The gem which fall is complete
 	 */
 	onFallComplete: function(gem) {
+		// console.log('fallen gem: ', gem);
 		gem.falling = false;
 		var gems = get('.gem');
 		
@@ -417,8 +360,9 @@ var game = {
 
 		// If all the animations are finished, we allow the player to move gems again
 		for (var i = 0; i < gems.length; i++) {
-			game.checkComboStreak(gems[i]);	// And we check if there is a streak among his new neighbours
 			gems[i].addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
+			game.checkStreak(gems[i]);
+			// game.checkComboStreak(gems[i]);	// And we check if there is a streak among his new neighbours
 		};
 	},
 
@@ -432,10 +376,11 @@ var game = {
 
 		for (i = 0; i < gemsNb; i++) {
 			x = streak[i].x();
-			if (!columns.hasOwnProperty('column' + x))
+			if (columns['column' + x] == undefined){
 				columns['column' + x] = 1;	// We start to count
-			else	// Otherwise
+			}else {	// Otherwise
 				columns['column' + x]++;	// We add this gem to the count
+			}
 
 			y = 0 - columns['column' + x];	// And then we calculate the necessary shift on the Y axis
 			tile = parseInt(Math.random() * game.level.range);
@@ -444,7 +389,6 @@ var game = {
 			gem = new Gem(x, y, tile);
 			gem.addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
 			grid.appendChild(gem);
-			console.log('y: ', y);
 			gem.x(x);
 			gem.y(y);
 
