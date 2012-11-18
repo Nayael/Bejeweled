@@ -67,11 +67,11 @@ HTMLSpanElement.prototype.top = function(value) {
 	return this.style.top;
 };
 
-function addGemMethods (obj) {
+function addGemMethods (gem) {
 	/**
 	 * Returns (and sets, if a value is passed as an argument) the gem's x position on the map
 	 */
-	obj.x = function(value) {
+	gem.x = function(value) {
 		if (value != undefined)	{
 			this.id = (this.id != '') ? (this.id.substr(0, this.id.length - 1) + value) : 'tile0_' + value;
 			this.innerHTML = this.id.substr(4);	
@@ -84,7 +84,7 @@ function addGemMethods (obj) {
 	/**
 	 * Returns (and sets, if a value is passed as an argument) the gem's y position on the map
 	 */
-	obj.y = function(value) {
+	gem.y = function(value) {
 		if (value != undefined){
 			this.id = (this.id != '') ? (this.id.substring(0, 4) + value + this.id.substr(this.id.indexOf('_'))) : 'tile' + value + '_0';
 			this.innerHTML = this.id.substr(4);	
@@ -97,7 +97,7 @@ function addGemMethods (obj) {
 	/**
 	 * Returns (and sets, if a value is passed as an argument) the gem's y tile value
 	 */
-	obj.value = function(val) {
+	gem.value = function(val) {
 		if (val != undefined)
 			this.val = val;
 		if (this.className != '')
@@ -108,17 +108,92 @@ function addGemMethods (obj) {
 	/**
 	 * Compares a gem's value with this gem's value
 	 */
-	obj.equals = function(neighbour) {
-		if (neighbour.value() == obj.value() && neighbour != obj && !neighbour.falling)	{
+	gem.equals = function(neighbour) {
+		if (neighbour.value() == gem.value() && neighbour != gem && !neighbour.falling)	{
 			return true;
 		}
 		return false;
 	};
 
 	/**
+	 * Looks through an gem's neighbours in a given direction
+	 * @param vertical	bool	Check vertically or horizontally ?
+	 * @param step	int	(-1 OR 1) Check on one direction or another (left/right, top/bottom)
+	 * @return The streak array with the streaked gems in it
+	 */
+	gem.parseNeighbours = function(vertical, step) {
+		var streak = [],
+			i = 0,
+			x = gem.x(),
+			y = gem.y(),
+			currentGem;
+
+		// We run through the gems in one direction. The step indicates if we go one way or another on the X or Y axis (the axis is defined by the 'vertical' parameter)
+		for (i = ((vertical ? y : x) + step); (step == -1) ? (i > -1) : (i < 8); i += step) {
+			if (vertical) {
+				currentGem = get('#tile' + i + '_' + x);	// The current parsed gem
+			}else {
+				currentGem = get('#tile' + y + '_' + i);	// The current parsed gem
+			}
+
+			// If the current gem is equal to the source gem, we add it to the streak
+			if (streak.indexOf(currentGem) == -1 && gem.equals(currentGem)) {
+				streak = streak.concat(currentGem);		
+			}else {
+				break;
+			}
+		};
+		return streak;
+	};
+
+
+
+	/**
+	 * Checks for a streak in the gem's column
+	 * @return An array containing the identical adjacent gems in the column
+	 */
+	gem.checkColumn = function(top, bottom) {
+		if (top !== true && bottom !== true) {
+			return;
+		}
+		
+		var column = [];	
+		// Checking the gems on top (if the gem is at an extremity, don't check behind the border)
+		if (top && gem.y() > 0) {
+			column = column.concat(gem.parseNeighbours(true, -1));
+		}
+		// Checking the gems on bottom (if the gem is at an extremity, don't check behind the border)
+		if (bottom && gem.y() < 7) {
+			column = column.concat(gem.parseNeighbours(true, 1));
+		}
+		return column;
+	};
+
+	/**
+	 * Checks for a streak in the gem's row
+	 * @return An array containing the identical adjacent gems in the row
+	 */
+	gem.checkRow = function(left, right) {
+		if (left !== true && right !== true) {
+			return;
+		}
+
+		var row = [];
+		// Checking the gems on the left
+		if (left && gem.x() > 0) {
+			row = row.concat(gem.parseNeighbours(false, -1));
+		}
+		// Checking the gems on the right
+		if (right && gem.x() < 7) {
+			row = row.concat(gem.parseNeighbours(false, 1));
+		}
+		return row;
+	};
+
+	/**
 	 * Animates an element's CSS property from start value to end value (only values in pixels)
 	 */
-	obj.animate = function(property, start, end, speed) {
+	gem.animate = function(property, start, end, speed) {
 		if (start == end)
 			return;
 		
@@ -132,43 +207,43 @@ function addGemMethods (obj) {
 			for (var i = 0; i < speed; i++) {	
 				// If the property has reached the end value
 				if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
-					clearInterval(obj.timer);	// We stop the animation timer
-					obj.dispatch(MOVE_COMPLETE, obj);
-					obj.animated = false;
-					if (property === 'top' && obj.falling) {
-						obj.dispatch(FALL_COMPLETE, obj);
+					clearInterval(gem.timer);	// We stop the animation timer
+					gem.dispatch(MOVE_COMPLETE, gem);
+					gem.animated = false;
+					if (property === 'top' && gem.falling) {
+						gem.dispatch(FALL_COMPLETE, gem);
 					}
 					return;
 				}
 				start += direction;
-				obj.style[property] = start + 'px';
+				gem.style[property] = start + 'px';
 			}
 			return start;
 		};
 
 		var direction = (end - start > 0) ? 1 : -1;
 		// We start the gem's timer
-		obj.timer = setInterval(function() {
+		gem.timer = setInterval(function() {
 			start = doAnimation(start, end, direction, speed);
 		}, 30);
-		obj.animated = true;
+		gem.animated = true;
 	};
 
 	/**
 	 * Animates the explosion of an gem and removes it
 	 */
-	obj.explode = function() {
+	gem.explode = function() {
 		var i = 0, timer;
 		var animateExplosion = function () {
 			if (i >= 5) {
 				clearInterval(timer);
-				if (obj.parentNode) {
-					obj.parentNode.removeChild(obj);
-					// obj.removeListener(MOVE_COMPLETE, game.checkStreak);
+				if (gem.parentNode) {
+					gem.parentNode.removeChild(gem);
+					gem.removeListener(MOVE_COMPLETE, game.checkStreak);
 				}
 				return;
 			}
-			obj.style.backgroundImage = 'url("./images/sprites/' + obj.value() + '_explosion' + (i%2) + '.png")';
+			gem.style.backgroundImage = 'url("./images/sprites/' + gem.value() + '_explosion' + (i%2) + '.png")';
 			i++;	
 		};
 
@@ -179,10 +254,10 @@ function addGemMethods (obj) {
 
 	/**
 	 * Checks if a given gem is adjacent to the object
-	 * @param gem	The gem to compare with the current object
+	 * @param target	The gem to compare with the current object
 	 */
-	obj.isAdjacent = function(gem) {
-		return (((obj.x() === gem.x() - 1 || obj.x() === gem.x() + 1) && obj.y() === gem.y())
-			 || ((obj.y() === gem.y() - 1 || obj.y() === gem.y() + 1) && obj.x() === gem.x()));
+	gem.isNeighbour = function(target) {
+		return (((gem.x() === target.x() - 1 || gem.x() === target.x() + 1) && gem.y() === target.y())
+			 || ((gem.y() === target.y() - 1 || gem.y() === target.y() + 1) && gem.x() === target.x()));
 	};
 };
