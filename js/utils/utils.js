@@ -1,10 +1,4 @@
 /**
- * Some useful functions
- * by Nayael
- */
-
-
-/**
  * Returns a DOM object or an array of DOM objects, depending on the argument (id, class, or tag name)
  */
 function get(id) {

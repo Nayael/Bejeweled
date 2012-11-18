@@ -1,42 +1,43 @@
 /**
- * Creates an item from its coordinates and tile value
+ * Creates an gem from its coordinates and tile value
  */
-function Item(x, y, value) {
-	if (this == window)
-		throw new Error('Item() is a constructor, you can only call it with the keyword "new"');
-
-	var item, left, top;
-	left = ((60 * x) + 5 * (x + 1)) + 'px';
-	top = ((60 * y) + 5 * (y + 1)) + 'px';
-	item = document.createElement('span');
-
-	item.className = 'item';
-	item.val = value;
-	if (y >= 0 && x >= 0) {
-		item.id = 'tile' + y + '_' + x;
+function Gem(x, y, value) {
+	if (this == window) {
+		throw new Error('Gem() is a constructor, you can only call it with the keyword "new"');
 	}
 
-	item.style.top = top;
-	item.style.left = left;
-	item.style.backgroundImage = 'url("./images/sprites/' + value + '.png")';
-	item.style.backgroundRepeat = 'no-repeat';
-	item.style.backgroundPosition = 'top center';
-	// item.style.border = 'solid 3px #000';
+	var gem, left, top;
+	left = ((60 * x) + 5 * (x + 1)) + 'px';
+	top = ((60 * y) + 5 * (y + 1)) + 'px';
+	gem = document.createElement('span');
+
+	gem.className = 'gem';
+	gem.val = value;
+	if (y >= 0 && x >= 0) {
+		gem.id = 'tile' + y + '_' + x;
+	}
+	gem.innerHTML = x + '_' + y;
 	
-	item.animated = false;	// Is the element being animated ?
-	item.falling = false;	// Is the element falling ?
-	item.timer = null;
-	item.inStreak = false;
+	gem.style.top = top;
+	gem.style.left = left;
+	gem.style.backgroundImage = 'url("./images/sprites/' + value + '.png")';
+	gem.style.backgroundRepeat = 'no-repeat';
+	gem.style.backgroundPosition = 'top center';
+		
+	gem.animated = false;	// Is the element being animated ?
+	gem.falling = false;	// Is the element falling ?
+	gem.timer = null;
+	gem.inStreak = false;
 
-	addItemCapabilities(item);		// We add useful functions relative to item objects
-	addEventCapabilities(item);	// We add useful functions relative to events
+	addGemMethods(gem);	// We add useful functions relative to gem objects
+	addEventCapabilities(gem);	// We add useful functions relative to events
 
-	item.addListener(FALL_COMPLETE, game.onFallComplete);
-	return item;
+	gem.addListener(FALL_COMPLETE, game.onFallComplete);
+	return gem;
 };
 
 /**
- * Returns (and sets, if a value is passed as an argument) the item's "left" CSS property in px
+ * Returns (and sets, if a value is passed as an argument) the gem's "left" CSS property in px
  */
 HTMLSpanElement.prototype.left = function(value) {
 	if (value != undefined) {
@@ -52,7 +53,7 @@ HTMLSpanElement.prototype.left = function(value) {
 
 
 /**
- * Returns (and sets, if a value is passed as an argument) the item's "top" CSS property in px
+ * Returns (and sets, if a value is passed as an argument) the gem's "top" CSS property in px
  */
 HTMLSpanElement.prototype.top = function(value) {
 	if (value != undefined) {
@@ -66,35 +67,39 @@ HTMLSpanElement.prototype.top = function(value) {
 	return this.style.top;
 };
 
-function addItemCapabilities (obj) {
+function addGemMethods (obj) {
 	/**
-	 * Returns (and sets, if a value is passed as an argument) the item's x position on the map
+	 * Returns (and sets, if a value is passed as an argument) the gem's x position on the map
 	 */
 	obj.x = function(value) {
-		if (value != undefined)	
+		if (value != undefined)	{
 			this.id = (this.id != '') ? (this.id.substr(0, this.id.length - 1) + value) : 'tile0_' + value;
+			this.innerHTML = this.id.substr(4);	
+		}
 		if (this.id != '')
 			return parseInt(this.id.substr(this.id.length - 1));
 		return null;
 	};
 
 	/**
-	 * Returns (and sets, if a value is passed as an argument) the item's y position on the map
+	 * Returns (and sets, if a value is passed as an argument) the gem's y position on the map
 	 */
 	obj.y = function(value) {
-		if (value != undefined)
+		if (value != undefined){
 			this.id = (this.id != '') ? (this.id.substring(0, 4) + value + this.id.substr(this.id.indexOf('_'))) : 'tile' + value + '_0';
+			this.innerHTML = this.id.substr(4);	
+		}
 		if (this.id != '')
 			return parseInt(this.id.substring(4, this.id.indexOf('_')));
 		return null;
 	};
 
 	/**
-	 * Returns (and sets, if a value is passed as an argument) the item's y tile value
+	 * Returns (and sets, if a value is passed as an argument) the gem's y tile value
 	 */
 	obj.value = function(val) {
 		if (val != undefined)
-			// this.className = 'item tile_' + val;
+			// this.className = 'gem tile_' + val;
 			this.val = val;
 		if (this.className != '')
 			// return parseInt(this.className.substr(10));
@@ -134,7 +139,7 @@ function addItemCapabilities (obj) {
 		};
 
 		var direction = (end - start > 0) ? 1 : -1;
-		// We start the item's timer
+		// We start the gem's timer
 		obj.timer = setInterval(function() {
 			start = doAnimation(start, end, direction, speed);
 		}, 30);
@@ -142,15 +147,17 @@ function addItemCapabilities (obj) {
 	};
 
 	/**
-	 * Animates the explosion of an item and removes it
+	 * Animates the explosion of an gem and removes it
 	 */
 	obj.explode = function() {
 		var i = 0, timer;
 		var animateExplosion = function () {
 			if (i >= 5) {
 				clearInterval(timer);
-				if (obj.parentNode)
+				if (obj.parentNode) {
 					obj.parentNode.removeChild(obj);
+					// obj.removeListener(MOVE_COMPLETE, game.checkStreak);
+				}
 				return;
 			}
 			obj.style.backgroundImage = 'url("./images/sprites/' + obj.value() + '_explosion' + (i%2) + '.png")';
@@ -163,11 +170,11 @@ function addItemCapabilities (obj) {
 	};
 
 	/**
-	 * Checks if a given item is adjacent to the object
-	 * @param item	The item to compare with the current object
+	 * Checks if a given gem is adjacent to the object
+	 * @param gem	The gem to compare with the current object
 	 */
-	obj.isAdjacent = function(item) {
-		return (((obj.x() === item.x() - 1 || obj.x() === item.x() + 1) && obj.y() === item.y())
-			 || ((obj.y() === item.y() - 1 || obj.y() === item.y() + 1) && obj.x() === item.x()));
+	obj.isAdjacent = function(gem) {
+		return (((obj.x() === gem.x() - 1 || obj.x() === gem.x() + 1) && obj.y() === gem.y())
+			 || ((obj.y() === gem.y() - 1 || obj.y() === gem.y() + 1) && obj.x() === gem.x()));
 	};
 };
