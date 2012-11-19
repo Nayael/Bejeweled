@@ -1,6 +1,3 @@
-var FALL_COMPLETE = 'fall_complete';
-var MOVE_COMPLETE = 'move_complete';
-
 function addEventCapabilities(object) {
 	object.listenersFor = {};   // A list of all the listeners on a given event
 	

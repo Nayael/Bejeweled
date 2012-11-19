@@ -49,12 +49,13 @@ function removeEvent(element, event, func) {
  * Returns the length of an object (associative array)
  */
 Object.getLength = function(obj) {
-	var getLength = 0, key;
-	for (key in obj) {	
-		if (obj.hasOwnProperty(key))
-			getLength++;
+	var length = 0;
+	for (var key in obj) {	
+		if (obj.hasOwnProperty(key)) {
+			length++;
+		}
 	}
-	return getLength;
+	return length;
 };
 
 /**
@@ -62,7 +63,8 @@ Object.getLength = function(obj) {
  */
 Object.getKeys = function(obj) {
 	var keys = [];
-	for(var key in obj)
+	for(var key in obj) {
 		keys.push(key);
+	};
 	return keys;
 };

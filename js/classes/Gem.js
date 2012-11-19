@@ -32,52 +32,52 @@ function Gem(x, y, value) {
 	addGemMethods(gem);	// We add useful functions relative to gem objects
 	addEventCapabilities(gem);	// We add useful functions relative to events
 
-	gem.addListener(FALL_COMPLETE, game.onFallComplete);
+	gem.addListener(GemEvent.FALL_COMPLETE, game.onFallComplete);
 	return gem;
 };
 
-/**
- * Returns (and sets, if a value is passed as an argument) the gem's "left" CSS property in px
- */
-HTMLSpanElement.prototype.left = function(value) {
-	if (value != undefined) {
-		if (typeof(value) == 'number' && parseInt(value) == value)	// If value is an integer
-			this.style.left = value + 'px';
-		else if (typeof(value) == 'string')	// If value is a string
-			this.style.left = value;
-		return value;
-	}
-		
-	return this.style.left;
-};
-
-
-/**
- * Returns (and sets, if a value is passed as an argument) the gem's "top" CSS property in px
- */
-HTMLSpanElement.prototype.top = function(value) {
-	if (value != undefined) {
-		if (typeof(value) == 'number' && parseInt(value) == value)	// If value is an integer
-			this.style.top = value + 'px';
-		else if (typeof(value) == 'string')	// If value is a string
-			this.style.top = value;
-		return value;
-	}
-
-	return this.style.top;
-};
-
 function addGemMethods (gem) {
+	/**
+	 * Returns (and sets, if a value is passed as an argument) the gem's "left" CSS property in px
+	 */
+	gem.left = function(value) {
+		if (value != undefined) {
+			if (typeof(value) == 'number' && parseInt(value) == value)	// If value is an integer
+				gem.style.left = value + 'px';
+			else if (typeof(value) == 'string')	// If value is a string
+				gem.style.left = value;
+			return value;
+		}
+			
+		return gem.style.left;
+	};
+
+
+	/**
+	 * Returns (and sets, if a value is passed as an argument) the gem's "top" CSS property in px
+	 */
+	gem.top = function(value) {
+		if (value != undefined) {
+			if (typeof(value) == 'number' && parseInt(value) == value)	// If value is an integer
+				gem.style.top = value + 'px';
+			else if (typeof(value) == 'string')	// If value is a string
+				gem.style.top = value;
+			return value;
+		}
+
+		return gem.style.top;
+	};
+
 	/**
 	 * Returns (and sets, if a value is passed as an argument) the gem's x position on the map
 	 */
 	gem.x = function(value) {
 		if (value != undefined)	{
-			this.id = (this.id != '') ? (this.id.substr(0, this.id.length - 1) + value) : 'tile0_' + value;
-			this.innerHTML = this.id.substr(4);	
+			gem.id = (gem.id != '') ? (gem.id.substr(0, gem.id.length - 1) + value) : 'tile0_' + value;
+			gem.innerHTML = gem.id.substr(4);	
 		}
-		if (this.id != '')
-			return parseInt(this.id.substr(this.id.length - 1));
+		if (gem.id != '')
+			return parseInt(gem.id.substr(gem.id.length - 1));
 		return null;
 	};
 
@@ -86,11 +86,11 @@ function addGemMethods (gem) {
 	 */
 	gem.y = function(value) {
 		if (value != undefined){
-			this.id = (this.id != '') ? (this.id.substring(0, 4) + value + this.id.substr(this.id.indexOf('_'))) : 'tile' + value + '_0';
-			this.innerHTML = this.id.substr(4);	
+			gem.id = (gem.id != '') ? (gem.id.substring(0, 4) + value + gem.id.substr(gem.id.indexOf('_'))) : 'tile' + value + '_0';
+			gem.innerHTML = gem.id.substr(4);	
 		}
-		if (this.id != '')
-			return parseInt(this.id.substring(4, this.id.indexOf('_')));
+		if (gem.id != '')
+			return parseInt(gem.id.substring(4, gem.id.indexOf('_')));
 		return null;
 	};
 
@@ -99,9 +99,9 @@ function addGemMethods (gem) {
 	 */
 	gem.value = function(val) {
 		if (val != undefined)
-			this.val = val;
-		if (this.className != '')
-			return this.val;
+			gem.val = val;
+		if (gem.className != '')
+			return gem.val;
 		return null;
 	};
 
@@ -115,7 +115,14 @@ function addGemMethods (gem) {
 		return false;
 	};
 
-
+	/**
+	 * Checks if a given gem is adjacent to the object
+	 * @param target	The gem to compare with the current object
+	 */
+	gem.isNeighbour = function(target) {
+		return (((gem.x() === target.x() - 1 || gem.x() === target.x() + 1) && gem.y() === target.y())
+			 || ((gem.y() === target.y() - 1 || gem.y() === target.y() + 1) && gem.x() === target.x()));
+	};
 
 	/**
 	 * Searches for the presence of an gem streak
@@ -126,7 +133,7 @@ function addGemMethods (gem) {
 			y = gem.y(),
 			row = [],
 			column = [],
-			streak = [];
+			streak = {};
 
 		row = gem.checkRow(true, true);
 		column = gem.checkColumn(true, true);
@@ -134,8 +141,9 @@ function addGemMethods (gem) {
 		// If we have a row of three identical gems
 		if (row.length > 1) {
 			for (var i = 0; i < row.length; i++) {
-				if (streak.indexOf(row[i]) == -1) {
-					streak.push(row[i]);
+				streak[row[i].x()] = [];
+				if (streak[row[i].x()].indexOf(row[i]) == -1) {
+					streak[row[i].x()].push(row[i]);
 					row[i].inStreak = true;
 				}
 			};
@@ -144,17 +152,23 @@ function addGemMethods (gem) {
 		// If we have a column of three identical gems
 		if (column.length > 1) {
 			for (var i = 0; i < column.length; i++) {
-				if (streak.indexOf(column[i]) == -1) {
-					streak.push(column[i]);
+				if (streak[column[i].x()] == undefined) {
+					streak[column[i].x()] = [];
+				}
+				if (streak[column[i].x()].indexOf(column[i]) == -1) {
+					streak[column[i].x()].push(column[i]);
 					column[i].inStreak = true;
 				}
 			};
 		}
- 
 		// If we have a row or a column of three identical gems
-		if ((row.length > 1 || column.length > 1) && streak.indexOf(gem) == -1) {
-			streak.push(gem);	// We know the moved gem will be removed
+		if ((row.length > 1 || column.length > 1) && (streak[gem.x()] == undefined || streak[gem.x()].indexOf(gem) == -1)) {
+			if (streak[gem.x()] == undefined) {
+				streak[gem.x()] = [];
+			}
+			streak[gem.x()].push(gem);	// We know the moved gem will be removed
 		}
+		console.log('streak: ', streak);
 		return streak;
 	};
 
@@ -236,7 +250,7 @@ function addGemMethods (gem) {
 	/**
 	 * Animates an element's CSS property from start value to end value (only values in pixels)
 	 */
-	gem.animate = function(property, start, end, speed) {
+	gem.animate = function(property, start, end, speed, check) {
 		if (start == end)
 			return;
 		
@@ -251,10 +265,12 @@ function addGemMethods (gem) {
 				// If the property has reached the end value
 				if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
 					clearInterval(gem.timer);	// We stop the animation timer
-					gem.dispatch(MOVE_COMPLETE, gem);
+					if (check === true) {				    
+						game.checkStreak(gem);
+					}
 					gem.animated = false;
 					if (property === 'top' && gem.falling) {
-						gem.dispatch(FALL_COMPLETE, gem);
+						gem.dispatch(GemEvent.FALL_COMPLETE, gem);
 					}
 					return;
 				}
@@ -273,34 +289,45 @@ function addGemMethods (gem) {
 	};
 
 	/**
-	 * Animates the explosion of an gem and removes it
+	 * Makes the gem fall vertically
+	 * @param height	The height of the fall
 	 */
-	gem.explode = function() {
-		var i = 0, timer;
-		var animateExplosion = function () {
-			if (i >= 5) {
-				clearInterval(timer);
-				if (gem.parentNode) {
-					gem.parentNode.removeChild(gem);
-					gem.removeListener(MOVE_COMPLETE, game.checkStreak);
-				}
-				return;
-			}
-			gem.style.backgroundImage = 'url("./images/sprites/' + gem.value() + '_explosion' + (i%2) + '.png")';
-			i++;	
-		};
-
-		timer = setInterval(function() {
-			animateExplosion();
-		}, 100);
+	gem.fall = function (height) {
+		var top = gem.top();
+		top = parseInt(top.substring(0, top.length - 2));
+		top += 65 * height;
+		top += 'px';
+		gem.animate('top', gem.top(), top, 6);
 	};
 
 	/**
-	 * Checks if a given gem is adjacent to the object
-	 * @param target	The gem to compare with the current object
+	 * Animates the explosion of an gem and removes it
+	 * @param streak	An array containing the gems that are in a streak
 	 */
-	gem.isNeighbour = function(target) {
-		return (((gem.x() === target.x() - 1 || gem.x() === target.x() + 1) && gem.y() === target.y())
-			 || ((gem.y() === target.y() - 1 || gem.y() === target.y() + 1) && gem.x() === target.x()));
+	gem.destroy = function(streak) {
+		var i = 0, loops = 5, timer;
+
+		function animateExplosion () {
+			if (i >= loops) {
+				clearInterval(gem.timer);
+				delete gem.timer;
+				gem.parentNode.removeChild(gem);
+				game.onStreakRemoved(streak);
+				return;
+			}
+
+			gem.style.backgroundImage = 'url("./images/sprites/' + gem.value() + '_explosion' + (i % 2) + '.png")';
+			i++;	
+		};
+
+		gem.timer = setInterval(function() {
+			animateExplosion();
+		}, 500 / loops);
 	};
+};
+
+const GemEvent = {
+	FALL_COMPLETE: 'fall_complete',
+	MOVE_COMPLETE: 'move_complete',
+	DESTROYED: 'destroyed'
 };
