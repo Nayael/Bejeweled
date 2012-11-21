@@ -23,7 +23,7 @@ function Gem(x, y, value) {
 	gem.style.backgroundImage = 'url("./images/sprites/' + value + '.png")';
 	gem.style.backgroundRepeat = 'no-repeat';
 	gem.style.backgroundPosition = 'top center';
-		
+	
 	gem.animated = false;	// Is the element being animated ?
 	gem.falling = false;	// Is the element falling ?
 	gem.timer = null;
@@ -35,6 +35,7 @@ function Gem(x, y, value) {
 	gem.addListener(GemEvent.FALL_COMPLETE, game.onFallComplete);
 	return gem;
 };
+Gem.tileHeight = 65;
 
 function addGemMethods (gem) {
 	/**
@@ -269,7 +270,7 @@ function addGemMethods (gem) {
 					}
 					gem.animated = false;
 					if (property === 'top' && gem.falling) {
-						gem.y(gem.y() + delta / 65);	// We set the new Y position after the fall
+						gem.y(gem.y() + delta / Gem.tileHeight);	// We set the new Y position after the fall
 						if (check === true) {					    
 							game.onFallComplete();
 						}
@@ -300,7 +301,7 @@ function addGemMethods (gem) {
 	gem.fall = function (height, check) {
 		var top = gem.top();
 		top = parseInt(top.substring(0, top.length - 2));
-		top += 65 * height;
+		top += Gem.tileHeight * height;
 		top += 'px';
 		gem.falling = true;
 		gem.animate('top', gem.top(), top, 6, check);
