@@ -168,7 +168,6 @@ function addGemMethods (gem) {
 			}
 			streak[gem.x()].push(gem);	// We know the moved gem will be removed
 		}
-		console.log('streak: ', streak);
 		return streak;
 	};
 
@@ -260,18 +259,22 @@ function addGemMethods (gem) {
 		if (end.indexOf('px') != -1)
 			end = parseInt(end.substr(0, end.length - 2));
 
-		var doAnimation = function(start, end, direction, speed) {
+		var doAnimation = function(start) {
 			for (var i = 0; i < speed; i++) {	
 				// If the property has reached the end value
 				if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
 					clearInterval(gem.timer);	// We stop the animation timer
-					if (check === true) {				    
+					if (check === true && !gem.falling) {				    
 						game.checkStreak(gem);
 					}
 					gem.animated = false;
 					if (property === 'top' && gem.falling) {
-						gem.dispatch(GemEvent.FALL_COMPLETE, gem);
+						gem.y(gem.y() + delta / 65);	// We set the new Y position after the fall
+						if (check === true) {					    
+							game.onFallComplete();
+						}
 					}
+					gem.falling = false;
 					return;
 				}
 				start += direction;
@@ -280,10 +283,11 @@ function addGemMethods (gem) {
 			return start;
 		};
 
-		var direction = (end - start > 0) ? 1 : -1;
+		var delta = end - start;
+		var direction = (delta > 0) ? 1 : -1;
 		// We start the gem's timer
 		gem.timer = setInterval(function() {
-			start = doAnimation(start, end, direction, speed);
+			start = doAnimation(start);
 		}, 30);
 		gem.animated = true;
 	};
@@ -291,20 +295,23 @@ function addGemMethods (gem) {
 	/**
 	 * Makes the gem fall vertically
 	 * @param height	The height of the fall
+	 * @param check		The height of the fall
 	 */
-	gem.fall = function (height) {
+	gem.fall = function (height, check) {
 		var top = gem.top();
 		top = parseInt(top.substring(0, top.length - 2));
 		top += 65 * height;
 		top += 'px';
-		gem.animate('top', gem.top(), top, 6);
+		gem.falling = true;
+		gem.animate('top', gem.top(), top, 6, check);
 	};
 
 	/**
 	 * Animates the explosion of an gem and removes it
 	 * @param streak	An array containing the gems that are in a streak
+	 * @param fallAfter	bool: Should the gms fall after this gem's explosion ? (true for the first destroyed gem)
 	 */
-	gem.destroy = function(streak) {
+	gem.destroy = function(streak, fallAfter) {
 		var i = 0, loops = 5, timer;
 
 		function animateExplosion () {
@@ -312,7 +319,9 @@ function addGemMethods (gem) {
 				clearInterval(gem.timer);
 				delete gem.timer;
 				gem.parentNode.removeChild(gem);
-				game.onStreakRemoved(streak);
+				if (fallAfter === true) {			    
+					game.onStreakRemoved(streak);
+				}
 				return;
 			}
 

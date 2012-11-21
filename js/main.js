@@ -106,36 +106,32 @@ var game = {
 	 * Looks for the presence and removes a streak around an gem
 	 * @param gem	The gem which neighbours will be checked for a streak
 	 */
-	checkStreak: function(gem, existingStreak) {
+	checkStreak: function(gem) {
 		// gem.removeListener(GemEvent.MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the gems
 		var gems = get('.gem');
 		var streak = gem.getStreak();	// We look for a streak from the gem
 
-		// If an existing streak is given, we concatenate the two streaks
-		if (existingStreak != undefined) {
-			for (var column in existingStreak) {
-				if (streak[column] == undefined) {
-				    streak[column] = existingStreak[column];
+		// If an existing streak was given, we concatenate the two streaks
+		if (game.streak != undefined) {
+			for (var column in streak) {
+				if (game.streak[column] == undefined) {
+				    game.streak[column] = streak[column];
 				}else {
-					for (var i = 0; i < existingStreak[column].length; i++) {
-						streak[column].push(existingStreak[column][i]);
+					for (var i = 0; i < streak[column].length; i++) {
+						game.streak[column].push(streak[column][i]);
 					};
 				}
 			};
+		}else {
+			game.streak = streak;	// Otherwise, we create it
+			if (game.gem != undefined) {	// And, if this function was called after the player swap two gems, we stop the function (it will be called again with the checkStreak from the second gem)
+				return;
+			}
 		}
 		
-		if (Object.getLength(streak) > 0) {
+		if (Object.getLength(game.streak) > 0) {
 			gem.inStreak = true;
-			game.removeStreak(streak);
-			// setTimeout(function() {		// We continue after the streak disappeared
-			// 	var generatedGems = game.generateGems(streak),
-			// 		newGems = generatedGems.newGems;
-
-			// 	streak = generatedGems.streak;
-			// 	game.gemsFall(newGems, streak);
-
-			// 	game.deselectGem();
-			// }, 500);
+			game.removeStreak(game.streak);
 		}else if (game.gem != null && game.gem.id !== gem.id && !game.gem.inStreak) {	// If there is a selected gem, and it is not in a streak, we will have to reverse the swap
 			game.swapGems(gem, game.gem, false);		// We re-swap the gems to their respective original positions
 			game.deselectGem();
@@ -169,9 +165,11 @@ var game = {
 	 * @param gemsToRemove	An array containing the gems that are in a streak
 	 */
 	removeStreak: function(gemsToRemove) {
+		var fallAfter = true;
 		for (var column in gemsToRemove) {
 			for (var i = 0; i < gemsToRemove[column].length; i++) {
-				gemsToRemove[column][i].destroy(gemsToRemove);
+				gemsToRemove[column][i].destroy(gemsToRemove, fallAfter);
+				fallAfter = false;
 			};
 		};
 	},
@@ -181,38 +179,41 @@ var game = {
 	 * @param streak	An array containing the gems that are in a streak
 	 */
 	onStreakRemoved: function(streak) {		// We continue after the streak disappeared
-		var firstYToFall = 8;	// The Y of the first item that will fall
+		var firstYToFall = 8,	// The Y of the first item that will fall
+			newGems = null,
+			currentGem = null,
+			fallHeight = 0,
+			fallStarted = false;
+
+		// We run through the gem columns
 		for (var column in streak) {
+			firstYToFall = 8;
 			for (var i = 0; i < streak[column].length; i++) {
-				if (streak[column][i].timer !== undefined) {	// If at least one gem is being destroyed, we stop the method
-					return;
-				}
 				if (streak[column][i].y() < firstYToFall) {
 					firstYToFall = streak[column][i].y();
 				}
 			};
-		};
-		firstYToFall--;
+			firstYToFall--;
+			
+			// We generate the new gems, only once
+			if (newGems == null) {	    
+				newGems = game.generateGems(streak);
+			}
 
-		var newGems = game.generateGems(streak),
-			gemsToFall = [];
-
-		// We run through the gem columns
-		for (column in streak) {
-			var currentGem, fallHeight = 0;
-			for (i = firstYToFall; i >= -8; i--) {	// We run through the column from the bottom gem to the top gem, and make them fall
-				if (get('#tile' + i + '_' + streak[column][0].x()) == null) {
+			fallHeight = 0;
+			for (i = firstYToFall; i >= -8; i--) {	// We define the height of the fall
+				if (get('#tile' + i + '_' + streak[column][0].x()) == null)
 					break;
-				}
-				if (i < 0) {
+				if (i < 0)
 					fallHeight++;
-				}
 			};
 			for (i = firstYToFall; i >= -fallHeight; i--) {	// We run through the column from the bottom gem to the top gem, and make them fall
 				currentGem = get('#tile' + i + '_' + streak[column][0].x());
-				currentGem.fall(fallHeight);
+				currentGem.fall(fallHeight, (!fallStarted ? true : false));
+				fallStarted = true;
 			};
 		};
+		delete game.streak;
 		game.deselectGem();
 	},
 
@@ -240,7 +241,6 @@ var game = {
 				}
 				tile = parseInt(Math.random() * game.level.range);
 
-			// PROBLEM : Gems with the same ids are generated
 				gem = new Gem(x, y, tile);
 				gem.addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
 				grid.appendChild(gem);
@@ -254,75 +254,16 @@ var game = {
 	},
 
 	/**
-	 * Makes the remaining gems fall after a streak disappeared
-	 * @param newGems	The gems that were generated after the streak
-	 * @param streak	An array containing the gems that are in a streak
-	 */	
-	gemsFall: function(newGems, streak) {
-		// var columns = {			// The columns which contain gems that must fall
-		// 	indexes: {},
-		// };
-
-		// for (var i = 0, x, y; i < streak.length; i++) {
-		// 	x = streak[i].x();
-		// 	y = streak[i].y();
-
-		// 	if (columns.indexes[x] == undefined){
-		// 		columns.indexes[x] = 1;
-		// 		columns['yMin' + x] = 8;
-		// 		columns['yMax' + x] = 0;
-		// 	}else if (newGems.indexOf(streak[i]) == -1) {	// We only count the gems that were removed, not the new ones
-		// 		columns.indexes[x]++;
-		// 	}
-			
-		// 	if (y < columns['yMin' + x]) {
-		// 		columns['yMin' + x] = y;
-		// 	}
-		// 	if (y > columns['yMax' + x]) {
-		// 		columns['yMax' + x] = y;
-		// 	}
-		// };
-
-		// for (var i = 0; i < Object.getLength(columns.indexes); i++) {
-		// 	var gem, top, keys = Object.getKeys(columns.indexes), nbGems = columns.indexes[keys[i]];
-		// 	var yMin = columns['yMin' + keys[i]];
-		// 	var yMax = columns['yMax' + keys[i]];
-
-		// 	for (var j = (yMax - nbGems); j >= yMin; j--) {	// We run through the gems
-		// 		gem = get('#tile' + j + '_' + keys[i]);
-		// 		if (gem != null) {
-		// 			top = gem.top();
-		// 			top = parseInt(top.substring(0, top.length - 2));
-		// 			top += 60 * nbGems + 5 * nbGems;
-		// 			top += 'px';
-
-		// 			gem.falling = true;
-		// 			gem.animate('top', gem.top(), top, 6);	// We move the gem to its new position
-		// 			gem.x(keys[i]);
-		// 			gem.y(j + nbGems);
-		// 		}
-		// 	}
-		// };
-	},
-
-	/**
-	 * Triggers every time an gem's fall is complete
-	 * Add the mouse event listeners to all the gems, once all the animations are done
-	 * @param gem	The gem which fall is complete
+	 * Triggers every time a gem streak's fall is complete
+	 * Adds the mouse event listeners to all the gems, once all the animations are done
 	 */
-	onFallComplete: function(gem) {
-		gem.falling = false;
+	onFallComplete: function() {
 		var gems = get('.gem');
-		
-		for (var i = 0; i < gems.length; i++) {
-			if (gems[i].animated)	// If at least one gem is still being animated
-				return;
-		};
 
 		// If all the animations are finished, we allow the player to move gems again
 		for (var i = 0; i < gems.length; i++) {
 			gems[i].addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
-			game.checkStreak(gems[i]);
+			// game.checkStreak(gems[i]);
 			// game.checkComboStreak(gems[i]);	// And we check if there is a streak among his new neighbours
 		};
 	}
