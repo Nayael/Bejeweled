@@ -27,10 +27,10 @@ function Gem(x, y, value) {
 	addGemMethods(gem);	// We add useful functions relative to gem objects
 	addEventCapabilities(gem);	// We add useful functions relative to events
 
-	gem.addListener(GemEvent.FALL_COMPLETE, game.onFallComplete);
+	gem.addListener(Gem.Event.FALL_COMPLETE, game.onFallComplete);
 	return gem;
 };
-Gem.tileHeight = 65;
+Gem.TILE_HEIGHT = 65;
 
 function addGemMethods (gem) {
 	/**
@@ -105,7 +105,7 @@ function addGemMethods (gem) {
 	 * Compares a gem's value with this gem's value
 	 */
 	gem.equals = function(neighbour) {
-		if (neighbour.value() == gem.value() && neighbour != gem && !neighbour.falling)	{
+		if (neighbour != null && neighbour.value() == gem.value() && neighbour != gem && !neighbour.falling)	{
 			return true;
 		}
 		return false;
@@ -251,78 +251,98 @@ function addGemMethods (gem) {
 			return;
 		
 		this.style[property] = start;
-		if (start.indexOf('px') != -1)
-			start = parseInt(start.substr(0, start.length - 2));
-		if (end.indexOf('px') != -1)
-			end = parseInt(end.substr(0, end.length - 2));
+		start = parseInt(start.substr(0, start.length - 2));
+		end = parseInt(end.substr(0, end.length - 2));
 
 		var doAnimation = function(start) {
-			for (var i = 0; i < speed; i++) {	
+			for (var i = 0; i < speed; i++) {
 				// If the property has reached the end value
 				if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
 					clearInterval(gem.timer);	// We stop the animation timer
 					delete gem.timer;
-					gem.animated = false;
+
 					if (check === true && !gem.falling) {
 						game.checkStreak(gem);
 					}
-					console.log('gem.falling: ', gem.falling);
-					if (property === 'top' && gem.falling) {
-						gem.falling = false;
-						gem.y(parseInt(gem.y() + delta / Gem.tileHeight));	// We set the new Y position after the fall
+					if (gem.falling) {
+						gem.onFallComplete();
 					}
 					return;
 				}
 				start += direction;
 				gem.style[property] = start + 'px';
-			}
+			};
 			return start;
 		};
 
-		var delta = end - start;
-		var direction = (delta > 0) ? 1 : -1;
+		var delta = end - start,
+			direction = (delta > 0) ? 1 : -1;
+
 		// We start the gem's timer
 		gem.timer = setInterval(function() {
 			start = doAnimation(start);
 		}, 30);
-		gem.animated = true;
 	};
 
 	/**
 	 * Makes the gem fall vertically
 	 */
-	gem.fall = function () {
+	gem.fallStreak = function () {
 		var x = gem.x(),
 			y = gem.y(),
 			top = '',
 			height = 0,
 			yOffset = 1,
+			column = [gem],
 			currentGem = null;
 
-		// While there is an empty spot below the gem, we make it (and all the gems on top of it) fall from 1
-		while (get('#tile' + (y + 1) + '_' + x) == null && (y + 1) != 8) {
-			top = gem.top();
-			height = parseInt(top.substring(0, top.length - 2));
-			height += Gem.tileHeight;
-			gem.falling = true;
-			gem.animate('top', top, height + 'px', 6);
+		// We make all the gems on the column fall by 1 slot
+		gem.fall();
+		for (var i = y; i >= -(game.level.map.length - 1); i--) {
+			currentGem = get('#tile' + i + '_' + x);
+			if (currentGem != null) {
+				column.push(currentGem);
+				currentGem.fall();
+			}
+		};
+		// While there is an empty spot below the gem, we make it (and all the gems on top of it) fall by 1 slot
+		// while (get('#tile' + (y + 1) + '_' + x) == null && (y + 1) != 8) {
+		// 	gem.fall();		// The first gem on the bottom falls
 			
-			for (var i = y; i >= -(game.level.map.length - 1); i--) {
-				currentGem = get('#tile' + i + '_' + x);
-				if (currentGem == null) {
-					yOffset++;
-					continue;
-				}
-				top = currentGem.top();
-				height = parseInt(top.substring(0, top.length - 2));
-				height += Gem.tileHeight * yOffset;
-				currentGem.falling = true;
-				currentGem.animate('top', top, height + 'px', 6);
-			};
-			y++;
-			yOffset = 2;
+		// 	for (var i = y; i >= -(game.level.map.length - 1); i--) {
+		// 		currentGem = get('#tile' + i + '_' + x);
+		// 		if (currentGem == null) {
+		// 			yOffset++;
+		// 			continue;
+		// 		}
+		// 		currentGem.fall(yOffset);
+		// 	};
+		// 	y++;
+		// 	yOffset = 2;
+		// }
+		// game.onFallComplete();
+	};
+
+	/**
+	 * Makes the gem fall by one slot
+	 */
+	gem.fall = function () {
+		var top = gem.top();
+		var height = parseInt(top.substring(0, top.length - 2));
+		height += Gem.TILE_HEIGHT;
+		gem.falling = true;
+		gem.y(parseInt(gem.y() + 1));	// We set the new Y position after the fall
+		gem.animate('top', top, height + 'px', 6);
+	};
+
+	gem.onFallComplete = function() {
+		var gems = get('.gem');
+		gem.falling = false;
+		if (get('#tile' + (gem.y() + 1) + '_' + gem.x()) == null && (gem.y() + 1) != 8) {
+			gem.fall();
+		}else {
+			game.checkStreak(gem);
 		}
-		game.onFallComplete();
 	};
 
 	/**
@@ -356,7 +376,7 @@ function addGemMethods (gem) {
 	};
 };
 
-const GemEvent = {
+Gem.Event = {
 	FALL_COMPLETE: 'fall_complete',
 	MOVE_COMPLETE: 'move_complete',
 	DESTROYED: 'destroyed'

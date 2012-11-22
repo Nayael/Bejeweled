@@ -25,6 +25,21 @@ var game = {
 		// };
 	},
 
+	mainLoop: setInterval(function() {
+		var gems = get('.gem'), addClick = true;
+		for (var i = 0; i < gems.length; i++) {
+			if (gems[i].timer != undefined) {
+			    addClick = false;
+			}
+		};
+		if (addClick) {
+			for (var i = 0; i < gems.length; i++) {
+				gems[i].removeEventListener('click', game.onGemClick, false);	// We add the mouse event listener
+				gems[i].addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
+			};
+		}
+	}, 60),
+
 	/**
 	 * Triggers when an gem is clicked (select it or proceed to the swap)
 	 * @param e	The mouse event
@@ -84,8 +99,8 @@ var game = {
 			};
 
 			if (check === true) {
-			// 	source.addListener(GemEvent.MOVE_COMPLETE, game.checkStreak);// Once the animation is over, check for a streak around the gem
-			// 	dest.addListener(GemEvent.MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the gem
+			// 	source.addListener(Gem.Event.MOVE_COMPLETE, game.checkStreak);// Once the animation is over, check for a streak around the gem
+			// 	dest.addListener(Gem.Event.MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the gem
 			}
 
 			if (source.left() != dest.left()) {
@@ -109,9 +124,12 @@ var game = {
 	 * @param gem	The gem which neighbours will be checked for a streak
 	 */
 	checkStreak: function(gem) {
-		// gem.removeListener(GemEvent.MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the gems
+		// gem.removeListener(Gem.Event.MOVE_COMPLETE, game.checkStreak);	// Once the animation is over, check for a streak around the gems
 		var gems = get('.gem');
 		var streak = gem.getStreak();	// We look for a streak from the gem
+		for (var i = 0; i < gems.length; i++) {
+			gems[i].removeEventListener('click', game.onGemClick, false);	// We remove the mouse event listeners
+		};
 
 		if (Object.getLength(streak) > 0) {
 			gem.inStreak = true;
@@ -124,24 +142,6 @@ var game = {
 				gems[i].addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
 			};
 		}
-	},
-
-	/**
-	 * Checks if there is a streak among the new generated gems
-	 * @param gem	The gem which siblings will be parsed
-	 */
-	checkComboStreak: function(gem) {
-		// var streak = game.getStreak(gem);
-		// if (streak.length > 0) {
-		// 	game.removeStreak(streak);
-		// 	setTimeout(function() {	// We continue after the streak disappeared
-		// 		var generatedGems = game.generateGems(streak);
-		// 		var newGems = generatedGems.newGems;
-		// 		streak = generatedGems.streak;
-		// 		// console.log('newGems: ', newGems);
-		// 		game.gemsFall(newGems, streak);
-		// 	}, 500);
-		// }
 	},
 
 	/**
@@ -208,11 +208,12 @@ var game = {
 					break;
 				}
 			};
-			
+			if (firstYToFall >= 7) {	// If there is no "hole" in the grid
+			    firstYToFall = -1;		// It means there is a hole from the top, the first gem to fall is on top the grid
+			}
 			game.generateGems(column);	// We generate the new gems
-			get('#tile' + firstYToFall + '_' + column).fall();	// We make the first gem fall (the others will follow)
+			get('#tile' + firstYToFall + '_' + column).fallStreak();	// We make the first gem fall (the others will follow)
 		};
-		delete game.streak;
 		game.deselectGem();
 	},
 
@@ -247,7 +248,6 @@ var game = {
 		// If all the animations are finished, we allow the player to move gems again
 		for (var i = 0; i < gems.length; i++) {
 			gems[i].addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
-			// gems[i].checkStreak();
 		};
 	}
 };
