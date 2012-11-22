@@ -81,7 +81,7 @@ function addGemMethods (gem) {
 	 * Returns (and sets, if a value is passed as an argument) the gem's y position on the map
 	 */
 	gem.y = function(value) {
-		if (value != undefined){
+		if (value != undefined) {
 			gem.id = (gem.id != '') ? (gem.id.substring(0, 4) + value + gem.id.substr(gem.id.indexOf('_'))) : 'tile' + value + '_0';
 			gem.innerHTML = gem.id.substr(4);	
 		}
@@ -305,22 +305,6 @@ function addGemMethods (gem) {
 				currentGem.fall();
 			}
 		};
-		// While there is an empty spot below the gem, we make it (and all the gems on top of it) fall by 1 slot
-		// while (get('#tile' + (y + 1) + '_' + x) == null && (y + 1) != 8) {
-		// 	gem.fall();		// The first gem on the bottom falls
-			
-		// 	for (var i = y; i >= -(game.level.map.length - 1); i--) {
-		// 		currentGem = get('#tile' + i + '_' + x);
-		// 		if (currentGem == null) {
-		// 			yOffset++;
-		// 			continue;
-		// 		}
-		// 		currentGem.fall(yOffset);
-		// 	};
-		// 	y++;
-		// 	yOffset = 2;
-		// }
-		// game.onFallComplete();
 	};
 
 	/**
@@ -335,13 +319,17 @@ function addGemMethods (gem) {
 		gem.animate('top', top, height + 'px', 6);
 	};
 
+	/**
+	 * Trggiers everytime the gem's fall is finished
+	 */
 	gem.onFallComplete = function() {
 		var gems = get('.gem');
 		gem.falling = false;
-		if (get('#tile' + (gem.y() + 1) + '_' + gem.x()) == null && (gem.y() + 1) != 8) {
-			gem.fall();
-		}else {
-			game.checkStreak(gem);
+
+		if (get('#tile' + (gem.y() + 1) + '_' + gem.x()) == null && (gem.y() + 1) != 8) {	// If there is still an empty slot below the gem
+			gem.fall();		// We make it fall again
+		}else {				// Otherwise, the fall is over
+			game.checkStreak(gem);	// We look for a streak
 		}
 	};
 
