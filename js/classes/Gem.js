@@ -20,17 +20,21 @@ function Gem(x, y, value) {
 	gem.style.backgroundRepeat = 'no-repeat';
 	gem.style.backgroundPosition = 'top center';
 	
-	gem.animated = false;	// Is the element being animated ?
 	gem.falling = false;	// Is the element falling ?
 	gem.inStreak = false;
 
 	addGemMethods(gem);	// We add useful functions relative to gem objects
 	addEventCapabilities(gem);	// We add useful functions relative to events
 
-	gem.addListener(Gem.Event.FALL_COMPLETE, game.onFallComplete);
 	return gem;
 };
+
 Gem.TILE_HEIGHT = 65;
+Gem.Event = {
+	FALL_COMPLETE: 'fall_complete',
+	MOVE_COMPLETE: 'move_complete',
+	DESTROYED: 'destroyed'
+};
 
 function addGemMethods (gem) {
 	/**
@@ -290,10 +294,6 @@ function addGemMethods (gem) {
 	gem.fallStreak = function () {
 		var x = gem.x(),
 			y = gem.y(),
-			top = '',
-			height = 0,
-			yOffset = 1,
-			column = [gem],
 			currentGem = null;
 
 		// We make all the gems on the column fall by 1 slot
@@ -301,7 +301,6 @@ function addGemMethods (gem) {
 		for (var i = y; i >= -(game.level.map.length - 1); i--) {
 			currentGem = get('#tile' + i + '_' + x);
 			if (currentGem != null) {
-				column.push(currentGem);
 				currentGem.fall();
 			}
 		};
@@ -311,8 +310,9 @@ function addGemMethods (gem) {
 	 * Makes the gem fall by one slot
 	 */
 	gem.fall = function () {
-		var top = gem.top();
-		var height = parseInt(top.substring(0, top.length - 2));
+		var top = gem.top(),
+			height = parseInt(top.substring(0, top.length - 2));
+		
 		height += Gem.TILE_HEIGHT;
 		gem.falling = true;
 		gem.y(parseInt(gem.y() + 1));	// We set the new Y position after the fall
@@ -362,10 +362,4 @@ function addGemMethods (gem) {
 			animateExplosion();
 		}, 500 / loops);
 	};
-};
-
-Gem.Event = {
-	FALL_COMPLETE: 'fall_complete',
-	MOVE_COMPLETE: 'move_complete',
-	DESTROYED: 'destroyed'
 };
