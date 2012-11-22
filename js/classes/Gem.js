@@ -5,17 +5,13 @@ function Gem(x, y, value) {
 	if (this == window) {
 		throw new Error('Gem() is a constructor, you can only call it with the keyword "new"');
 	}
-
-	var gem, left, top;
-	left = ((60 * x) + 5 * (x + 1)) + 'px';
-	top = ((60 * y) + 5 * (y + 1)) + 'px';
-	gem = document.createElement('span');
+	var left = ((60 * x) + (5 * (x + 1))) + 'px',
+		top = ((60 * y) + (5 * (y + 1))) + 'px',
+		gem = document.createElement('span');
 
 	gem.className = 'gem';
 	gem.val = value;
-	if (y >= 0 && x >= 0) {
-		gem.id = 'tile' + y + '_' + x;
-	}
+	gem.id = 'tile' + y + '_' + x;
 	gem.innerHTML = y + '_' + x;
 	
 	gem.style.top = top;
@@ -26,7 +22,6 @@ function Gem(x, y, value) {
 	
 	gem.animated = false;	// Is the element being animated ?
 	gem.falling = false;	// Is the element falling ?
-	gem.timer = null;
 	gem.inStreak = false;
 
 	addGemMethods(gem);	// We add useful functions relative to gem objects
@@ -168,6 +163,7 @@ function addGemMethods (gem) {
 				streak[gem.x()] = [];
 			}
 			streak[gem.x()].push(gem);	// We know the moved gem will be removed
+			gem.inStreak = true;
 		}
 		return streak;
 	};
@@ -194,8 +190,8 @@ function addGemMethods (gem) {
 			}
 
 			// If the current gem is equal to the source gem, we add it to the streak
-			if (streak.indexOf(currentGem) == -1 && gem.equals(currentGem)) {
-				streak = streak.concat(currentGem);		
+			if (streak.indexOf(currentGem) == -1 && gem.equals(currentGem) && currentGem.inStreak == false) {
+				streak = streak.concat(currentGem);
 			}else {
 				break;
 			}
@@ -265,17 +261,16 @@ function addGemMethods (gem) {
 				// If the property has reached the end value
 				if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
 					clearInterval(gem.timer);	// We stop the animation timer
-					if (check === true && !gem.falling) {				    
+					delete gem.timer;
+					gem.animated = false;
+					if (check === true && !gem.falling) {
 						game.checkStreak(gem);
 					}
-					gem.animated = false;
+					console.log('gem.falling: ', gem.falling);
 					if (property === 'top' && gem.falling) {
-						gem.y(gem.y() + delta / Gem.tileHeight);	// We set the new Y position after the fall
-						if (check === true) {					    
-							game.onFallComplete();
-						}
+						gem.falling = false;
+						gem.y(parseInt(gem.y() + delta / Gem.tileHeight));	// We set the new Y position after the fall
 					}
-					gem.falling = false;
 					return;
 				}
 				start += direction;
@@ -295,16 +290,39 @@ function addGemMethods (gem) {
 
 	/**
 	 * Makes the gem fall vertically
-	 * @param height	The height of the fall
-	 * @param check		The height of the fall
 	 */
-	gem.fall = function (height, check) {
-		var top = gem.top();
-		top = parseInt(top.substring(0, top.length - 2));
-		top += Gem.tileHeight * height;
-		top += 'px';
-		gem.falling = true;
-		gem.animate('top', gem.top(), top, 6, check);
+	gem.fall = function () {
+		var x = gem.x(),
+			y = gem.y(),
+			top = '',
+			height = 0,
+			yOffset = 1,
+			currentGem = null;
+
+		// While there is an empty spot below the gem, we make it (and all the gems on top of it) fall from 1
+		while (get('#tile' + (y + 1) + '_' + x) == null && (y + 1) != 8) {
+			top = gem.top();
+			height = parseInt(top.substring(0, top.length - 2));
+			height += Gem.tileHeight;
+			gem.falling = true;
+			gem.animate('top', top, height + 'px', 6);
+			
+			for (var i = y; i >= -(game.level.map.length - 1); i--) {
+				currentGem = get('#tile' + i + '_' + x);
+				if (currentGem == null) {
+					yOffset++;
+					continue;
+				}
+				top = currentGem.top();
+				height = parseInt(top.substring(0, top.length - 2));
+				height += Gem.tileHeight * yOffset;
+				currentGem.falling = true;
+				currentGem.animate('top', top, height + 'px', 6);
+			};
+			y++;
+			yOffset = 2;
+		}
+		game.onFallComplete();
 	};
 
 	/**
@@ -319,8 +337,10 @@ function addGemMethods (gem) {
 			if (i >= loops) {
 				clearInterval(gem.timer);
 				delete gem.timer;
-				gem.parentNode.removeChild(gem);
-				if (fallAfter === true) {			    
+				if (gem.parentNode) {
+					gem.parentNode.removeChild(gem);
+				}
+				if (fallAfter === true) {
 					game.onStreakRemoved(streak);
 				}
 				return;
