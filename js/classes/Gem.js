@@ -12,7 +12,7 @@ function Gem(x, y, value) {
 	gem.className = 'gem';
 	gem.val = value;
 	gem.id = 'tile' + y + '_' + x;
-	gem.innerHTML = y + '_' + x;
+	// gem.innerHTML = y + '_' + x;
 	
 	gem.style.top = top;
 	gem.style.left = left;
@@ -24,7 +24,7 @@ function Gem(x, y, value) {
 	gem.inStreak = false;
 
 	addGemMethods(gem);	// We add useful functions relative to gem objects
-	addEventCapabilities(gem);	// We add useful functions relative to events
+	// addEventCapabilities(gem);	// We add useful functions relative to events
 
 	return gem;
 };
@@ -74,7 +74,7 @@ function addGemMethods (gem) {
 	gem.x = function(value) {
 		if (value != undefined)	{
 			gem.id = (gem.id != '') ? (gem.id.substr(0, gem.id.length - 1) + value) : 'tile0_' + value;
-			gem.innerHTML = gem.id.substr(4);	
+			// gem.innerHTML = gem.id.substr(4);	
 		}
 		if (gem.id != '')
 			return parseInt(gem.id.substr(gem.id.length - 1));
@@ -87,7 +87,7 @@ function addGemMethods (gem) {
 	gem.y = function(value) {
 		if (value != undefined) {
 			gem.id = (gem.id != '') ? (gem.id.substring(0, 4) + value + gem.id.substr(gem.id.indexOf('_'))) : 'tile' + value + '_0';
-			gem.innerHTML = gem.id.substr(4);	
+			// gem.innerHTML = gem.id.substr(4);	
 		}
 		if (gem.id != '')
 			return parseInt(gem.id.substring(4, gem.id.indexOf('_')));
@@ -298,7 +298,7 @@ function addGemMethods (gem) {
 
 		// We make all the gems on the column fall by 1 slot
 		gem.fall();
-		for (var i = y; i >= -(game.level.map.length - 1); i--) {
+		for (var i = y; i >= -(game.gridSize - 1); i--) {
 			currentGem = get('#tile' + i + '_' + x);
 			if (currentGem != null) {
 				currentGem.fall();
@@ -316,7 +316,7 @@ function addGemMethods (gem) {
 		height += Gem.TILE_HEIGHT;
 		gem.falling = true;
 		gem.y(parseInt(gem.y() + 1));	// We set the new Y position after the fall
-		gem.animate('top', top, height + 'px', 6);
+		gem.animate('top', top, height + 'px', 8);
 	};
 
 	/**
@@ -339,7 +339,7 @@ function addGemMethods (gem) {
 	 * @param fallAfter	bool: Should the gms fall after this gem's explosion ? (true for the first destroyed gem)
 	 */
 	gem.destroy = function(streak, fallAfter) {
-		var i = 0, loops = 5, timer;
+		var i = 0, loops = 3, timer;
 
 		function animateExplosion () {
 			if (i >= loops) {
@@ -360,6 +360,6 @@ function addGemMethods (gem) {
 
 		gem.timer = setInterval(function() {
 			animateExplosion();
-		}, 500 / loops);
+		}, 100);
 	};
 };
