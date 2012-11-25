@@ -4,6 +4,7 @@ var game = {
 	level: levels[0],	// The current level object
 	gridSize: 8,
 	gem: null,			// The selected gem
+	score: 0,			// The player's score
 
 	/**
 	 * Creates the game's grid of gems

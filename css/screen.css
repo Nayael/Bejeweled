@@ -1,40 +1,83 @@
 @charset "UTF-8";
 
-html, body{
-	margin: 0px;
-	padding: 0px;
+html {
+	height: 100%;
 }
 
 body{
-	background: #EEF;
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	background-color: #FFFFFF;
 }
 
 #content{
-	width: 1200px;
+	position: relative;
+	width: 1000px;
+	min-height: 100%;
 	margin: auto;
-	margin-top: 150px;
+	background: #EEF;
+	box-shadow: 0px -1px 10px #AAAAAA;
+	-o-box-shadow: 0px -1px 10px #AAAAAA;
+	-moz-box-shadow: 0px -1px 10px #AAAAAA;
+	-webkit-box-shadow: 0px -1px 10px #AAAAAA;
 }
 
-#content p, #content footer{
+a {
+	text-decoration: none;
+	color: #000000;
+}
+
+nav{
+	background-color: #CCCCCC;
+	margin-bottom: 30px;
+}
+
+nav a{
+	display: inline-block;
+	padding: 10px 20px 15px 20px;
+}
+
+nav a.current_menu{
+	background-color: #AAAAAA;
+	font-weight: bold;
+}
+
+p, a, footer{
 	font-family: 'Segoe UI', 'Arial', 'Helvetica', 'Trebuchet MS', sans-serif;
 	font-size: 14px;
 	text-align: justify;
 }
 
+footer{
+	padding: 5px;
+}
+
+
+/********************/
+/***** GAME CSS *****/
+/********************/
 #game_content{
-	width: 800px;
-	height: 700px;
+	width: 750px;
+	height: 525px;
 	margin: auto;
-	margin-top: 30px;
+	margin-bottom: 50px;
+	background: #CCC;
+	border: 1px solid #000;
+}
+
+#player_info{
+	position: relative;
+	float: right;
+	height: 525px;
+	width: 200px;
 	border: 1px solid #000;
 }
 
 #grid{
-	width: 540px;
-	height: 540px;
-	margin-left: 50px;
-	margin-top: 50px;
-	border: 1px solid black;
+	width: 525px;
+	height: 525px;
+	border: 1px solid #000;
 	position: relative;
 }
 
@@ -42,11 +85,5 @@ body{
 	position: absolute;
 	width: 60px;
 	height: 60px;
-	-moz-user-select: -moz-none;
-	-khtml-user-select: none;
-	-webkit-user-select: none;
-	-o-user-select: none;
-	user-select: none;
 	cursor: default;
-	
 }
