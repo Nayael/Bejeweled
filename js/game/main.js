@@ -158,7 +158,7 @@ game.checkStreak = function(gem) {
  * @param gemsToRemove	{Array} An array containing the gems that are in a streak
  */
 game.removeStreak = function(gemsToRemove) {
-	var totalGems = 0, nbGems = 0, fallAfter = false;
+	var totalGems = 0, nbGems = 0, fallAfter = false, scoreBonus = 0, gaugeSize = 0;
 
 	for (var column in gemsToRemove) {
 		for (var i = 0; i < gemsToRemove[column].length; i++) {
@@ -175,6 +175,23 @@ game.removeStreak = function(gemsToRemove) {
 			gemsToRemove[column][i].destroy(gemsToRemove, fallAfter);
 		};
 	};
+	scoreBonus += totalGems*100;	// Every destroyed gems equals 100 points
+	
+	// For a streak bigger than 3, the player gets a bonus	
+	if (totalGems > 3) {
+		for (var i = 0; i < totalGems - 3; i++) {
+			scoreBonus += 100 * (i+1);
+		};
+	}
+	game.score += scoreBonus;
+	
+	// We update the UI
+	gaugeSize = (game.score/game.level.finalScore * 100);
+	if (gaugeSize > 100) {
+		gaugeSize = 100;
+	}
+	get('#player_score').innerHTML = game.score;
+	get('#current_gauge').style.height = gaugeSize + '%';
 };
 
 /**

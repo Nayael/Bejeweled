@@ -10,17 +10,20 @@
 </head>
 <body>
 	<div id="content">
-		<nav>
-			<a href="#" id="bt_index" class="current_menu">Accueil</a>
-			<a href="#game" id="bt_game">Jeu</a>
-		</nav>
+		<header>
+			<nav>
+				<a href="#" id="bt_index" class="current_menu">Accueil</a>
+				<a href="#game" id="bt_game">Jeu</a>
+			</nav>
+		</header>
 		<div id="site_content">
 			<p>The objective of this game is to swap one gem with an adjacent gem to form a horizontal or vertical chain of three or more gems. Bonus points are given when more than three identical gems are formed or forms two lines of identical gems in one swap. Gems disappear when chains are formed and gems fall from the top to fill in gaps. Sometimes chain reactions, called cascades, are triggered, where chains are formed by the falling gems. Cascades are awarded with bonus points. There are two variations of the game to choose from.</p><p>Although normally the player gets only 3 in a row for gems, sometimes they can get 4 or 5 in a row. And in rare conditions, they can get 6, 7 and even 8 in a row. However, some versions of the engine do not register it. The player gets more points and sometimes special powerups from more than 3 gems in a row.</p>
 		</div>
 		<div id="game_content">
 			<div id="player_info">
-				<div>Score<div id="total_score"></div></div>
-				<div id="score_gauge"></div>
+				<div id="score_gauge"><div id="current_gauge"></div></div>
+				<p id="score_text">Score</p>
+				<div id="player_score">0</div>
 				<button id="restart_bt">Recommencer</button>
 			</div>
 			<div id="grid"></div>

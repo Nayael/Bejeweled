@@ -30,21 +30,10 @@ function remove (elem) {
  */
 Object.getLength = function(obj) {
 	var length = 0;
-	for (var key in obj) {	
+	for (var key in obj) {
 		if (obj.hasOwnProperty(key)) {
 			length++;
 		}
 	}
 	return length;
-};
-
-/**
- * Returns all the keys of an object (associative array) in an array
- */
-Object.getKeys = function(obj) {
-	var keys = [];
-	for(var key in obj) {
-		keys.push(key);
-	};
-	return keys;
 };

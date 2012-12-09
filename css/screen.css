@@ -9,6 +9,9 @@ body{
 	padding: 0;
 	height: 100%;
 	background-color: #FFFFFF;
+	font-family: 'Segoe UI', 'Arial', 'Helvetica', 'Trebuchet MS', sans-serif;
+	font-size: 14px;
+	text-align: justify;
 }
 
 #content{
@@ -16,7 +19,7 @@ body{
 	width: 1000px;
 	min-height: 100%;
 	margin: auto;
-	background: #EEF;
+	background-color: #EEF;
 	box-shadow: 0px -1px 10px #AAAAAA;
 	-o-box-shadow: 0px -1px 10px #AAAAAA;
 	-moz-box-shadow: 0px -1px 10px #AAAAAA;
@@ -28,9 +31,15 @@ a {
 	color: #000000;
 }
 
+header{
+	padding-bottom: 30px;
+	position: relative;
+	z-index: 30;
+	background-color: #EEF;
+}
+
 nav{
 	background-color: #CCCCCC;
-	margin-bottom: 30px;
 }
 
 nav a{
@@ -41,12 +50,6 @@ nav a{
 
 nav a.current_menu{
 	background-color: #AAAAAA;
-}
-
-p, a, footer{
-	font-family: 'Segoe UI', 'Arial', 'Helvetica', 'Trebuchet MS', sans-serif;
-	font-size: 14px;
-	text-align: justify;
 }
 
 footer{
@@ -60,24 +63,51 @@ footer{
 #game_content{
 	display: none;
 	width: 750px;
-	height: 525px;
+	height: 520px;
 	margin: auto;
 	margin-bottom: 50px;
 	background: #CCC;
-	border: 1px solid #000;
 }
 
 #player_info{
 	position: relative;
 	float: right;
-	height: 525px;
+	top: 60px;
 	width: 200px;
-	border: 1px solid #000;
+	background-color: #FFF;
+	text-align: center;
+}
+
+#score_text{
+	font-size: 18px;
+}
+
+#player_score{
+	margin-bottom: 25px;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+#score_gauge{
+	position: relative;
+	float: left;
+	width: 15px;
+	height: 400px;
+	background-color: #666;
+}
+
+#current_gauge{
+	position: absolute;
+	bottom: 0px;
+	left: 2.5px;
+	width: 11px;
+	height: 0%;
+	background-color: #000;
 }
 
 #grid{
-	width: 525px;
-	height: 525px;
+	width: 520px;
+	height: 520px;
 	border: 1px solid #000;
 	position: relative;
 }
