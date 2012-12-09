@@ -78,8 +78,13 @@ footer{
 	text-align: center;
 }
 
-#score_text{
+#player_info p, #game_level{
 	font-size: 18px;
+}
+
+#game_level{
+	margin-top: -10px;
+	font-weight: bold;
 }
 
 #player_score{
@@ -117,4 +122,12 @@ footer{
 	width: 60px;
 	height: 60px;
 	cursor: default;
+	transition: visibility 0s linear 0.5s,opacity 0.5s linear;
 }
+
+/*.gem_appear{
+	-webkit-transition: display .1s;
+	-moz-transition: display .1s;
+	-o-transition: display .1s;
+	transition: display .1s;
+}*/

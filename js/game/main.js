@@ -5,7 +5,9 @@ game.levelIndex = 0;	// The current level index
 game.level = levels[0];	// The current level object
 game.gridSize = 8;
 game.gem = null;		// The selected gem
-game.score = 0;			// The player's score
+game.totalScore = 0;
+game.levelScore = 0;
+game.finalScore = 15000;
 
 /**
  * Creates the game's grid of gems
@@ -27,7 +29,7 @@ game.init = function () {
 			}while (vGems.length >= 2 || hGems.length >= 2);
 
 			gem.addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
-			grid.appendChild(gem);
+			gem.pop(grid);
 			vGems = [];
 			hGems = [];
 		};
@@ -56,7 +58,7 @@ game.mainLoop = setInterval(function() {
 
 /**
  * Triggers when an gem is clicked (select it or proceed to the swap)
- * @param e	{event} The mouse event
+ * @param {event} e	The mouse event
  */
 game.onGemClick = function(e) {
 	var target = e.srcElement || e.target;
@@ -73,7 +75,7 @@ game.onGemClick = function(e) {
 
 /**
  * Makes a given gem the game's selected gem
- * @param gem	{Gem} The gem to select
+ * @param {Gem} gem	The gem to select
  */
 game.selectGem = function(gem) {
 	game.deselectGem();
@@ -95,9 +97,9 @@ game.deselectGem = function() {
 
 /**
  * Swaps two gems
- * @param source	{Gem} The first gem to swap
- * @param dest		{Gem} The second gem to swap with the first one
- * @param check		{bool} Shall we look for a streak with the swapped gems ?
+ * @param {Gem} source	The first gem to swap
+ * @param {Gem} dest	The second gem to swap with the first one
+ * @param {bool} check	Shall we look for a streak with the swapped gems ?
  */
 game.swapGems = function(source, dest, check) {
 	var sourceX = source.x(),
@@ -131,7 +133,7 @@ game.swapGems = function(source, dest, check) {
 // TODO combo streak : si après la chute, plus de 3 streak --> problème de détection de streak
 /**
  * Looks for the presence and removes a streak around an gem
- * @param gem	{Gem} The gem which neighbours will be checked for a streak
+ * @param {Gem} gem	The gem which neighbours will be checked for a streak
  */
 game.checkStreak = function(gem) {
 	var gems = get('.gem');
@@ -140,6 +142,10 @@ game.checkStreak = function(gem) {
 		gems[i].removeEventListener('click', game.onGemClick, false);	// We remove the mouse event listeners
 	};
 
+	if (game.levelScore >= game.finalScore) {
+		game.nextLevel();
+		return;
+	}
 	if (Object.getLength(streak) > 0) {
 		gem.inStreak = true;
 		game.removeStreak(streak);
@@ -155,7 +161,7 @@ game.checkStreak = function(gem) {
 
 /**
  * Removes all the gems that form a streak (column or row, or both)
- * @param gemsToRemove	{Array} An array containing the gems that are in a streak
+ * @param {Array} gemsToRemove	An array containing the gems that are in a streak
  */
 game.removeStreak = function(gemsToRemove) {
 	var totalGems = 0, nbGems = 0, fallAfter = false, scoreBonus = 0, gaugeSize = 0;
@@ -183,20 +189,21 @@ game.removeStreak = function(gemsToRemove) {
 			scoreBonus += 100 * (i+1);
 		};
 	}
-	game.score += scoreBonus;
+	game.levelScore += scoreBonus;
+	game.totalScore += scoreBonus;
 	
 	// We update the UI
-	gaugeSize = (game.score/game.level.finalScore * 100);
-	if (gaugeSize > 100) {
+	gaugeSize = (game.levelScore/game.finalScore * 100);
+	if (game.levelScore >= game.finalScore) {
 		gaugeSize = 100;
 	}
-	get('#player_score').innerHTML = game.score;
+	get('#player_score').innerHTML = game.totalScore;
 	get('#current_gauge').style.height = gaugeSize + '%';
 };
 
 /**
  * Triggers when a streak is destroyed: starts the generation of new gems
- * @param streak	{Array} An array containing the gems that are in a streak
+ * @param {Array} streak	An array containing the gems that are in a streak
  */
 game.onStreakRemoved = function(streak) {		// We continue after the streak disappeared
 	var firstYToFall = game.gridSize,	// The Y of the first item that will fall
@@ -245,7 +252,7 @@ game.onStreakRemoved = function(streak) {		// We continue after the streak disap
 
 /**
  * Generates random gems above the grid after a streak disappeared
- * @param streak	{Array} An array containing the gems that are in a streak
+ * @param {Array} streak	An array containing the gems that are in a streak
  * @return {Array} An array of the new generated gems
  */
 game.generateGems = function(x) {
@@ -265,16 +272,43 @@ game.generateGems = function(x) {
 };
 
 /**
- * Restarts the game
+ * Removes all the gems from the grid
  */
-game.restart = function() {
+game.emptyGrid = function() {
 	var gems = get('.gem'), grid = get('#grid');
 	for (var i = 0; i < gems.length; i++) {
 		grid.removeChild(gems[i]);
 	};
-	game.score = 0;
+}
+
+/**
+ * Restarts the game
+ */
+game.restart = function() {
+	game.emptyGrid();
+	game.levelScore = 0;
+	game.totalScore = 0;
+	game.finalScore = 15000;
 	game.levelIndex = 0;
+	get('#game_level').innerHTML = 1;
+	get('#player_score').innerHTML = 0;
 	game.level = levels[0];
+	game.init();
+};
+
+/**
+ * Goes to the next level
+ */
+game.nextLevel = function() {
+	var gems = get('.gem');
+	alert('Niveau ' + (game.levelIndex + 1) + ' terminé !');
+	game.levelIndex++;
+	game.level = levels[game.levelIndex];
+	get('#current_gauge').style.height = '0%';
+	get('#game_level').innerHTML = (game.levelIndex + 1);
+	game.levelScore = 0;
+	game.finalScore *= 1.5;
+	game.emptyGrid();
 	game.init();
 };
 

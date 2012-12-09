@@ -106,6 +106,16 @@ function addGemMethods (gem) {
 	};
 
 	/**
+	 * Makes the gem pop on the grid
+	 */
+	gem.pop = function(grid) {
+		// gem.style.visibility = 'hidden';
+		// gem.style.opacity = 0;
+		grid.appendChild(gem);
+		// gem.style.webkitTransition = 'visibility 0s linear 0.5s,opacity 0.5s linear';
+	};
+
+	/**
 	 * Compares a gem's value with this gem's value
 	 */
 	gem.equals = function(neighbour) {
@@ -137,7 +147,7 @@ function addGemMethods (gem) {
 
 		row = gem.checkRow(true, true);
 		column = gem.checkColumn(true, true);
-
+		
 		// If we have a row of three identical gems
 		if (row.length > 1) {
 			for (var i = 0; i < row.length; i++) {
