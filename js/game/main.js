@@ -1,58 +1,74 @@
-// This variable represents the instance of the game
-var game = {};
-
-game.levelIndex = 0;	// The current level index
-game.level = levels[0];	// The current level object
-game.gridSize = 8;
-game.gem = null;		// The selected gem
-game.totalScore = 0;
-game.levelScore = 0;
-game.finalScore = 15000;
+var Game = {};	// The game instance
+Game.GRID_SIZE = 8;
 
 /**
- * Creates the game's grid of gems
+ * Initializes the game
  */
-game.init = function () {
+Game.init = function () {
+	Game.GEM_RANGE = 6;
+	Game.level = 1;
+	Game.gem = null;
+	Game.score = {
+		goal: 15000,
+		total: 0,
+		current: 0
+	};
+
+	get('#game_level').innerHTML = Game.level;
+	get('#player_score').innerHTML = Game.score.total;
+	get('#restart_bt').onclick = Game.restart;
+	Game.createGrid();
+};
+
+/**
+ * Created the game's grid
+ */
+Game.createGrid = function() {
 	var grid = get('#grid'), map = [], row, vGems = [], hGems = [];
 
-	for (var i = 0, j = 0; i < game.gridSize; i++) {
+	for (var i = 0, j = 0; i < Game.GRID_SIZE; i++) {
 		row = [];
 		map.push(row);	// We create a row in the map
 
-		for (j = 0; j < game.gridSize; j++) {
+		for (j = 0; j < Game.GRID_SIZE; j++) {
 			do {
-				gem = new Gem(j, i, parseInt(Math.random() * game.level.range));
+				gem = new Gem(j, i, parseInt(Math.random() * Game.GEM_RANGE));
 				if (i > 0)
 					vGems = gem.parseNeighbours(true, -1);
 				if (j > 0)
 					hGems = gem.parseNeighbours(false, -1);
 			}while (vGems.length >= 2 || hGems.length >= 2);
 
-			gem.addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
+			gem.addEventListener('click', Game.onGemClick, false);	// We add the mouse event listener
 			gem.pop(grid);
 			vGems = [];
 			hGems = [];
 		};
 	};
-
-	get('#restart_bt').onclick = game.restart;
 };
 
 /**
  * The game main loop
  */
-game.mainLoop = setInterval(function() {
+Game.mainLoop = setInterval(function() {
 	var gems = get('.gem'), addClick = true;
 	for (var i = 0; i < gems.length; i++) {
 		if (gems[i].timer != undefined) {	// If at least one gem is being animated
 		    addClick = false;	// We prevent the player from clicking on the gems
 		}
 	};
+	// If all the animations are over
 	if (addClick) {
 		for (var i = 0; i < gems.length; i++) {
-			gems[i].removeEventListener('click', game.onGemClick, false);	// We remove all the previous listeners, just in case
-			gems[i].addEventListener('click', game.onGemClick, false);
+			gems[i].removeEventListener('click', Game.onGemClick, false);	// We remove all the previous listeners, just in case
+			gems[i].addEventListener('click', Game.onGemClick, false);
 		};
+
+		// If the goal has been reached, we go to the next level
+		if (Game.score.current >= Game.score.goal) {
+			Game.nextLevel();
+			return;
+		}
 	}
 }, 60);
 
@@ -60,15 +76,15 @@ game.mainLoop = setInterval(function() {
  * Triggers when an gem is clicked (select it or proceed to the swap)
  * @param {event} e	The mouse event
  */
-game.onGemClick = function(e) {
+Game.onGemClick = function(e) {
 	var target = e.srcElement || e.target;
-	if (game.gem == null) {
-		game.selectGem(target);
+	if (Game.gem == null) {
+		Game.selectGem(target);
 	}else {
-		if (target.isNeighbour(game.gem)) {			// If the clicked gem is adjacent to the first selected gem
-			game.swapGems(game.gem, target, true);	// We can swap them
+		if (target.isNeighbour(Game.gem)) {			// If the clicked gem is adjacent to the first selected gem
+			Game.swapGems(Game.gem, target, true);	// We can swap them
 		}else {							// Otherwise
-			game.selectGem(target);		// We select the new one
+			Game.selectGem(target);		// We select the new one
 		}
 	}
 };
@@ -77,21 +93,21 @@ game.onGemClick = function(e) {
  * Makes a given gem the game's selected gem
  * @param {Gem} gem	The gem to select
  */
-game.selectGem = function(gem) {
-	game.deselectGem();
-	if (game.gem == null || gem.id !== game.gem.id) {
+Game.selectGem = function(gem) {
+	Game.deselectGem();
+	if (Game.gem == null || gem.id !== Game.gem.id) {
 		gem.style.border = 'solid 3px #000';
-		game.gem = gem;
+		Game.gem = gem;
 	}
 };
 
 /**
  * Deselects the game's selected gem
  */
-game.deselectGem = function() {
-	if (game.gem != null) {
-		game.gem.style.border = '';
-		game.gem = null;   
+Game.deselectGem = function() {
+	if (Game.gem != null) {
+		Game.gem.style.border = '';
+		Game.gem = null;   
 	}
 };
 
@@ -101,7 +117,7 @@ game.deselectGem = function() {
  * @param {Gem} dest	The second gem to swap with the first one
  * @param {bool} check	Shall we look for a streak with the swapped gems ?
  */
-game.swapGems = function(source, dest, check) {
+Game.swapGems = function(source, dest, check) {
 	var sourceX = source.x(),
 		sourceY = source.y(),
 		destX = dest.x(),
@@ -111,7 +127,7 @@ game.swapGems = function(source, dest, check) {
 	if (source.left() != dest.left() || source.top() != dest.top()) {
 		var gems = get('.gem');
 		for (var i = 0; i < gems.length; i++) {
-			gems[i].removeEventListener('click', game.onGemClick, false);	// We prevent the player from clicking on the gems
+			gems[i].removeEventListener('click', Game.onGemClick, false);	// We prevent the player from clicking on the gems
 		};
 
 		if (source.left() != dest.left()) {
@@ -135,26 +151,22 @@ game.swapGems = function(source, dest, check) {
  * Looks for the presence and removes a streak around an gem
  * @param {Gem} gem	The gem which neighbours will be checked for a streak
  */
-game.checkStreak = function(gem) {
+Game.checkStreak = function(gem) {
 	var gems = get('.gem');
 	var streak = gem.getStreak();	// We look for a streak from the gem
 	for (var i = 0; i < gems.length; i++) {
-		gems[i].removeEventListener('click', game.onGemClick, false);	// We remove the mouse event listeners
+		gems[i].removeEventListener('click', Game.onGemClick, false);	// We remove the mouse event listeners
 	};
 
-	if (game.levelScore >= game.finalScore) {
-		game.nextLevel();
-		return;
-	}
 	if (Object.getLength(streak) > 0) {
 		gem.inStreak = true;
-		game.removeStreak(streak);
-	}else if (game.gem != null && game.gem.id !== gem.id && !game.gem.inStreak) {	// If there is a selected gem, and it is not in a streak, we will have to reverse the swap
-		game.swapGems(gem, game.gem, false);		// We re-swap the gems to their respective original positions
-		game.deselectGem();
+		Game.removeStreak(streak);
+	}else if (Game.gem != null && Game.gem.id !== gem.id && !Game.gem.inStreak) {	// If there is a selected gem, and it is not in a streak, we will have to reverse the swap
+		Game.swapGems(gem, Game.gem, false);		// We re-swap the gems to their respective original positions
+		Game.deselectGem();
 		
 		for (var i = 0; i < gems.length; i++) {
-			gems[i].addEventListener('click', game.onGemClick, false);	// We add the mouse event listener
+			gems[i].addEventListener('click', Game.onGemClick, false);	// We add the mouse event listener
 		};
 	}
 };
@@ -163,7 +175,7 @@ game.checkStreak = function(gem) {
  * Removes all the gems that form a streak (column or row, or both)
  * @param {Array} gemsToRemove	An array containing the gems that are in a streak
  */
-game.removeStreak = function(gemsToRemove) {
+Game.removeStreak = function(gemsToRemove) {
 	var totalGems = 0, nbGems = 0, fallAfter = false, scoreBonus = 0, gaugeSize = 0;
 
 	for (var column in gemsToRemove) {
@@ -189,15 +201,15 @@ game.removeStreak = function(gemsToRemove) {
 			scoreBonus += 100 * (i+1);
 		};
 	}
-	game.levelScore += scoreBonus;
-	game.totalScore += scoreBonus;
+	Game.score.current += scoreBonus;
+	Game.score.total += scoreBonus;
 	
 	// We update the UI
-	gaugeSize = (game.levelScore/game.finalScore * 100);
-	if (game.levelScore >= game.finalScore) {
+	gaugeSize = (Game.score.current/Game.score.goal * 100);
+	if (Game.score.current >= Game.score.goal) {
 		gaugeSize = 100;
 	}
-	get('#player_score').innerHTML = game.totalScore;
+	get('#player_score').innerHTML = Game.score.total;
 	get('#current_gauge').style.height = gaugeSize + '%';
 };
 
@@ -205,8 +217,8 @@ game.removeStreak = function(gemsToRemove) {
  * Triggers when a streak is destroyed: starts the generation of new gems
  * @param {Array} streak	An array containing the gems that are in a streak
  */
-game.onStreakRemoved = function(streak) {		// We continue after the streak disappeared
-	var firstYToFall = game.gridSize,	// The Y of the first item that will fall
+Game.onStreakRemoved = function(streak) {		// We continue after the streak disappeared
+	var firstYToFall = Game.GRID_SIZE,	// The Y of the first item that will fall
 		newGems = null,
 		currentGem = null,
 		fallHeight = 0,
@@ -215,7 +227,7 @@ game.onStreakRemoved = function(streak) {		// We continue after the streak disap
 
 	// We run through the gem columns
 	for (var column in streak) {
-		for (var i = game.gridSize - 1; i >= 0; i--) {
+		for (var i = Game.GRID_SIZE - 1; i >= 0; i--) {
 			currentGem = get('#tile' + i + '_' + column);
 			if (currentGem != null && currentGem.timer != undefined) {	// If there is an item from another streak that is still animated, we pass this column
 				skip = true;
@@ -227,8 +239,8 @@ game.onStreakRemoved = function(streak) {		// We continue after the streak disap
 			continue;
 		}
 
-		firstYToFall = game.gridSize;
-		for (i = game.gridSize - 1; i >= 0; i--) {	// We run through the column from bottom to top
+		firstYToFall = Game.GRID_SIZE;
+		for (i = Game.GRID_SIZE - 1; i >= 0; i--) {	// We run through the column from bottom to top
 			currentGem = get('#tile' + i + '_' + column);
 			if (currentGem == null) {				// Once we found a gem that was destroyed
 				for (var j = i - 1; j >= 0; j--) {	// We run through the gems on top of it
@@ -244,10 +256,10 @@ game.onStreakRemoved = function(streak) {		// We continue after the streak disap
 		if (firstYToFall >= 7) {	// If there is no "hole" in the grid
 		    firstYToFall = -1;		// It means there is a hole from the top, the first gem to fall is on top the grid
 		}
-		game.generateGems(column);	// We generate the new gems
+		Game.generateGems(column);	// We generate the new gems
 		get('#tile' + firstYToFall + '_' + column).fallStreak();	// We make the first gem fall (the others will follow)
 	};
-	game.deselectGem();
+	Game.deselectGem();
 };
 
 /**
@@ -255,15 +267,14 @@ game.onStreakRemoved = function(streak) {		// We continue after the streak disap
  * @param {Array} streak	An array containing the gems that are in a streak
  * @return {Array} An array of the new generated gems
  */
-game.generateGems = function(x) {
+Game.generateGems = function(x) {
 	var quantity = 0, y, value;
-
-	for (var i = game.gridSize - 1; i >= 0; i--) {
+	for (var i = Game.GRID_SIZE - 1; i >= 0; i--) {
 		currentGem = get('#tile' + i + '_' + x);
 		if (currentGem == null) {
 			quantity++;
 
-			value = parseInt(Math.random() * game.level.range);
+			value = parseInt(Math.random() * Game.GEM_RANGE);
 			y = -1 * quantity;
 			gem = new Gem(parseInt(x), y, value);
 			grid.appendChild(gem);
@@ -274,7 +285,7 @@ game.generateGems = function(x) {
 /**
  * Removes all the gems from the grid
  */
-game.emptyGrid = function() {
+Game.emptyGrid = function() {
 	var gems = get('.gem'), grid = get('#grid');
 	for (var i = 0; i < gems.length; i++) {
 		grid.removeChild(gems[i]);
@@ -284,32 +295,24 @@ game.emptyGrid = function() {
 /**
  * Restarts the game
  */
-game.restart = function() {
-	game.emptyGrid();
-	game.levelScore = 0;
-	game.totalScore = 0;
-	game.finalScore = 15000;
-	game.levelIndex = 0;
-	get('#game_level').innerHTML = 1;
-	get('#player_score').innerHTML = 0;
-	game.level = levels[0];
-	game.init();
+Game.restart = function() {
+	Game.emptyGrid();
+	Game.init();
 };
 
 /**
  * Goes to the next level
  */
-game.nextLevel = function() {
-	var gems = get('.gem');
-	alert('Niveau ' + (game.levelIndex + 1) + ' terminé !');
-	game.levelIndex++;
-	game.level = levels[game.levelIndex];
+Game.nextLevel = function() {
+	alert('Niveau ' + Game.level + ' terminé !');
+	Game.level++;
+	Game.score.current = 0;
+	Game.score.goal *= 1.5;
+
 	get('#current_gauge').style.height = '0%';
-	get('#game_level').innerHTML = (game.levelIndex + 1);
-	game.levelScore = 0;
-	game.finalScore *= 1.5;
-	game.emptyGrid();
-	game.init();
+	get('#game_level').innerHTML = Game.level;
+	Game.emptyGrid();
+	Game.createGrid();
 };
 
-window.onload = game.init();
+window.onload = Game.init();

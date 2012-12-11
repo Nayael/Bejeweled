@@ -122,7 +122,8 @@ footer{
 	width: 60px;
 	height: 60px;
 	cursor: default;
-	transition: visibility 0s linear 0.5s,opacity 0.5s linear;
+	background-position: top center;
+	background-repeat: no-repeat;
 }
 
 /*.gem_appear{

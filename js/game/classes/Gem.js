@@ -17,24 +17,15 @@ function Gem(x, y, value) {
 	gem.style.top = top;
 	gem.style.left = left;
 	gem.style.backgroundImage = 'url("./images/sprites/' + value + '.png")';
-	gem.style.backgroundRepeat = 'no-repeat';
-	gem.style.backgroundPosition = 'top center';
 	
 	gem.falling = false;	// Is the element falling ?
 	gem.inStreak = false;
 
 	addGemMethods(gem);	// We add useful functions relative to gem objects
-	// addEventCapabilities(gem);	// We add useful functions relative to events
-
 	return gem;
 };
 
 Gem.TILE_HEIGHT = 65;
-Gem.Event = {
-	FALL_COMPLETE: 'fall_complete',
-	MOVE_COMPLETE: 'move_complete',
-	DESTROYED: 'destroyed'
-};
 
 function addGemMethods (gem) {
 	/**
@@ -276,7 +267,7 @@ function addGemMethods (gem) {
 					delete gem.timer;
 
 					if (check === true && !gem.falling) {
-						game.checkStreak(gem);
+						Game.checkStreak(gem);
 					}
 					if (gem.falling) {
 						gem.onFallComplete();
@@ -308,7 +299,7 @@ function addGemMethods (gem) {
 
 		// We make all the gems on the column fall by 1 slot
 		gem.fall();
-		for (var i = y; i >= -(game.gridSize - 1); i--) {
+		for (var i = y; i >= -(Game.GRID_SIZE - 1); i--) {
 			currentGem = get('#tile' + i + '_' + x);
 			if (currentGem != null) {
 				currentGem.fall();
@@ -339,7 +330,7 @@ function addGemMethods (gem) {
 		if (get('#tile' + (gem.y() + 1) + '_' + gem.x()) == null && (gem.y() + 1) != 8) {	// If there is still an empty slot below the gem
 			gem.fall();		// We make it fall again
 		}else {				// Otherwise, the fall is over
-			game.checkStreak(gem);	// We look for a streak
+			Game.checkStreak(gem);	// We look for a streak
 		}
 	};
 
@@ -359,7 +350,7 @@ function addGemMethods (gem) {
 					gem.parentNode.removeChild(gem);
 				}
 				if (fallAfter === true) {
-					game.onStreakRemoved(streak);
+					Game.onStreakRemoved(streak);
 				}
 				return;
 			}
