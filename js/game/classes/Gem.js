@@ -27,7 +27,7 @@ function Gem(x, y, value) {
 
 Gem.TILE_HEIGHT = 65;
 
-function addGemMethods (gem) {
+function addGemMethods(gem) {
 	/**
 	 * Returns (and sets, if a value is passed as an argument) the gem's "left" CSS property in px
 	 */

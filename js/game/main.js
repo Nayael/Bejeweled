@@ -1,11 +1,13 @@
 var Game = {};	// The game instance
+
 Game.GRID_SIZE = 8;
+Game.GEM_HEIGHT = 65;
 
 /**
  * Initializes the game
  */
 Game.init = function () {
-	Game.GEM_RANGE = 6;
+	Game.GEM_RANGE = 7;
 	Game.level = 1;
 	Game.gem = null;
 	Game.score = {

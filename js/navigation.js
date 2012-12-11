@@ -16,13 +16,15 @@ Site.onMenuClick = function(event) {
 	var target = event.target || event.srcElement,
 		hash = window.location.hash;
 
-	if (target.getAttribute('href') == '#game')
+	if (target.getAttribute('href') == '#game') {
 		window.location.hash = 'game';
-	else
+	}else {
 		window.location.hash = '';
+	}
 
-	if (window.location.hash != hash)
+	if (window.location.hash != hash) {
 		Site.changePageFromHash();
+	}
 };
 
 /**
@@ -38,10 +40,11 @@ Site.changePageFromHash = function () {
 		links[i].setAttribute('class', '');
 	};
 
-	if (window.location.hash === '')
+	if (window.location.hash === ''){
 		links[0].setAttribute('class', 'current_menu');
-	else
+	}else {
 		get('#bt_' + window.location.hash.substr(1)).setAttribute('class', 'current_menu');
+	}
 };
 
 // We initialize the menu buttons listeners
