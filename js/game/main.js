@@ -16,8 +16,8 @@ Game.init = function () {
 		current: 0
 	};
 
-	get('#game_level').innerHTML = Game.level;
-	get('#player_score').innerHTML = Game.score.total;
+	get('#level').innerHTML = Game.level;
+	get('#total_score').innerHTML = Game.score.total;
 	get('#restart_bt').onclick = Game.restart;
 	Game.createGrid();
 };
@@ -178,7 +178,7 @@ Game.checkStreak = function(gem) {
  * @param {Array} gemsToRemove	An array containing the gems that are in a streak
  */
 Game.removeStreak = function(gemsToRemove) {
-	var totalGems = 0, nbGems = 0, fallAfter = false, scoreBonus = 0, gaugeSize = 0;
+	var totalGems = 0, nbGems = 0, fallAfter = false;
 
 	for (var column in gemsToRemove) {
 		for (var i = 0; i < gemsToRemove[column].length; i++) {
@@ -195,24 +195,8 @@ Game.removeStreak = function(gemsToRemove) {
 			gemsToRemove[column][i].destroy(gemsToRemove, fallAfter);
 		};
 	};
-	scoreBonus += totalGems*100;	// Every destroyed gems equals 100 points
 	
-	// For a streak bigger than 3, the player gets a bonus	
-	if (totalGems > 3) {
-		for (var i = 0; i < totalGems - 3; i++) {
-			scoreBonus += 100 * (i+1);
-		};
-	}
-	Game.score.current += scoreBonus;
-	Game.score.total += scoreBonus;
-	
-	// We update the UI
-	gaugeSize = (Game.score.current/Game.score.goal * 100);
-	if (Game.score.current >= Game.score.goal) {
-		gaugeSize = 100;
-	}
-	get('#player_score').innerHTML = Game.score.total;
-	get('#current_gauge').style.height = gaugeSize + '%';
+	Game.updateScore(totalGems);
 };
 
 /**
@@ -285,6 +269,53 @@ Game.generateGems = function(x) {
 };
 
 /**
+ * Updates the player's score after a match
+ * @param {Number}	destroyedGems	The number of gems that were destroyed
+ */
+Game.updateScore = function(destroyedGems) {
+	var gain = destroyedGems * 100,	// Every destroyed gems equals 100 points
+		gaugeSize = 0,
+		gainSpan = document.createElement('span'),
+		yOrigin = 120,
+		yShift = 4;
+	
+	// For a streak bigger than 3, the player gets a bonus	
+	if (destroyedGems > 3) {
+		for (var i = 0; i < destroyedGems - 3; i++) {
+			gain += 100 * (i+1);
+		};
+	}
+
+	Game.score.current += gain;
+	Game.score.total += gain;
+
+	// We update the UI
+	gainSpan.innerHTML = '<strong>+' + gain + '</strong>';
+	gainSpan.style.position = 'absolute';
+	gainSpan.style.top = yOrigin + 'px';
+	gainSpan.style.left = '90px';
+	get('#player_info').insertBefore(gainSpan, get('#total_score'));
+
+	// The gain animation
+	var gainMove = setInterval(function() {
+		var y = parseInt(gainSpan.style.top.substring(0, gainSpan.style.top.indexOf('px')));
+		if (y >= yOrigin + 20) {
+		    clearInterval(gainMove);
+		    get('#player_info').removeChild(gainSpan);
+		    return;
+		}
+		gainSpan.style.top = (y+yShift)+'px';
+	}, 60);
+
+	gaugeSize = (Game.score.current/Game.score.goal * 100);
+	if (Game.score.current >= Game.score.goal) {
+		gaugeSize = 100;
+	}
+	get('#total_score').innerHTML = Game.score.total;
+	get('#current_gauge').style.height = gaugeSize + '%';
+}
+
+/**
  * Removes all the gems from the grid
  */
 Game.emptyGrid = function() {
@@ -312,7 +343,7 @@ Game.nextLevel = function() {
 	Game.score.goal *= 1.5;
 
 	get('#current_gauge').style.height = '0%';
-	get('#game_level').innerHTML = Game.level;
+	get('#level').innerHTML = Game.level;
 	Game.emptyGrid();
 	Game.createGrid();
 };

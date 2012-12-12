@@ -12,7 +12,6 @@ function Gem(x, y, value) {
 	gem.className = 'gem';
 	gem.val = value;
 	gem.id = 'tile' + y + '_' + x;
-	// gem.innerHTML = y + '_' + x;
 	
 	gem.style.top = top;
 	gem.style.left = left;
@@ -65,7 +64,6 @@ function addGemMethods(gem) {
 	gem.x = function(value) {
 		if (value != undefined)	{
 			gem.id = (gem.id != '') ? (gem.id.substr(0, gem.id.length - 1) + value) : 'tile0_' + value;
-			// gem.innerHTML = gem.id.substr(4);	
 		}
 		if (gem.id != '')
 			return parseInt(gem.id.substr(gem.id.length - 1));
@@ -78,7 +76,6 @@ function addGemMethods(gem) {
 	gem.y = function(value) {
 		if (value != undefined) {
 			gem.id = (gem.id != '') ? (gem.id.substring(0, 4) + value + gem.id.substr(gem.id.indexOf('_'))) : 'tile' + value + '_0';
-			// gem.innerHTML = gem.id.substr(4);	
 		}
 		if (gem.id != '')
 			return parseInt(gem.id.substring(4, gem.id.indexOf('_')));
