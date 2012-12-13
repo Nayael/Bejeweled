@@ -18,7 +18,7 @@ Game.init = function () {
 
 	get('#level').innerHTML = Game.level;
 	get('#total_score').innerHTML = Game.score.total;
-	get('#restart_bt').onclick = Game.restart;
+	get('#restart_bt').onclick = Game.confirmRestart;
 	Game.createGrid();
 };
 
@@ -65,6 +65,10 @@ Game.mainLoop = setInterval(function() {
 			gems[i].removeEventListener('click', Game.onGemClick, false);	// We remove all the previous listeners, just in case
 			gems[i].addEventListener('click', Game.onGemClick, false);
 		};
+
+		if (Game.combo != undefined) {
+			delete Game.combo;
+		}
 
 		// If the goal has been reached, we go to the next level
 		if (Game.score.current >= Game.score.goal) {
@@ -148,19 +152,23 @@ Game.swapGems = function(source, dest, check) {
 	}
 };
 
-// TODO combo streak : si après la chute, plus de 3 streak --> problème de détection de streak
 /**
  * Looks for the presence and removes a streak around an gem
  * @param {Gem} gem	The gem which neighbours will be checked for a streak
  */
 Game.checkStreak = function(gem) {
-	var gems = get('.gem');
-	var streak = gem.getStreak();	// We look for a streak from the gem
+	var gems = get('.gem'),
+		streak = gem.getStreak();	// We look for a streak from the gem
+
 	for (var i = 0; i < gems.length; i++) {
 		gems[i].removeEventListener('click', Game.onGemClick, false);	// We remove the mouse event listeners
 	};
 
 	if (Object.getLength(streak) > 0) {
+		// We calculate the number of combos
+		if (Game.gem == null) {
+			Game.combo = (Game.combo == undefined ? 1 : Game.combo + 1);
+		}
 		gem.inStreak = true;
 		Game.removeStreak(streak);
 	}else if (Game.gem != null && Game.gem.id !== gem.id && !Game.gem.inStreak) {	// If there is a selected gem, and it is not in a streak, we will have to reverse the swap
@@ -178,6 +186,15 @@ Game.checkStreak = function(gem) {
  * @param {Array} gemsToRemove	An array containing the gems that are in a streak
  */
 Game.removeStreak = function(gemsToRemove) {
+	var song = 'misc1.wav';
+	if (Game.combo != undefined && Game.combo > 1) {
+	    song = 'spring.wav';
+	}
+	// We play a sound for the gem destruction
+	var sound = document.createElement('audio');
+	sound.setAttribute('src', './audio/'+song);
+	sound.play();
+
 	var totalGems = 0, nbGems = 0, fallAfter = false;
 
 	for (var column in gemsToRemove) {
@@ -273,7 +290,8 @@ Game.generateGems = function(x) {
  * @param {Number}	destroyedGems	The number of gems that were destroyed
  */
 Game.updateScore = function(destroyedGems) {
-	var gain = destroyedGems * 100,	// Every destroyed gems equals 100 points
+	var perGem = 100 + (Game.combo == undefined ? 0 : (50 * Game.combo)),
+		gain = destroyedGems * perGem,
 		gaugeSize = 0,
 		gainSpan = document.createElement('span'),
 		yOrigin = 120,
@@ -304,7 +322,7 @@ Game.updateScore = function(destroyedGems) {
 		    get('#player_info').removeChild(gainSpan);
 		    return;
 		}
-		gainSpan.style.top = (y+yShift)+'px';
+		gainSpan.style.top = (y+yShift) + 'px';
 	}, 60);
 
 	gaugeSize = (Game.score.current/Game.score.goal * 100);
@@ -346,6 +364,20 @@ Game.nextLevel = function() {
 	get('#level').innerHTML = Game.level;
 	Game.emptyGrid();
 	Game.createGrid();
+};
+
+Game.confirmRestart = function() {
+	if (confirm('Êtes-vous sûr(e) de vouloir recommencer ?')){
+		Game.restart();
+	}
+	// var popup = new Popup('Voulez-vous recommencer le jeu ?', [
+	// 	{
+	// 		text: 'Oui',
+	// 		callback: Game.restart
+	// 	},{
+	// 		text: 'Non'
+	// 	}, '300px', '200px'
+	// ]);
 };
 
 window.onload = Game.init();
