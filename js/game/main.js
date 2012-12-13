@@ -56,7 +56,7 @@ Game.mainLoop = setInterval(function() {
 	var gems = get('.gem'), addClick = true;
 	for (var i = 0; i < gems.length; i++) {
 		if (gems[i].timer != undefined) {	// If at least one gem is being animated
-		    addClick = false;	// We prevent the player from clicking on the gems
+			addClick = false;	// We prevent the player from clicking on the gems
 		}
 	};
 	// If all the animations are over
@@ -102,7 +102,7 @@ Game.onGemClick = function(e) {
 Game.selectGem = function(gem) {
 	Game.deselectGem();
 	if (Game.gem == null || gem.id !== Game.gem.id) {
-		gem.style.border = 'solid 3px #000';
+		gem.style.backgroundImage += ', url("./images/sprites/gemSelected.gif")';
 		Game.gem = gem;
 	}
 };
@@ -112,7 +112,7 @@ Game.selectGem = function(gem) {
  */
 Game.deselectGem = function() {
 	if (Game.gem != null) {
-		Game.gem.style.border = '';
+		Game.gem.style.backgroundImage = 'url("./images/sprites/' + Game.gem.value() + '.png")';
 		Game.gem = null;   
 	}
 };
@@ -188,7 +188,7 @@ Game.checkStreak = function(gem) {
 Game.removeStreak = function(gemsToRemove) {
 	var song = 'misc1.wav';
 	if (Game.combo != undefined && Game.combo > 1) {
-	    song = 'spring.wav';
+		song = 'spring.wav';
 	}
 	// We play a sound for the gem destruction
 	var sound = document.createElement('audio');
@@ -257,7 +257,7 @@ Game.onStreakRemoved = function(streak) {		// We continue after the streak disap
 			}
 		};
 		if (firstYToFall >= 7) {	// If there is no "hole" in the grid
-		    firstYToFall = -1;		// It means there is a hole from the top, the first gem to fall is on top the grid
+			firstYToFall = -1;		// It means there is a hole from the top, the first gem to fall is on top the grid
 		}
 		Game.generateGems(column);	// We generate the new gems
 		get('#tile' + firstYToFall + '_' + column).fallStreak();	// We make the first gem fall (the others will follow)
@@ -294,8 +294,8 @@ Game.updateScore = function(destroyedGems) {
 		gain = destroyedGems * perGem,
 		gaugeSize = 0,
 		gainSpan = document.createElement('span'),
-		yOrigin = 120,
-		yShift = 4;
+		yOrigin = 160,
+		yShift = 5;
 	
 	// For a streak bigger than 3, the player gets a bonus	
 	if (destroyedGems > 3) {
@@ -306,21 +306,34 @@ Game.updateScore = function(destroyedGems) {
 
 	Game.score.current += gain;
 	Game.score.total += gain;
+	
+	// If there is already a gain displayed, we sum the gains
+	var existingGain = get('.score_gain');
+	if (existingGain != null) {
+		if (existingGain.length == undefined) {
+			existingGain = [existingGain];
+		}
+		for (var i = 0; i < existingGain.length; i++) {
+			gain += parseInt(existingGain[i].innerHTML.substr(1));
+			get('#player_info').removeChild(existingGain[i]);
+		};
+	}
 
 	// We update the UI
-	gainSpan.innerHTML = '<strong>+' + gain + '</strong>';
-	gainSpan.style.position = 'absolute';
+	gainSpan.className  ='score_gain';
+	gainSpan.innerHTML = '+' + gain;
 	gainSpan.style.top = yOrigin + 'px';
-	gainSpan.style.left = '90px';
 	get('#player_info').insertBefore(gainSpan, get('#total_score'));
 
 	// The gain animation
 	var gainMove = setInterval(function() {
 		var y = parseInt(gainSpan.style.top.substring(0, gainSpan.style.top.indexOf('px')));
-		if (y >= yOrigin + 20) {
-		    clearInterval(gainMove);
-		    get('#player_info').removeChild(gainSpan);
-		    return;
+		if (y >= yOrigin + 35) {
+			clearInterval(gainMove);
+			if (gainSpan.parentNode) {
+				get('#player_info').removeChild(gainSpan);
+			}
+			return;
 		}
 		gainSpan.style.top = (y+yShift) + 'px';
 	}, 60);

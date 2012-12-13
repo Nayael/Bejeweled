@@ -9,7 +9,7 @@ body{
 	padding: 0;
 	height: 100%;
 	background-color: #FFFFFF;
-	font-family: 'Segoe UI', 'Arial', 'Helvetica', 'Trebuchet MS', sans-serif;
+	font-family: 'Electrolize', 'Segoe UI', Helvetica, Arial, 'Trebuchet MS', sans-serif;
 	font-size: 14px;
 	text-align: justify;
 }
@@ -19,7 +19,7 @@ body{
 	width: 1000px;
 	min-height: 100%;
 	margin: auto;
-	background-color: #EEF;
+	background-color: #222244;
 	box-shadow: 0px -1px 10px #AAAAAA;
 	-o-box-shadow: 0px -1px 10px #AAAAAA;
 	-moz-box-shadow: 0px -1px 10px #AAAAAA;
@@ -35,7 +35,7 @@ header{
 	padding-bottom: 30px;
 	position: relative;
 	z-index: 30;
-	background-color: #EEF;
+	background-color: #222244;
 }
 
 nav{
@@ -66,15 +66,21 @@ footer{
 	height: 520px;
 	margin: auto;
 	margin-bottom: 50px;
-	background: #CCC;
+	background-color: #CCC;
+}
+
+#grid{
+	position: relative;
+	width: 520px;
+	height: 520px;
+	background-color: #222;
 }
 
 #player_info{
 	position: relative;
 	float: right;
 	top: 60px;
-	width: 200px;
-	background-color: #FFF;
+	width: 230px;
 	text-align: center;
 }
 
@@ -82,9 +88,10 @@ footer{
 	font-size: 18px;
 }
 
-#game_level{
-	margin-top: -10px;
+#level{
+	margin-bottom: 60px;
 	font-weight: bold;
+	font-size: 20px;
 }
 
 #player_score{
@@ -93,9 +100,23 @@ footer{
 	font-weight: bold;
 }
 
+#total_score{
+	padding: 20px 0 20px 0;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.score_gain{
+	position: absolute;
+	left: 102px;
+	font-size: 15px;
+	color: #22AA22;
+}
+
 #score_gauge{
 	position: relative;
 	float: left;
+	left: 30px;
 	width: 15px;
 	height: 400px;
 	background-color: #666;
@@ -107,14 +128,7 @@ footer{
 	left: 2.5px;
 	width: 11px;
 	height: 0%;
-	background-color: #000;
-}
-
-#grid{
-	width: 520px;
-	height: 520px;
-	border: 1px solid #000;
-	position: relative;
+	background-color: #00F000;
 }
 
 .gem{
@@ -126,9 +140,37 @@ footer{
 	background-repeat: no-repeat;
 }
 
-/*.gem_appear{
-	-webkit-transition: display .1s;
-	-moz-transition: display .1s;
-	-o-transition: display .1s;
-	transition: display .1s;
-}*/
+#restart_bt{
+	position: absolute;
+	bottom: 0;
+	left: 75px;
+	font-family: 'Electrolize', 'Segoe UI', Helvetica, Arial, 'Trebuchet MS', sans-serif;
+}
+
+button{
+	cursor:pointer;
+	height: 30px;
+	margin: 15px -5px 15px 0px;
+	padding-left: 0 9px 0 9px;
+	background-color: #F3F3F3;
+	border: solid 1px #DCDCDC;
+    border-radius: 2px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+	font-size: 10pt;
+	color: #6E6E6E;
+}
+
+button:hover{
+	border-color: #999;
+	-o-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+	-moz-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+	-webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+	color: #333;
+}
+
+button:active{
+	border-color: #444;
+	color: #000;
+}
