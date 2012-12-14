@@ -54,17 +54,33 @@ Game.createGrid = function() {
  */
 Game.mainLoop = setInterval(function() {
 	var gems = get('.gem'), addClick = true;
+
 	for (var i = 0; i < gems.length; i++) {
 		if (gems[i].timer != undefined) {	// If at least one gem is being animated
 			addClick = false;	// We prevent the player from clicking on the gems
+			break;
 		}
 	};
+
 	// If all the animations are over
 	if (addClick) {
+		addClick = false;	// We prevent the player from clicking on the gems
 		for (var i = 0; i < gems.length; i++) {
 			gems[i].removeEventListener('click', Game.onGemClick, false);	// We remove all the previous listeners, just in case
 			gems[i].addEventListener('click', Game.onGemClick, false);
 		};
+
+		// We activate the bombs' click
+		if (get('.bomb') != undefined) {
+			var bombs = get('.bomb');
+			if (bombs.length == undefined) {
+				bombs = [bombs];
+			}
+			
+			for (var i = 0; i < bombs.length; i++) {
+				bombs[i].active = true;
+			};
+		}
 
 		if (Game.combo != undefined) {
 			delete Game.combo;
@@ -187,8 +203,13 @@ Game.checkStreak = function(gem) {
  */
 Game.removeStreak = function(gemsToRemove) {
 	var song = 'misc1.wav';
+
+	// If there is more than 1 combo streak
 	if (Game.combo != undefined && Game.combo > 1) {
 		song = 'spring.wav';
+		if (Game.combo == 2) {	// The player earns a bonus
+			Game.winBomb();
+		}
 	}
 	// We play a sound for the gem destruction
 	var sound = document.createElement('audio');
@@ -379,6 +400,9 @@ Game.nextLevel = function() {
 	Game.createGrid();
 };
 
+/**
+ * Displays a coinfirm popup to restart the game
+ */
 Game.confirmRestart = function() {
 	if (confirm('Êtes-vous sûr(e) de vouloir recommencer ?')){
 		Game.restart();
@@ -391,6 +415,42 @@ Game.confirmRestart = function() {
 	// 		text: 'Non'
 	// 	}, '300px', '200px'
 	// ]);
+};
+
+/**
+ * Adds a bonus item : the bomb
+ */
+Game.winBomb = function() {
+	/**
+	 * Makes the bomb explode
+	 */
+	var explode = function(event) {
+		if (!bomb.active)
+			return;
+
+		var gemsToRemove = [];
+		for (var i = (x > 0 ? x - 1 : x); i <= (x < 7 ? x + 1 : x); i++) {
+			gemsToRemove[i] = [];
+			for (var j = (y > 0 ? y - 1 : y); j <= (y < 7 ? y + 1 : y); j++) {
+				if (i == x && j == y)
+					continue;
+				gemsToRemove[i].push(get('#tile' + j + '_' + i));
+			};
+		};
+		get('#grid').removeChild(bomb);
+		Game.removeStreak(gemsToRemove);
+	};
+
+	// We randomly position a bomb
+	var bomb = new Game.Bomb(explode), x, y;
+	do {
+		x = parseInt(Math.random() * Game.GRID_SIZE);
+		y = parseInt(Math.random() * Game.GRID_SIZE);
+	}while (get('#tile' + y + '_' + x) == null);
+	bomb.style.left = ((60 * x) + (5 * (x + 1))) + 'px';
+	bomb.style.top = ((60 * y) + (5 * (y + 1))) + 'px';
+	get('#grid').removeChild(get('#tile' + y + '_' + x));
+	get('#grid').appendChild(bomb);
 };
 
 window.onload = Game.init();

@@ -24,8 +24,6 @@ function Gem(x, y, value) {
 	return gem;
 };
 
-Gem.TILE_HEIGHT = 65;
-
 function addGemMethods(gem) {
 	/**
 	 * Returns (and sets, if a value is passed as an argument) the gem's "left" CSS property in px
@@ -311,7 +309,7 @@ function addGemMethods(gem) {
 		var top = gem.top(),
 			height = parseInt(top.substring(0, top.length - 2));
 		
-		height += Gem.TILE_HEIGHT;
+		height += Game.GEM_HEIGHT;
 		gem.falling = true;
 		gem.y(parseInt(gem.y() + 1));	// We set the new Y position after the fall
 		gem.animate('top', top, height + 'px', 8);

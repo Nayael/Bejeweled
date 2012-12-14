@@ -8,7 +8,7 @@ body{
 	margin: 0;
 	padding: 0;
 	height: 100%;
-	background-color: #FFFFFF;
+	background-color: #111111;
 	font-family: 'Electrolize', 'Segoe UI', Helvetica, Arial, 'Trebuchet MS', sans-serif;
 	font-size: 14px;
 	text-align: justify;
@@ -20,10 +20,15 @@ body{
 	min-height: 100%;
 	margin: auto;
 	background-color: #222244;
-	box-shadow: 0px -1px 10px #AAAAAA;
-	-o-box-shadow: 0px -1px 10px #AAAAAA;
-	-moz-box-shadow: 0px -1px 10px #AAAAAA;
-	-webkit-box-shadow: 0px -1px 10px #AAAAAA;
+	color: #FFFFFF;
+	box-shadow: 0px -1px 10px #444444;
+	-o-box-shadow: 0px -1px 10px #444444;
+	-moz-box-shadow: 0px -1px 10px #444444;
+	-webkit-box-shadow: 0px -1px 10px #444444;
+}
+
+#site_content{
+	padding: 15px;
 }
 
 a {
@@ -53,7 +58,7 @@ nav a.current_menu{
 }
 
 footer{
-	padding: 5px;
+	padding: 15px;
 }
 
 
@@ -65,8 +70,7 @@ footer{
 	width: 750px;
 	height: 520px;
 	margin: auto;
-	margin-bottom: 50px;
-	background-color: #CCC;
+	background-color: #333355;
 }
 
 #grid{
@@ -125,19 +129,23 @@ footer{
 #current_gauge{
 	position: absolute;
 	bottom: 0px;
-	left: 2.5px;
+	left: 2px;
 	width: 11px;
 	height: 0%;
 	background-color: #00F000;
 }
 
-.gem{
+.gem, .bomb{
 	position: absolute;
 	width: 60px;
 	height: 60px;
-	cursor: default;
-	background-position: top center;
+	background-position: center center;
 	background-repeat: no-repeat;
+}
+
+.bomb{
+	background-image: url('../images/sprites/bomb.png');
+	background-color: #FFFFFF;
 }
 
 #restart_bt{
