@@ -1,54 +1,3 @@
-var Game = {};	// The game instance
-
-Game.GRID_SIZE = 8;
-Game.GEM_HEIGHT = 65;
-
-/**
- * Initializes the game
- */
-Game.init = function () {
-	Game.GEM_RANGE = 7;
-	Game.level = 1;
-	Game.gem = null;
-	Game.score = {
-		goal: 15000,
-		total: 0,
-		current: 0
-	};
-
-	get('#level').innerHTML = Game.level;
-	get('#total_score').innerHTML = Game.score.total;
-	get('#restart_bt').onclick = Game.confirmRestart;
-	Game.createGrid();
-};
-
-/**
- * Created the game's grid
- */
-Game.createGrid = function() {
-	var grid = get('#grid'), map = [], row, vGems = [], hGems = [];
-
-	for (var i = 0, j = 0; i < Game.GRID_SIZE; i++) {
-		row = [];
-		map.push(row);	// We create a row in the map
-
-		for (j = 0; j < Game.GRID_SIZE; j++) {
-			do {
-				gem = new Gem(j, i, parseInt(Math.random() * Game.GEM_RANGE));
-				if (i > 0)
-					vGems = gem.parseNeighbours(true, -1);
-				if (j > 0)
-					hGems = gem.parseNeighbours(false, -1);
-			}while (vGems.length >= 2 || hGems.length >= 2);
-
-			gem.addEventListener('click', Game.onGemClick, false);	// We add the mouse event listener
-			gem.pop(grid);
-			vGems = [];
-			hGems = [];
-		};
-	};
-};
-
 /**
  * The game main loop
  */
@@ -92,7 +41,7 @@ Game.mainLoop = setInterval(function() {
 			return;
 		}
 	}
-}, 60);
+}, 50);
 
 /**
  * Triggers when an gem is clicked (select it or proceed to the swap)
@@ -202,19 +151,17 @@ Game.checkStreak = function(gem) {
  * @param {Array} gemsToRemove	An array containing the gems that are in a streak
  */
 Game.removeStreak = function(gemsToRemove) {
-	var song = 'misc1.wav';
+	var file = 'misc1.wav';
 
 	// If there is more than 1 combo streak
 	if (Game.combo != undefined && Game.combo > 1) {
-		song = 'spring.wav';
-		if (Game.combo == 2) {	// The player earns a bonus
+		file = 'spring.wav';
+		if (Game.combo == 2 && Game.bonus.bomb == undefined) {	// The player earns a bonus
 			Game.winBomb();
 		}
 	}
 	// We play a sound for the gem destruction
-	var sound = document.createElement('audio');
-	sound.setAttribute('src', './audio/'+song);
-	sound.play();
+	Game.playSound(file);
 
 	var totalGems = 0, nbGems = 0, fallAfter = false;
 
@@ -365,15 +312,15 @@ Game.updateScore = function(destroyedGems) {
 	}
 	get('#total_score').innerHTML = Game.score.total;
 	get('#current_gauge').style.height = gaugeSize + '%';
-}
+};
 
 /**
- * Removes all the gems from the grid
+ * Removes all the items from the grid
  */
 Game.emptyGrid = function() {
-	var gems = get('.gem'), grid = get('#grid');
-	for (var i = 0; i < gems.length; i++) {
-		grid.removeChild(gems[i]);
+	var items = get('.item'), grid = get('#grid');
+	for (var i = 0; i < items.length; i++) {
+		grid.removeChild(items[i]);
 	};
 }
 
@@ -383,21 +330,6 @@ Game.emptyGrid = function() {
 Game.restart = function() {
 	Game.emptyGrid();
 	Game.init();
-};
-
-/**
- * Goes to the next level
- */
-Game.nextLevel = function() {
-	alert('Niveau ' + Game.level + ' terminé !');
-	Game.level++;
-	Game.score.current = 0;
-	Game.score.goal *= 1.5;
-
-	get('#current_gauge').style.height = '0%';
-	get('#level').innerHTML = Game.level;
-	Game.emptyGrid();
-	Game.createGrid();
 };
 
 /**
@@ -418,39 +350,18 @@ Game.confirmRestart = function() {
 };
 
 /**
- * Adds a bonus item : the bomb
+ * Goes to the next level
  */
-Game.winBomb = function() {
-	/**
-	 * Makes the bomb explode
-	 */
-	var explode = function(event) {
-		if (!bomb.active)
-			return;
+Game.nextLevel = function() {
+	alert('Niveau ' + Game.level + ' terminé !');
+	Game.level++;
+	Game.score.current = 0;
+	Game.score.goal *= 1.5;
 
-		var gemsToRemove = [];
-		for (var i = (x > 0 ? x - 1 : x); i <= (x < 7 ? x + 1 : x); i++) {
-			gemsToRemove[i] = [];
-			for (var j = (y > 0 ? y - 1 : y); j <= (y < 7 ? y + 1 : y); j++) {
-				if (i == x && j == y)
-					continue;
-				gemsToRemove[i].push(get('#tile' + j + '_' + i));
-			};
-		};
-		get('#grid').removeChild(bomb);
-		Game.removeStreak(gemsToRemove);
-	};
-
-	// We randomly position a bomb
-	var bomb = new Game.Bomb(explode), x, y;
-	do {
-		x = parseInt(Math.random() * Game.GRID_SIZE);
-		y = parseInt(Math.random() * Game.GRID_SIZE);
-	}while (get('#tile' + y + '_' + x) == null);
-	bomb.style.left = ((60 * x) + (5 * (x + 1))) + 'px';
-	bomb.style.top = ((60 * y) + (5 * (y + 1))) + 'px';
-	get('#grid').removeChild(get('#tile' + y + '_' + x));
-	get('#grid').appendChild(bomb);
+	get('#current_gauge').style.height = '0%';
+	get('#level').innerHTML = Game.level;
+	Game.emptyGrid();
+	Game.createGrid();
 };
 
 window.onload = Game.init();

@@ -9,9 +9,10 @@ function Gem(x, y, value) {
 		top = ((60 * y) + (5 * (y + 1))) + 'px',
 		gem = document.createElement('span');
 
-	gem.className = 'gem';
+	gem.className = 'gem item';
 	gem.val = value;
 	gem.id = 'tile' + y + '_' + x;
+	gem.innerHTML = y+'_'+x;
 	
 	gem.style.top = top;
 	gem.style.left = left;
@@ -20,66 +21,12 @@ function Gem(x, y, value) {
 	gem.falling = false;	// Is the element falling ?
 	gem.inStreak = false;
 
-	addGemMethods(gem);	// We add useful functions relative to gem objects
+	addItemCapabilities(gem);	// We add useful functions relative to gem objects
+	addGemCapabilities(gem);	// We add useful functions relative to gem objects
 	return gem;
 };
 
-function addGemMethods(gem) {
-	/**
-	 * Returns (and sets, if a value is passed as an argument) the gem's "left" CSS property in px
-	 */
-	gem.left = function(value) {
-		if (value != undefined) {
-			if (typeof(value) == 'number' && parseInt(value) == value)	// If value is an integer
-				gem.style.left = value + 'px';
-			else if (typeof(value) == 'string')	// If value is a string
-				gem.style.left = value;
-			return value;
-		}
-			
-		return gem.style.left;
-	};
-
-
-	/**
-	 * Returns (and sets, if a value is passed as an argument) the gem's "top" CSS property in px
-	 */
-	gem.top = function(value) {
-		if (value != undefined) {
-			if (typeof(value) == 'number' && parseInt(value) == value)	// If value is an integer
-				gem.style.top = value + 'px';
-			else if (typeof(value) == 'string')	// If value is a string
-				gem.style.top = value;
-			return value;
-		}
-
-		return gem.style.top;
-	};
-
-	/**
-	 * Returns (and sets, if a value is passed as an argument) the gem's x position on the map
-	 */
-	gem.x = function(value) {
-		if (value != undefined)	{
-			gem.id = (gem.id != '') ? (gem.id.substr(0, gem.id.length - 1) + value) : 'tile0_' + value;
-		}
-		if (gem.id != '')
-			return parseInt(gem.id.substr(gem.id.length - 1));
-		return null;
-	};
-
-	/**
-	 * Returns (and sets, if a value is passed as an argument) the gem's y position on the map
-	 */
-	gem.y = function(value) {
-		if (value != undefined) {
-			gem.id = (gem.id != '') ? (gem.id.substring(0, 4) + value + gem.id.substr(gem.id.indexOf('_'))) : 'tile' + value + '_0';
-		}
-		if (gem.id != '')
-			return parseInt(gem.id.substring(4, gem.id.indexOf('_')));
-		return null;
-	};
-
+function addGemCapabilities(gem) {
 	/**
 	 * Returns (and sets, if a value is passed as an argument) the gem's y tile value
 	 */
@@ -105,7 +52,7 @@ function addGemMethods(gem) {
 	 * Compares a gem's value with this gem's value
 	 */
 	gem.equals = function(neighbour) {
-		if (neighbour != null && neighbour.value() == gem.value() && neighbour != gem && !neighbour.falling)	{
+		if (neighbour != null && neighbour.value && neighbour.value() == gem.value() && neighbour != gem && !neighbour.falling)	{
 			return true;
 		}
 		return false;
@@ -136,6 +83,7 @@ function addGemMethods(gem) {
 		
 		// If we have a row of three identical gems
 		if (row.length > 1) {
+			console.log('row: ', row);
 			for (var i = 0; i < row.length; i++) {
 				streak[row[i].x()] = [];
 				if (streak[row[i].x()].indexOf(row[i]) == -1) {
@@ -147,6 +95,7 @@ function addGemMethods(gem) {
 
 		// If we have a column of three identical gems
 		if (column.length > 1) {
+			console.log('column: ', column);
 			for (var i = 0; i < column.length; i++) {
 				if (streak[column[i].x()] == undefined) {
 					streak[column[i].x()] = [];
@@ -182,13 +131,8 @@ function addGemMethods(gem) {
 			currentGem;
 
 		// We run through the gems in one direction. The step indicates if we go one way or another on the X or Y axis (the axis is defined by the 'vertical' parameter)
-		for (i = ((vertical ? y : x) + step); (step == -1) ? (i > -1) : (i < 8); i += step) {
-			if (vertical) {
-				currentGem = get('#tile' + i + '_' + x);	// The current parsed gem
-			}else {
-				currentGem = get('#tile' + y + '_' + i);	// The current parsed gem
-			}
-
+		for (i = ((vertical ? y : x) + step); (step == -1) ? (i > -1) : (i < Game.GRID_SIZE); i += step) {
+			currentGem = vertical ? get('#tile' + i + '_' + x) : get('#tile' + y + '_' + i);	// The current parsed gem
 			// If the current gem is equal to the source gem, we add it to the streak
 			if (streak.indexOf(currentGem) == -1 && gem.equals(currentGem) && currentGem.inStreak == false) {
 				streak = streak.concat(currentGem);
@@ -241,92 +185,6 @@ function addGemMethods(gem) {
 			row = row.concat(gem.parseNeighbours(false, 1));
 		}
 		return row;
-	};
-
-	/**
-	 * Animates an element's CSS property from start value to end value (only values in pixels)
-	 */
-	gem.animate = function(property, start, end, speed, check) {
-		if (start == end)
-			return;
-		
-		this.style[property] = start;
-		start = parseInt(start.substr(0, start.length - 2));
-		end = parseInt(end.substr(0, end.length - 2));
-
-		var doAnimation = function(start) {
-			for (var i = 0; i < speed; i++) {
-				// If the property has reached the end value
-				if ((direction == 1 && start >= end) || (direction == -1 && start <= end)) {
-					clearInterval(gem.timer);	// We stop the animation timer
-					delete gem.timer;
-
-					if (check === true && !gem.falling) {
-						Game.checkStreak(gem);
-					}
-					if (gem.falling) {
-						gem.onFallComplete();
-					}
-					return;
-				}
-				start += direction;
-				gem.style[property] = start + 'px';
-			};
-			return start;
-		};
-
-		var delta = end - start,
-			direction = (delta > 0) ? 1 : -1;
-
-		// We start the gem's timer
-		gem.timer = setInterval(function() {
-			start = doAnimation(start);
-		}, 30);
-	};
-
-	/**
-	 * Makes the gem fall vertically
-	 */
-	gem.fallStreak = function () {
-		var x = gem.x(),
-			y = gem.y(),
-			currentGem = null;
-
-		// We make all the gems on the column fall by 1 slot
-		gem.fall();
-		for (var i = y; i >= -(Game.GRID_SIZE - 1); i--) {
-			currentGem = get('#tile' + i + '_' + x);
-			if (currentGem != null) {
-				currentGem.fall();
-			}
-		};
-	};
-
-	/**
-	 * Makes the gem fall by one slot
-	 */
-	gem.fall = function () {
-		var top = gem.top(),
-			height = parseInt(top.substring(0, top.length - 2));
-		
-		height += Game.GEM_HEIGHT;
-		gem.falling = true;
-		gem.y(parseInt(gem.y() + 1));	// We set the new Y position after the fall
-		gem.animate('top', top, height + 'px', 8);
-	};
-
-	/**
-	 * Trggiers everytime the gem's fall is finished
-	 */
-	gem.onFallComplete = function() {
-		var gems = get('.gem');
-		gem.falling = false;
-
-		if (get('#tile' + (gem.y() + 1) + '_' + gem.x()) == null && (gem.y() + 1) != 8) {	// If there is still an empty slot below the gem
-			gem.fall();		// We make it fall again
-		}else {				// Otherwise, the fall is over
-			Game.checkStreak(gem);	// We look for a streak
-		}
 	};
 
 	/**
