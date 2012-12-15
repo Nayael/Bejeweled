@@ -8,6 +8,7 @@ Game.GEM_HEIGHT = 65;
 Game.init = function () {
 	Game.gemRange = 7;	// The number of different gems on the grid
 	Game.level = 1;
+	Game.time = 0;
 	Game.gem = null;	// The currently selected gem
 	Game.hint = null;	// A hint for the player : an array containing gems that can be moved to make a streak
 	Game.score = {
@@ -21,7 +22,7 @@ Game.init = function () {
 	get('#level').innerHTML = Game.level;
 	get('#total_score').innerHTML = Game.score.total;
 	get('#restart_bt').onclick = Game.confirmRestart;
-	
+
 	Game.createGrid();
 };
 
@@ -50,4 +51,7 @@ Game.createGrid = function() {
 			hGems = [];
 		};
 	};
+	
+	// We check if there is at least one possible move
+	Game.checkGameOver();
 };

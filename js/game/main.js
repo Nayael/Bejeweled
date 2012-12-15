@@ -365,12 +365,22 @@ Game.nextLevel = function() {
 };
 
 /**
- * Checks if the player still has a possibility to make a streak
- * @return {boolean} True if the game is over, false otherwise
+ * Checks if the game is over (no possibility to make a streak)
  */
-Game.isOver = function() {
-	return (Game.checkHint() == null);
+Game.checkGameOver = function() {
+	if (Game.checkHint() == null) {
+		Game.gameOver();
+	}
 };
+
+/**
+ * When the game is over : displays a popup to make the player restart
+ */
+Game.gameOver = function() {
+	if (confirm('Il n\'y a plus de mouvements possibles.\nVoulez-vous recommencer ?')){
+		Game.restart();
+	}
+}
 
 /**
  * Checks if the player still has a possibility to make a streak
@@ -383,12 +393,10 @@ Game.checkHint = function() {
 	for (var i = 0; i < gems.length; i++) {
 		// If there is at least one gem can be moved to make a streak
 		if ((hint = gems[i].getPossibleMove()) != null) {
-			console.log('hint: ', hint);
-			console.log('hint[0], hint[1]: ', hint[0], hint[1]);
 			break;
 		}
 	};
-	Game.hint = hint;
+	Game.hint = hint;	// We keep the hint for the player
 	return hint;
 };
 

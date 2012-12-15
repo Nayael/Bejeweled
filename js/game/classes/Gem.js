@@ -235,18 +235,19 @@ Game.addGemCapabilities = function(gem) {
 			pair = gem.y() < column[0].y() ? [gem, column[0]] : [column[0], gem];
 			x = gem.x();
 
-			// If a move is possible with this streak
+			// If a move is possible with this column
 			if (pair[0].y() > 0 && gem.equals((equalGem = get('#tile' + (pair[0].y() - 1) + '_' + (x - 1))))	// Checking on top left
 			||	pair[0].y() > 0 && gem.equals((equalGem = get('#tile' + (pair[0].y() - 1) + '_' + (x + 1))))	// Checking on top right
-			||	pair[0].y() > 1 && gem.equals((equalGem = get('#tile' + (pair[0].y() - 2) + '_' + (x))))		// Checking on top, two gems ahead
+			||	pair[0].y() > 1 && gem.equals((equalGem = get('#tile' + (pair[0].y() - 2) + '_' + (x))))		// Checking on top, two gems further
 			||	pair[1].y() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (pair[1].y() + 1) + '_' + (x - 1))))	// Checking on bottom left
 			||	pair[1].y() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (pair[1].y() + 1) + '_' + (x - 1))))	// Checking on bottom right
-			||	pair[1].y() < (Game.GRID_SIZE - 2) && gem.equals((equalGem = get('#tile' + (pair[1].y() + 2) + '_' + (x))))		// Checking on bottom, two gems down
+			||	pair[1].y() < (Game.GRID_SIZE - 2) && gem.equals((equalGem = get('#tile' + (pair[1].y() + 2) + '_' + (x))))		// Checking on bottom, two gems further
 			) {
 				gemsToSwap = [equalGem];
+				// If the detected gem is below the column, the gem to swap it with will be below too
 				if (equalGem.y() > pair[1].y()) {
 					gemsToSwap.push(get('#tile' + (pair[1].y() + 1) + '_' + x));
-				}else {
+				}else {	// Otherwise, the gem to swap it with will be on top too
 					gemsToSwap.push(get('#tile' + (pair[0].y() - 1) + '_' + x));
 				}
 				return gemsToSwap;
@@ -255,13 +256,13 @@ Game.addGemCapabilities = function(gem) {
 			pair = gem.x() < row[0].x() ? [gem, row[0]] : [row[0], gem];
 			y = gem.y();
 
-			// If a move is possible with this streak
-			if (pair[0].x() > 0 && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[0].x() - 1))))	// Checking on top left
-			||	pair[0].x() > 0 && gem.equals((equalGem = get('#tile' + (y + 1) + '_' + (pair[0].x() - 1))))	// Checking on top right
-			||	pair[0].x() > 1 && gem.equals((equalGem = get('#tile' + (y) + '_' + (pair[0].x() - 2))))		// Checking on top, two gems ahead
-			||	pair[1].x() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[1].x() + 1))))	// Checking on bottom left
-			||	pair[1].x() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[1].x() + 1))))	// Checking on bottom right
-			||	pair[1].x() < (Game.GRID_SIZE - 2) && gem.equals((equalGem = get('#tile' + (y) + '_' + (pair[1].x() + 2))))		// Checking on bottom, two gems down
+			// If a move is possible with this row
+			if (pair[0].x() > 0 && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[0].x() - 1))))	// Checking on left top
+			||	pair[0].x() > 0 && gem.equals((equalGem = get('#tile' + (y + 1) + '_' + (pair[0].x() - 1))))	// Checking on left bottom
+			||	pair[0].x() > 1 && gem.equals((equalGem = get('#tile' + (y) + '_' + (pair[0].x() - 2))))		// Checking on left, two gems further
+			||	pair[1].x() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[1].x() + 1))))	// Checking on right top
+			||	pair[1].x() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[1].x() + 1))))	// Checking on right bottom
+			||	pair[1].x() < (Game.GRID_SIZE - 2) && gem.equals((equalGem = get('#tile' + (y) + '_' + (pair[1].x() + 2))))		// Checking on right, two gems further
 			) {
 				gemsToSwap = [equalGem];
 				if (equalGem.x() > pair[1].x()) {
