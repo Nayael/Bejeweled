@@ -35,7 +35,7 @@ function addItemCapabilities(item) {
 	item.x = function(value) {
 		if (value != undefined)	{
 			item.id = (item.id != '') ? (item.id.substr(0, item.id.length - 1) + value) : 'tile0_' + value;
-			item.innerHTML = item.y()+'_'+item.x();
+			// item.innerHTML = item.y()+'_'+item.x();
 		}
 		if (item.id != '')
 			return parseInt(item.id.substr(item.id.length - 1));
@@ -48,7 +48,7 @@ function addItemCapabilities(item) {
 	item.y = function(value) {
 		if (value != undefined) {
 			item.id = (item.id != '') ? (item.id.substring(0, 4) + value + item.id.substr(item.id.indexOf('_'))) : 'tile' + value + '_0';
-			item.innerHTML = item.y()+'_'+item.x();
+			// item.innerHTML = item.y()+'_'+item.x();
 		}
 		if (item.id != '')
 			return parseInt(item.id.substring(4, item.id.indexOf('_')));

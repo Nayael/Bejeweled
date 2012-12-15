@@ -12,7 +12,7 @@ Game.Gem = function(x, y, value) {
 	gem.className = 'gem item';
 	gem.val = value;
 	gem.id = 'tile' + y + '_' + x;
-	gem.innerHTML = y+'_'+x;
+	// gem.innerHTML = y+'_'+x;
 	
 	gem.style.top = top;
 	gem.style.left = left;
@@ -231,7 +231,27 @@ Game.addGemCapabilities = function(gem) {
 			gemsToSwap = [];
 
 		// The gem has to have one equal neighbour
-		if (column && column.length == 1) {
+		if (row && row.length == 1) {
+			pair = gem.x() < row[0].x() ? [gem, row[0]] : [row[0], gem];
+			y = gem.y();
+
+			// If a move is possible with this row
+			if (pair[0].x() > 0 && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[0].x() - 1))))	// Checking on left top
+			||	pair[0].x() > 0 && gem.equals((equalGem = get('#tile' + (y + 1) + '_' + (pair[0].x() - 1))))	// Checking on left bottom
+			||	pair[0].x() > 1 && gem.equals((equalGem = get('#tile' + (y) + '_' + (pair[0].x() - 2))))		// Checking on left, two gems further
+			||	pair[1].x() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[1].x() + 1))))	// Checking on right top
+			||	pair[1].x() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[1].x() + 1))))	// Checking on right bottom
+			||	pair[1].x() < (Game.GRID_SIZE - 2) && gem.equals((equalGem = get('#tile' + (y) + '_' + (pair[1].x() + 2))))		// Checking on right, two gems further
+			) {
+				gemsToSwap = [equalGem];
+				if (equalGem.x() > pair[1].x()) {
+					gemsToSwap.push(get('#tile' + y + '_' + (pair[1].x() + 1)));
+				}else {
+					gemsToSwap.push(get('#tile' + y + '_' + (pair[0].x() - 1)));
+				}
+				return gemsToSwap;
+			}
+		}else if (column && column.length == 1) {
 			pair = gem.y() < column[0].y() ? [gem, column[0]] : [column[0], gem];
 			x = gem.x();
 
@@ -249,26 +269,6 @@ Game.addGemCapabilities = function(gem) {
 					gemsToSwap.push(get('#tile' + (pair[1].y() + 1) + '_' + x));
 				}else {	// Otherwise, the gem to swap it with will be on top too
 					gemsToSwap.push(get('#tile' + (pair[0].y() - 1) + '_' + x));
-				}
-				return gemsToSwap;
-			}
-		}else if (row && row.length == 1) {
-			pair = gem.x() < row[0].x() ? [gem, row[0]] : [row[0], gem];
-			y = gem.y();
-
-			// If a move is possible with this row
-			if (pair[0].x() > 0 && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[0].x() - 1))))	// Checking on left top
-			||	pair[0].x() > 0 && gem.equals((equalGem = get('#tile' + (y + 1) + '_' + (pair[0].x() - 1))))	// Checking on left bottom
-			||	pair[0].x() > 1 && gem.equals((equalGem = get('#tile' + (y) + '_' + (pair[0].x() - 2))))		// Checking on left, two gems further
-			||	pair[1].x() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[1].x() + 1))))	// Checking on right top
-			||	pair[1].x() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[1].x() + 1))))	// Checking on right bottom
-			||	pair[1].x() < (Game.GRID_SIZE - 2) && gem.equals((equalGem = get('#tile' + (y) + '_' + (pair[1].x() + 2))))		// Checking on right, two gems further
-			) {
-				gemsToSwap = [equalGem];
-				if (equalGem.x() > pair[1].x()) {
-					gemsToSwap.push(get('#tile' + y + '_' + (pair[1].x() + 1)));
-				}else {
-					gemsToSwap.push(get('#tile' + y + '_' + (pair[0].x() - 1)));
 				}
 				return gemsToSwap;
 			}

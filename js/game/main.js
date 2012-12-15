@@ -2,18 +2,17 @@
  * The game main loop
  */
 Game.mainLoop = setInterval(function() {
-	var gems = get('.gem'), addClick = true;
-
+	var gems = get('.gem');
 	for (var i = 0; i < gems.length; i++) {
 		if (gems[i].timer != undefined) {	// If at least one gem is being animated
-			addClick = false;	// We prevent the player from clicking on the gems
-			break;
+			Game.moving = true;	// The gems are moving, we prevent the player from clicking on the gems
+			return;
 		}
 	};
 
 	// If all the animations are over
-	if (addClick) {
-		addClick = false;	// We prevent the player from clicking on the gems
+	if (Game.moving) {
+		Game.moving = false;
 		for (var i = 0; i < gems.length; i++) {
 			gems[i].removeEventListener('click', Game.onGemClick, false);	// We remove all the previous listeners, just in case
 			gems[i].addEventListener('click', Game.onGemClick, false);
@@ -40,6 +39,9 @@ Game.mainLoop = setInterval(function() {
 			Game.nextLevel();
 			return;
 		}
+
+		// We check if the game is over (and get a hint for the player at the same time)
+		Game.checkGameOver();
 	}
 }, 50);
 
@@ -390,13 +392,14 @@ Game.checkHint = function() {
 	var gems = get('.gem'),
 		hint = null;
 
-	for (var i = 0; i < gems.length; i++) {
+	for (var i = gems.length - 1; i >= 0; i--) {
 		// If there is at least one gem can be moved to make a streak
 		if ((hint = gems[i].getPossibleMove()) != null) {
 			break;
 		}
 	};
 	Game.hint = hint;	// We keep the hint for the player
+	console.log('hint: ', hint[0], hint[1]);
 	return hint;
 };
 

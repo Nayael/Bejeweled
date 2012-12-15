@@ -6,11 +6,12 @@ Game.GEM_HEIGHT = 65;
  * Initializes the game
  */
 Game.init = function () {
-	Game.gemRange = 7;	// The number of different gems on the grid
+	Game.gemRange = 7;		// The number of different gems on the grid
 	Game.level = 1;
 	Game.time = 0;
-	Game.gem = null;	// The currently selected gem
-	Game.hint = null;	// A hint for the player : an array containing gems that can be moved to make a streak
+	Game.gem = null;		// The currently selected gem
+	Game.hint = null;		// A hint for the player : an array containing gems that can be moved to make a streak
+	Game.moving = false;	// Are the gems moving or not ?
 	Game.score = {
 		goal: 15000,
 		total: 0,
