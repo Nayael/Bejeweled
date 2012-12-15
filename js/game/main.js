@@ -13,37 +13,44 @@ Game.mainLoop = setInterval(function() {
 	// If all the animations are over
 	if (Game.moving) {
 		Game.moving = false;
-		for (var i = 0; i < gems.length; i++) {
-			gems[i].removeEventListener('click', Game.onGemClick, false);	// We remove all the previous listeners, just in case
-			gems[i].addEventListener('click', Game.onGemClick, false);
-		};
-
-		// We activate the bombs' click
-		if (get('.bomb') != undefined) {
-			var bombs = get('.bomb');
-			if (bombs.length == undefined) {
-				bombs = [bombs];
-			}
-			
-			for (var i = 0; i < bombs.length; i++) {
-				bombs[i].active = true;
-			};
-		}
-
-		if (Game.combo != undefined) {
-			delete Game.combo;
-		}
-
-		// If the goal has been reached, we go to the next level
-		if (Game.score.current >= Game.score.goal) {
-			Game.nextLevel();
-			return;
-		}
-
-		// We check if the game is over (and get a hint for the player at the same time)
-		Game.checkGameOver();
+		Game.onMoveComplete(gems);
 	}
 }, 50);
+
+/**
+ * Triggers when all the animations of a movement are done
+ */
+Game.onMoveComplete = function(gems) {
+	for (var i = 0; i < gems.length; i++) {
+		gems[i].removeEventListener('click', Game.onGemClick, false);	// We remove all the previous listeners, just in case
+		gems[i].addEventListener('click', Game.onGemClick, false);
+	};
+
+	// We activate the bombs' click
+	if (get('.bomb') != undefined) {
+		var bombs = get('.bomb');
+		if (bombs.length == undefined) {
+			bombs = [bombs];
+		}
+		
+		for (var i = 0; i < bombs.length; i++) {
+			bombs[i].active = true;
+		};
+	}
+
+	if (Game.combo != undefined) {
+		delete Game.combo;
+	}
+
+	// If the goal has been reached, we go to the next level
+	if (Game.score.current >= Game.score.goal) {
+		Game.nextLevel();
+		return;
+	}
+
+	// We check if the game is over (and get a hint for the player at the same time)
+	Game.checkGameOver();
+};
 
 /**
  * Triggers when an gem is clicked (select it or proceed to the swap)
@@ -51,6 +58,11 @@ Game.mainLoop = setInterval(function() {
  */
 Game.onGemClick = function(e) {
 	var target = e.srcElement || e.target;
+	// If a hint is displayed, we remove it
+	if (Game.hint.displayed === true) {
+		Game.removeHint();
+	}
+
 	if (Game.gem == null) {
 		Game.selectGem(target);
 	}else {
@@ -158,8 +170,8 @@ Game.removeStreak = function(gemsToRemove) {
 	// If there is more than 1 combo streak
 	if (Game.combo != undefined && Game.combo > 1) {
 		file = 'spring.wav';
-		if (Game.combo == 2 && Game.bonus.bomb == undefined) {	// The player earns a bonus
 			Game.winBomb();
+		if (Game.combo == 2 && Game.bonus.bomb == undefined) {	// The player earns a bonus
 		}
 	}
 	// We play a sound for the gem destruction
@@ -370,7 +382,7 @@ Game.nextLevel = function() {
  * Checks if the game is over (no possibility to make a streak)
  */
 Game.checkGameOver = function() {
-	if (Game.checkHint() == null) {
+	if (!Game.checkHint()) {
 		Game.gameOver();
 	}
 };
@@ -382,25 +394,6 @@ Game.gameOver = function() {
 	if (confirm('Il n\'y a plus de mouvements possibles.\nVoulez-vous recommencer ?')){
 		Game.restart();
 	}
-}
-
-/**
- * Checks if the player still has a possibility to make a streak
- * @return {Array} An array containing the gems to swap if it is possible, null otherwise
- */
-Game.checkHint = function() {
-	var gems = get('.gem'),
-		hint = null;
-
-	for (var i = gems.length - 1; i >= 0; i--) {
-		// If there is at least one gem can be moved to make a streak
-		if ((hint = gems[i].getPossibleMove()) != null) {
-			break;
-		}
-	};
-	Game.hint = hint;	// We keep the hint for the player
-	console.log('hint: ', hint[0], hint[1]);
-	return hint;
 };
 
 window.onload = Game.init();

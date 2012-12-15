@@ -1,6 +1,6 @@
 var Game = {};	// The game instance
 Game.GRID_SIZE = 8;
-Game.GEM_HEIGHT = 65;
+Game.TILE_SIZE = 65;
 
 /**
  * Initializes the game
@@ -10,7 +10,6 @@ Game.init = function () {
 	Game.level = 1;
 	Game.time = 0;
 	Game.gem = null;		// The currently selected gem
-	Game.hint = null;		// A hint for the player : an array containing gems that can be moved to make a streak
 	Game.moving = false;	// Are the gems moving or not ?
 	Game.score = {
 		goal: 15000,
@@ -52,7 +51,29 @@ Game.createGrid = function() {
 			hGems = [];
 		};
 	};
-	
+
+	// var map = [	// The level's map (coordinates are: map[y][x])
+	// 	[0, 1, 0, 1, 0, 1, 0, 1],
+	// 	[0, 1, 0, 1, 0, 1, 0, 1],
+	// 	[0, 1, 0, 1, 0, 1, 0, 1],
+	// 	[0, 1, 0, 1, 0, 1, 0, 1],
+	// 	[0, 1, 0, 1, 0, 1, 0, 1],
+	// 	[0, 1, 0, 1, 0, 1, 0, 1],
+	// 	[0, 1, 0, 1, 0, 1, 0, 1],
+	// 	[0, 1, 0, 1, 0, 1, 0, 1]
+	// ];
+
+	// var grid = get('#grid'), row, value;
+
+	// for (var i = 0; i < map.length; i++) {
+	// 	row = map[i];
+	// 	for (var j = 0; j < row.length; j++) {
+	// 		value = row[j];
+	// 		gem = new Game.Gem(j, i, value);
+	// 		gem.addEventListener('click', Game.onGemClick, false);	// We add the mouse event listener
+	// 		gem.pop(grid);
+	// 	};
+	// };
 	// We check if there is at least one possible move
 	Game.checkGameOver();
 };

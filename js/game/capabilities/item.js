@@ -121,7 +121,7 @@ function addItemCapabilities(item) {
 		var top = item.top(),
 			height = parseInt(top.substring(0, top.length - 2));
 		
-		height += Game.GEM_HEIGHT;
+		height += Game.TILE_SIZE;
 		item.falling = true;
 		item.y(parseInt(item.y() + 1));	// We set the new Y position after the fall
 		item.animate('top', top, height + 'px', Game.GRID_SIZE);
