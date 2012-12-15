@@ -20,7 +20,7 @@ Game.checkHint = function() {
 	if (hint != null && (Game.hint == undefined || !Array.equals(Game.hint.gems, hint))) {
 		Game.hint = {
 			gems: hint,		// We keep the hint for the player
-			timer: setTimeout(Game.showHint, 15000)	// We will show it in 15 seconds if the player is stuck
+			timer: setTimeout(Game.showHint, 10000)	// We will show it in 10 seconds if the player is stuck
 		};
 	}
 	return (hint != null);
@@ -97,7 +97,7 @@ Game.showHint = function() {
 		if (arrow.parentNode) {
 			grid.removeChild(arrow);	// We remove the arrow if it is displayed
 		}
-		Game.hint.timer = setTimeout(Game.showHint, 15000);	// We restart the timer to re-display it in 15 seconds
+		Game.hint.timer = setTimeout(Game.showHint, 10000);	// We restart the timer to re-display it in 10 seconds
 		delete Game.hint.displayed;
 	};
 };

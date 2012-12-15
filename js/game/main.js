@@ -58,10 +58,6 @@ Game.onMoveComplete = function(gems) {
  */
 Game.onGemClick = function(e) {
 	var target = e.srcElement || e.target;
-	// If a hint is displayed, we remove it
-	if (Game.hint.displayed === true) {
-		Game.removeHint();
-	}
 
 	if (Game.gem == null) {
 		Game.selectGem(target);
@@ -147,6 +143,10 @@ Game.checkStreak = function(gem) {
 		// We calculate the number of combos
 		if (Game.gem == null) {
 			Game.combo = (Game.combo == undefined ? 1 : Game.combo + 1);
+		}
+		// If a hint is displayed, we remove it
+		if (Game.hint.displayed === true) {
+			Game.removeHint();
 		}
 		gem.inStreak = true;
 		Game.removeStreak(streak);
