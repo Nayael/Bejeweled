@@ -58,7 +58,7 @@ function addItemCapabilities(item) {
 	/**
 	 * Animates an element's CSS property from start value to end value (only values in pixels)
 	 */
-	item.animate = function(property, start, end, speed, check) {
+	item.animate = function(property, start, end, speed, callback) {
 		if (start == end)
 			return;
 		
@@ -73,8 +73,8 @@ function addItemCapabilities(item) {
 					clearInterval(item.timer);	// We stop the animation timer
 					delete item.timer;
 
-					if (check === true && !item.falling) {
-						Game.checkStreak(item);
+					if (callback != undefined && callback != null && !item.falling) {
+						callback(item);
 					}
 					if (item.falling) {
 						item.onFallComplete();

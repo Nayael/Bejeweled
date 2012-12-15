@@ -1,7 +1,7 @@
 /**
  * Creates an gem from its coordinates and tile value
  */
-function Gem(x, y, value) {
+Game.Gem = function(x, y, value) {
 	if (this == window) {
 		throw new Error('Gem() is a constructor, you can only call it with the keyword "new"');
 	}
@@ -21,12 +21,13 @@ function Gem(x, y, value) {
 	gem.falling = false;	// Is the element falling ?
 	gem.inStreak = false;
 
-	addItemCapabilities(gem);	// We add useful functions relative to gem objects
-	addGemCapabilities(gem);	// We add useful functions relative to gem objects
+	Game.addGemCapabilities(gem);	// We add useful functions relative to gem objects
 	return gem;
 };
 
-function addGemCapabilities(gem) {
+Game.addGemCapabilities = function(gem) {
+	addItemCapabilities(gem);	// We add useful functions relative to displayable items
+	
 	/**
 	 * Returns (and sets, if a value is passed as an argument) the gem's y tile value
 	 */
@@ -50,6 +51,7 @@ function addGemCapabilities(gem) {
 
 	/**
 	 * Compares a gem's value with this gem's value
+	 * @param {Gem} neighbour	The gem to compare with the current object
 	 */
 	gem.equals = function(neighbour) {
 		if (neighbour != null && neighbour.value && neighbour.value() == gem.value() && neighbour != gem && !neighbour.falling)	{
@@ -60,7 +62,7 @@ function addGemCapabilities(gem) {
 
 	/**
 	 * Checks if a given gem is adjacent to the object
-	 * @param target	The gem to compare with the current object
+	 * @param {Gem} target	The gem to compare with the current object
 	 */
 	gem.isNeighbour = function(target) {
 		return (((gem.x() === target.x() - 1 || gem.x() === target.x() + 1) && gem.y() === target.y())
@@ -83,7 +85,6 @@ function addGemCapabilities(gem) {
 		
 		// If we have a row of three identical gems
 		if (row.length > 1) {
-			console.log('row: ', row);
 			for (var i = 0; i < row.length; i++) {
 				streak[row[i].x()] = [];
 				if (streak[row[i].x()].indexOf(row[i]) == -1) {
@@ -95,7 +96,6 @@ function addGemCapabilities(gem) {
 
 		// If we have a column of three identical gems
 		if (column.length > 1) {
-			console.log('column: ', column);
 			for (var i = 0; i < column.length; i++) {
 				if (streak[column[i].x()] == undefined) {
 					streak[column[i].x()] = [];
@@ -160,7 +160,7 @@ function addGemCapabilities(gem) {
 			column = column.concat(gem.parseNeighbours(true, -1));
 		}
 		// Checking the gems on bottom (if the gem is at an extremity, don't check behind the border)
-		if (bottom && gem.y() < 7) {
+		if (bottom && gem.y() < (Game.GRID_SIZE - 1)) {
 			column = column.concat(gem.parseNeighbours(true, 1));
 		}
 		return column;
@@ -181,7 +181,7 @@ function addGemCapabilities(gem) {
 			row = row.concat(gem.parseNeighbours(false, -1));
 		}
 		// Checking the gems on the right
-		if (right && gem.x() < 7) {
+		if (right && gem.x() < (Game.GRID_SIZE - 1)) {
 			row = row.concat(gem.parseNeighbours(false, 1));
 		}
 		return row;
@@ -215,5 +215,62 @@ function addGemCapabilities(gem) {
 		gem.timer = setInterval(function() {
 			animateExplosion();
 		}, 100);
+	};
+
+	/**
+	 * Checks if a gem can be in a streak by a player's move
+	 * @return {Array}	The gems that the player has to swap in order to make a streak
+	 */
+	gem.getPossibleMove = function() {
+		var row = gem.checkRow(true, true),
+			column = gem.checkColumn(true, true),
+			pair = [],
+			x = 0,
+			y = 0,
+			equalGem = null,
+			gemsToSwap = [];
+
+		// The gem has to have one equal neighbour
+		if (column && column.length == 1) {
+			pair = gem.y() < column[0].y() ? [gem, column[0]] : [column[0], gem];
+			x = gem.x();
+
+			// If a move is possible with this streak
+			if (pair[0].y() > 0 && gem.equals((equalGem = get('#tile' + (pair[0].y() - 1) + '_' + (x - 1))))	// Checking on top left
+			||	pair[0].y() > 0 && gem.equals((equalGem = get('#tile' + (pair[0].y() - 1) + '_' + (x + 1))))	// Checking on top right
+			||	pair[0].y() > 1 && gem.equals((equalGem = get('#tile' + (pair[0].y() - 2) + '_' + (x))))		// Checking on top, two gems ahead
+			||	pair[1].y() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (pair[1].y() + 1) + '_' + (x - 1))))	// Checking on bottom left
+			||	pair[1].y() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (pair[1].y() + 1) + '_' + (x - 1))))	// Checking on bottom right
+			||	pair[1].y() < (Game.GRID_SIZE - 2) && gem.equals((equalGem = get('#tile' + (pair[1].y() + 2) + '_' + (x))))		// Checking on bottom, two gems down
+			) {
+				gemsToSwap = [equalGem];
+				if (equalGem.y() > pair[1].y()) {
+					gemsToSwap.push(get('#tile' + (pair[1].y() + 1) + '_' + x));
+				}else {
+					gemsToSwap.push(get('#tile' + (pair[0].y() - 1) + '_' + x));
+				}
+				return gemsToSwap;
+			}
+		}else if (row && row.length == 1) {
+			pair = gem.x() < row[0].x() ? [gem, row[0]] : [row[0], gem];
+			y = gem.y();
+
+			// If a move is possible with this streak
+			if (pair[0].x() > 0 && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[0].x() - 1))))	// Checking on top left
+			||	pair[0].x() > 0 && gem.equals((equalGem = get('#tile' + (y + 1) + '_' + (pair[0].x() - 1))))	// Checking on top right
+			||	pair[0].x() > 1 && gem.equals((equalGem = get('#tile' + (y) + '_' + (pair[0].x() - 2))))		// Checking on top, two gems ahead
+			||	pair[1].x() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[1].x() + 1))))	// Checking on bottom left
+			||	pair[1].x() < (Game.GRID_SIZE - 1) && gem.equals((equalGem = get('#tile' + (y - 1) + '_' + (pair[1].x() + 1))))	// Checking on bottom right
+			||	pair[1].x() < (Game.GRID_SIZE - 2) && gem.equals((equalGem = get('#tile' + (y) + '_' + (pair[1].x() + 2))))		// Checking on bottom, two gems down
+			) {
+				gemsToSwap = [equalGem];
+				if (equalGem.x() > pair[1].x()) {
+					gemsToSwap.push(get('#tile' + y + '_' + (pair[1].x() + 1)));
+				}else {
+					gemsToSwap.push(get('#tile' + y + '_' + (pair[0].x() - 1)));
+				}
+				return gemsToSwap;
+			}
+		}
 	};
 };

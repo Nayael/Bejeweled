@@ -6,7 +6,7 @@ Game.Bomb = function() {
 		throw new Error('Bomb() is a constructor, you can only call it with the keyword "new"');
 	}
 	var bomb = document.createElement('span');
-	addBombCapabilities(bomb);
+	Game.addBombCapabilities(bomb);
 
 	bomb.className = 'bomb item';
 	bomb.addEventListener('click', bomb.explode, false);
@@ -15,7 +15,7 @@ Game.Bomb = function() {
 	return bomb;
 };
 
-function addBombCapabilities(bomb) {
+Game.addBombCapabilities = function(bomb) {
 	addItemCapabilities(bomb);
 	/**
 	 * Makes the bomb, and the surrounding gems explode
@@ -35,7 +35,7 @@ function addBombCapabilities(bomb) {
 		};
 		get('#grid').removeChild(bomb);
 		Game.removeStreak(gemsToRemove);
-		Game.playSound('bomb.wav');
+		// Game.playSound('bomb.wav');
 		delete Game.bonus.bomb;
 	};
 };

@@ -102,11 +102,11 @@ Game.swapGems = function(source, dest, check) {
 		};
 
 		if (source.left() != dest.left()) {
-			source.animate('left', source.left(), dest.left(), 9, check);
-			dest.animate('left', dest.left(), source.left(), 9, check);
+			source.animate('left', source.left(), dest.left(), 9, check ? Game.checkStreak : null);
+			dest.animate('left', dest.left(), source.left(), 9, check ? Game.checkStreak : null);
 		}else if (source.top() != dest.top()) {
-			source.animate('top', source.top(), dest.top(), 9, check);	
-			dest.animate('top', dest.top(), source.top(), 9, check);
+			source.animate('top', source.top(), dest.top(), 9, check ? Game.checkStreak : null);	
+			dest.animate('top', dest.top(), source.top(), 9, check ? Game.checkStreak : null);
 		}
 		
 		// We swap the x and y properties
@@ -161,7 +161,7 @@ Game.removeStreak = function(gemsToRemove) {
 		}
 	}
 	// We play a sound for the gem destruction
-	Game.playSound(file);
+	// Game.playSound(file);
 
 	var totalGems = 0, nbGems = 0, fallAfter = false;
 
@@ -245,9 +245,9 @@ Game.generateGems = function(x) {
 		if (currentGem == null) {
 			quantity++;
 
-			value = parseInt(Math.random() * Game.GEM_RANGE);
+			value = parseInt(Math.random() * Game.gemRange);
 			y = -1 * quantity;
-			gem = new Gem(parseInt(x), y, value);
+			gem = new Game.Gem(parseInt(x), y, value);
 			grid.appendChild(gem);
 		}
 	};
@@ -362,6 +362,34 @@ Game.nextLevel = function() {
 	get('#level').innerHTML = Game.level;
 	Game.emptyGrid();
 	Game.createGrid();
+};
+
+/**
+ * Checks if the player still has a possibility to make a streak
+ * @return {boolean} True if the game is over, false otherwise
+ */
+Game.isOver = function() {
+	return (Game.checkHint() == null);
+};
+
+/**
+ * Checks if the player still has a possibility to make a streak
+ * @return {Array} An array containing the gems to swap if it is possible, null otherwise
+ */
+Game.checkHint = function() {
+	var gems = get('.gem'),
+		hint = null;
+
+	for (var i = 0; i < gems.length; i++) {
+		// If there is at least one gem can be moved to make a streak
+		if ((hint = gems[i].getPossibleMove()) != null) {
+			console.log('hint: ', hint);
+			console.log('hint[0], hint[1]: ', hint[0], hint[1]);
+			break;
+		}
+	};
+	Game.hint = hint;
+	return hint;
 };
 
 window.onload = Game.init();

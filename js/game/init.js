@@ -1,26 +1,15 @@
 var Game = {};	// The game instance
-
 Game.GRID_SIZE = 8;
 Game.GEM_HEIGHT = 65;
-
-var map = [	// The level's map (coordinates are: map[y][x])
-	[0, 1, 2, 1, 3, 4, 0, 1],
-	[2, 1, 2, 2, 0, 2, 4, 4],
-	[4, 4, 0, 3, 2, 0, 4, 1],
-	[3, 3, 1, 0, 2, 0, 3, 0],
-	[3, 4, 3, 0, 3, 1, 4, 2],
-	[1, 2, 1, 4, 3, 0, 1, 2],
-	[3, 1, 1, 2, 2, 4, 4, 1],
-	[0, 1, 0, 0, 3, 4, 4, 1]
-];
 
 /**
  * Initializes the game
  */
 Game.init = function () {
-	Game.GEM_RANGE = 7;
+	Game.gemRange = 7;	// The number of different gems on the grid
 	Game.level = 1;
-	Game.gem = null;
+	Game.gem = null;	// The currently selected gem
+	Game.hint = null;	// A hint for the player : an array containing gems that can be moved to make a streak
 	Game.score = {
 		goal: 15000,
 		total: 0,
@@ -28,9 +17,11 @@ Game.init = function () {
 	};
 	Game.bonus = {};
 
+	// We initialize the UI
 	get('#level').innerHTML = Game.level;
 	get('#total_score').innerHTML = Game.score.total;
 	get('#restart_bt').onclick = Game.confirmRestart;
+	
 	Game.createGrid();
 };
 
@@ -46,7 +37,7 @@ Game.createGrid = function() {
 
 		for (j = 0; j < Game.GRID_SIZE; j++) {
 			do {
-				gem = new Gem(j, i, parseInt(Math.random() * Game.GEM_RANGE));
+				gem = new Game.Gem(j, i, parseInt(Math.random() * Game.gemRange));
 				if (i > 0)
 					vGems = gem.parseNeighbours(true, -1);
 				if (j > 0)
