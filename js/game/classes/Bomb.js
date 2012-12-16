@@ -11,6 +11,7 @@ Game.Bomb = function() {
 	bomb.className = 'bomb item';
 	bomb.addEventListener('click', bomb.explode, false);
 	bomb.active = false;
+	bomb.isGem = false;
 
 	return bomb;
 };
@@ -23,14 +24,18 @@ Game.addBombCapabilities = function(bomb) {
 	bomb.explode = function(event) {
 		if (!bomb.active)
 			return;
-
-		var gemsToRemove = [], x = bomb.x(), y = bomb.y();
+		bomb.active = false;
+		var gemsToRemove = [],
+			x = bomb.x(),
+			y = bomb.y(),
+			item;
 		for (var i = (x > 0 ? x - 1 : x); i <= (x < 7 ? x + 1 : x); i++) {
 			gemsToRemove[i] = [];
 			for (var j = (y > 0 ? y - 1 : y); j <= (y < 7 ? y + 1 : y); j++) {
-				if (i == x && j == y)
+				item = get('#tile' + j + '_' + i);
+				if (i == x && j == y || item == null || !item.isGem)
 					continue;
-				gemsToRemove[i].push(get('#tile' + j + '_' + i));
+				gemsToRemove[i].push(item);
 			};
 		};
 		get('#grid').removeChild(bomb);

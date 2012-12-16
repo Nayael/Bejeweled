@@ -22,6 +22,7 @@ Game.init = function () {
 	get('#level').innerHTML = Game.level;
 	get('#total_score').innerHTML = Game.score.total;
 	get('#restart_bt').onclick = Game.confirmRestart;
+	get('#current_gauge').style.height = '0%';
 
 	Game.createGrid();
 };
@@ -53,13 +54,13 @@ Game.createGrid = function() {
 	};
 
 	// var map = [	// The level's map (coordinates are: map[y][x])
+	// 	[0, 2, 0, 1, 0, 1, 0, 1],
+	// 	[0, 2, 0, 1, 0, 1, 0, 1],
+	// 	[0, 1, 3, 7, 0, 1, 0, 1],
+	// 	[0, 6, 6, 3, 0, 1, 0, 1],
 	// 	[0, 1, 0, 1, 0, 1, 0, 1],
-	// 	[0, 1, 0, 1, 0, 1, 0, 1],
-	// 	[0, 1, 0, 1, 0, 1, 0, 1],
-	// 	[0, 1, 0, 1, 0, 1, 0, 1],
-	// 	[0, 1, 0, 1, 0, 1, 0, 1],
-	// 	[0, 1, 0, 1, 0, 1, 0, 1],
-	// 	[0, 1, 0, 1, 0, 1, 0, 1],
+	// 	[0, 2, 1, 4, 0, 1, 0, 1],
+	// 	[0, 2, 7, 4, 0, 1, 0, 1],
 	// 	[0, 1, 0, 1, 0, 1, 0, 1]
 	// ];
 

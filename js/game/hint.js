@@ -9,6 +9,9 @@ Game.checkHint = function() {
 	for (var i = gems.length - 1; i >= 0; i--) {
 		// If there is at least one gem can be moved to make a streak
 		if ((hint = gems[i].getPossibleMove()) != null) {
+			if (hint.length == 0) {
+				continue;
+			}
 			break;
 		}
 	};
@@ -17,12 +20,13 @@ Game.checkHint = function() {
 		clearTimeout(Game.hint.timer);
 	}
 	// We set the hint (only if it differs from the previous)
-	if (hint != null && (Game.hint == undefined || !Array.equals(Game.hint.gems, hint))) {
+	if (hint != null && hint.length > 0 && (Game.hint == undefined || !Array.equals(Game.hint.gems, hint))) {
 		Game.hint = {
 			gems: hint,		// We keep the hint for the player
-			timer: setTimeout(Game.showHint, 10000)	// We will show it in 10 seconds if the player is stuck
+			timer: setTimeout(Game.showHint, 3000)	// We will show it in 3 seconds if the player is stuck
 		};
 	}
+	// console.log('hint: ', hint[0], hint[1]);
 	return (hint != null);
 };
 
@@ -32,6 +36,9 @@ Game.checkHint = function() {
 Game.showHint = function() {
 	if (Game.hint == undefined)
 	    return;
+	if (Game.hint.timer && Game.removeHint) {
+		Game.removeHint(false);	// We remove the previous hint, and don't restart it, just in case
+	}
 	var arrow = document.createElement('span'),
 		gems = Game.hint.gems,
 		left, top, width, height,
@@ -69,7 +76,7 @@ Game.showHint = function() {
 	timer1 = setInterval(function() {
 		var blinks = 3, i = 0;	// The arrow blinks 3 times
 		timer2 = setInterval(function() {
-			Game.hint.displayed = true;
+			// Game.hint.displayed = true;
 			if (i == blinks * 2) {
 				clearInterval(timer2);
 				return;
@@ -77,6 +84,7 @@ Game.showHint = function() {
 			// Once every two, we display and remove the arrow
 			if (i % 2 == 0) {
 				grid.appendChild(arrow);
+				// Game.playSound('hint.wav');
 			}else {
 				if (arrow.parentNode) {
 					grid.removeChild(arrow);
@@ -89,15 +97,20 @@ Game.showHint = function() {
 	/**
 	 * Removes the hint animation once the player has clicked on a gem
 	 */
-	Game.removeHint = function() {
-		// We stop the blinking
-		clearInterval(timer2);
-		clearInterval(timer1);
-		clearTimeout(Game.hint.timer);
-		if (arrow.parentNode) {
-			grid.removeChild(arrow);	// We remove the arrow if it is displayed
+	Game.removeHint = function(reset) {
+		if (timer1 != null) {
+			// We stop the blinking
+			clearInterval(timer2);
+			timer2 = null;
+			clearInterval(timer1);
+			timer1 = null;
+			clearTimeout(Game.hint.timer);
+			if (arrow.parentNode) {
+				grid.removeChild(arrow);	// We remove the arrow if it is displayed
+			}
+			if (reset !== false) {
+				Game.hint.timer = setTimeout(Game.showHint, 3000);	// We restart the timer to re-display it in 3 seconds
+			}
 		}
-		Game.hint.timer = setTimeout(Game.showHint, 10000);	// We restart the timer to re-display it in 10 seconds
-		delete Game.hint.displayed;
 	};
 };

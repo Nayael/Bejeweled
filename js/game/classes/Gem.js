@@ -20,6 +20,7 @@ Game.Gem = function(x, y, value) {
 	
 	gem.falling = false;	// Is the element falling ?
 	gem.inStreak = false;
+	gem.isGem = true;
 
 	Game.addGemCapabilities(gem);	// We add useful functions relative to gem objects
 	return gem;
@@ -51,10 +52,10 @@ Game.addGemCapabilities = function(gem) {
 
 	/**
 	 * Compares a gem's value with this gem's value
-	 * @param {Gem} neighbour	The gem to compare with the current object
+	 * @param {Gem} target	The gem to compare with the current object
 	 */
-	gem.equals = function(neighbour) {
-		if (neighbour != null && neighbour.value && neighbour.value() == gem.value() && neighbour != gem && !neighbour.falling)	{
+	gem.equals = function(target) {
+		if (target != null && target.isGem && target.value && target.value() == gem.value() && target != gem && !target.falling)	{
 			return true;
 		}
 		return false;
@@ -229,6 +230,12 @@ Game.addGemCapabilities = function(gem) {
 			y = 0,
 			equalGem = null,
 			gemsToSwap = [];
+		y = gem.y();
+		x = gem.x();
+
+		if (row && row.length > 1 || column && column.length > 1) {
+			return [];
+		}
 
 		// The gem has to have one equal neighbour
 		if (row && row.length == 1) {
@@ -272,6 +279,20 @@ Game.addGemCapabilities = function(gem) {
 				}
 				return gemsToSwap;
 			}
+		}
+		var equalVGem = null, equalHGem = null;
+		// If there are two equal gems with one space between them, and it is possible to make a streak by placing a surrouding gem between them (horizontally or vertically)
+		if (gem.equals(get('#tile' + y + '_' + (x + 2))) && (gem.equals((equalHGem = get('#tile' + (y + 1) + '_' + (x + 1)))) || gem.equals((equalHGem = get('#tile' + (y - 1) + '_' + (x + 1)))))
+		||	gem.equals(get('#tile' + y + '_' + (x - 2))) && (gem.equals((equalHGem = get('#tile' + (y - 1) + '_' + (x - 1)))) || gem.equals((equalHGem = get('#tile' + (y + 1) + '_' + (x - 1)))))
+		||	gem.equals(get('#tile' + (y + 2) + '_' + x)) && (gem.equals((equalVGem = get('#tile' + (y + 1) + '_' + (x - 1)))) || gem.equals((equalVGem = get('#tile' + (y + 1) + '_' + (x + 1)))))
+		||	gem.equals(get('#tile' + (y - 2) + '_' + x)) && (gem.equals((equalVGem = get('#tile' + (y - 1) + '_' + (x - 1)))) || gem.equals((equalVGem = get('#tile' + (y - 1) + '_' + (x + 1)))))
+		) {
+			equalGem = (equalHGem == null ? equalVGem : equalHGem);
+			x = equalGem.x();
+			y = equalGem.y();
+			return (equalVGem != null) ?
+					[equalGem, get('#tile' + y + '_' + gem.x())]
+					: [equalGem, get('#tile' + gem.y() + '_' + x)];
 		}
 	};
 };

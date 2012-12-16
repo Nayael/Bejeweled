@@ -144,10 +144,8 @@ Game.checkStreak = function(gem) {
 		if (Game.gem == null) {
 			Game.combo = (Game.combo == undefined ? 1 : Game.combo + 1);
 		}
-		// If a hint is displayed, we remove it
-		if (Game.hint.displayed === true) {
+		if (Game.removeHint)
 			Game.removeHint();
-		}
 		gem.inStreak = true;
 		Game.removeStreak(streak);
 	}else if (Game.gem != null && Game.gem.id !== gem.id && !Game.gem.inStreak) {	// If there is a selected gem, and it is not in a streak, we will have to reverse the swap
@@ -165,13 +163,13 @@ Game.checkStreak = function(gem) {
  * @param {Array} gemsToRemove	An array containing the gems that are in a streak
  */
 Game.removeStreak = function(gemsToRemove) {
-	var file = 'misc1.wav';
+	var file = 'streak.wav';
 
 	// If there is more than 1 combo streak
-	if (Game.combo != undefined && Game.combo > 1) {
-		file = 'spring.wav';
-			Game.winBomb();
+	if (Game.combo != undefined && Game.combo > 0) {
+		file = 'combo.wav';
 		if (Game.combo == 2 && Game.bonus.bomb == undefined) {	// The player earns a bonus
+			Game.winBomb();
 		}
 	}
 	// We play a sound for the gem destruction
@@ -200,12 +198,13 @@ Game.removeStreak = function(gemsToRemove) {
 
 /**
  * Triggers when a streak is destroyed: starts the generation of new gems
+ * After that, makes the columns fall one by one
  * @param {Array} streak	An array containing the gems that are in a streak
  */
 Game.onStreakRemoved = function(streak) {		// We continue after the streak disappeared
 	var firstYToFall = Game.GRID_SIZE,	// The Y of the first item that will fall
 		newGems = null,
-		currentGem = null,
+		currentItem = null,
 		fallHeight = 0,
 		fallStarted = false,
 		skip = false;
@@ -213,24 +212,25 @@ Game.onStreakRemoved = function(streak) {		// We continue after the streak disap
 	// We run through the gem columns
 	for (var column in streak) {
 		for (var i = Game.GRID_SIZE - 1; i >= 0; i--) {
-			currentGem = get('#tile' + i + '_' + column);
-			if (currentGem != null && currentGem.timer != undefined) {	// If there is an item from another streak that is still animated, we pass this column
+			currentItem = get('#tile' + i + '_' + column);
+			if (currentItem != null && currentItem.timer != undefined) {	// If there is an item from another streak that is still animated, we pass this column
 				skip = true;
 				break;
 			}
 		};
-		if (skip) {
+		if (skip) {	// We will parse another column
 			skip = false;
 			continue;
 		}
 
 		firstYToFall = Game.GRID_SIZE;
 		for (i = Game.GRID_SIZE - 1; i >= 0; i--) {	// We run through the column from bottom to top
-			currentGem = get('#tile' + i + '_' + column);
-			if (currentGem == null) {				// Once we found a gem that was destroyed
+			currentItem = get('#tile' + i + '_' + column);
+			if (currentItem == null) {				// Once we found a gem that was destroyed
 				for (var j = i - 1; j >= 0; j--) {	// We run through the gems on top of it
-					currentGem = get('#tile' + j + '_' + column);
-					if (currentGem != null) {		// Once we found a valid gem on top of the destroyed gems
+					currentItem = get('#tile' + j + '_' + column);
+					// console.log('currentItem: ', currentItem);
+					if (currentItem != null && currentItem.isGem) {		// Once we found a valid gem on top of the destroyed gems
 						firstYToFall = j;			// It is the first that will fall on this column
 						break;
 					}
@@ -242,6 +242,7 @@ Game.onStreakRemoved = function(streak) {		// We continue after the streak disap
 			firstYToFall = -1;		// It means there is a hole from the top, the first gem to fall is on top the grid
 		}
 		Game.generateGems(column);	// We generate the new gems
+		// console.log('first to fall : ',get('#tile' + firstYToFall + '_' + column));
 		get('#tile' + firstYToFall + '_' + column).fallStreak();	// We make the first gem fall (the others will follow)
 	};
 	Game.deselectGem();
