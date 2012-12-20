@@ -14,17 +14,19 @@ Game.init = function () {
 	Game.gem = null;		// The currently selected gem
 	Game.moving = false;	// Are the gems moving or not ?
 	Game.score = {
-		goal: 15000,
-		current: 14700,
-		total: 14700
+		goal: 5000,
+		current: 0,
+		total: 0
 	};
 	Game.bonus = {};
+	Game.pauses = false;
 	Game.initTimer();
 
 	// We initialize the UI
 	get('#level').innerHTML = Game.level;
 	get('#total_score').innerHTML = Game.score.total;
 	get('#restart_bt').onclick = Game.confirmRestart;
+	get('#pause_bt').onclick = Game.pause;
 
 	Game.createGrid();
 };
@@ -87,3 +89,13 @@ Game.createGrid = function() {
 	// We check if there is at least one possible move
 	Game.checkGameOver();
 };
+
+/**
+ * Removes all the items from the grid
+ */
+Game.emptyGrid = function() {
+	var items = get('.item'), grid = get('#grid');
+	for (var i = 0; i < items.length; i++) {
+		grid.removeChild(items[i]);
+	};
+}

@@ -3,7 +3,8 @@
  */
 Game.mainLoop = setInterval(function() {
 	// We consider the game in pause if there is a popup or if we are on another page
-	if (get('#game_content').style.display === 'none' || get('.popup') != null) {
+	if (Game.paused || get('#game_content').style.display === 'none' || get('.popup') != null) {
+		Game.removeHint();
 		return;
 	}
 	Game.updateTimer();
@@ -32,7 +33,7 @@ Game.onMoveComplete = function(gems) {
 		gems[i].addEventListener('click', Game.onGemClick, false);
 	};
 
-	if (Game.combo >= 2 && Game.bonus.bomb == undefined) {	// The player earns a bomb is he makes more than 1 combo
+	if (Game.level >= 5 && Game.combo >= 2 && Game.bonus.bomb == undefined) {	// The player earns a bomb is he makes more than 1 combo
 		Game.winBomb();
 	}
 
@@ -131,13 +132,36 @@ Game.swapGems = function(source, dest, check) {
 };
 
 /**
- * Removes all the items from the grid
+ * Pauses the game
  */
-Game.emptyGrid = function() {
-	var items = get('.item'), grid = get('#grid');
-	for (var i = 0; i < items.length; i++) {
-		grid.removeChild(items[i]);
+Game.pause = function() {
+	if (Game.moving) {
+		return;
+	}
+	var pause;
+
+	/**
+	 * Resumes the game
+	 */
+	Game.resume = function() {
+		remove(pause);
+		Game.paused = false;
 	};
-}
+
+	pause = new Popup({
+		type: 'html',
+		content: '<h3>Jeu en pause</h3><br/>',
+		buttons: [
+			{
+				text: 'Reprendre',
+				callback: Game.resume
+			}
+		]
+	});
+	Game.removeHint();
+	pause.show();
+	Game.paused = true;
+};
+
 
 window.onload = Game.init();

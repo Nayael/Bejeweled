@@ -28,7 +28,7 @@ function Popup (args) {
 	this.container.style.position = 'absolute';
 	this.container.style.width = '100%';
 	this.container.style.height = '100%';
-	this.container.style.top = 0;
+	this.container.style.top = window.pageYOffset + 'px';
 	this.container.style.left = 0;
 	this.container.style.zIndex = '1000';
 	this.container.style.textAlign = 'center';

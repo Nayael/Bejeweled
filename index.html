@@ -8,19 +8,22 @@
 	<link rel="icon" type="image/x-icon" href="images/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="css/screen.css" />
 	<link rel="stylesheet" type="text/css" href="css/game.css" />
-	<!-- <link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'> -->
+	<link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'>
 </head>
 <body><div id="content">
 		<header>
 			<nav>
 				<a href="#" id="bt_index" class="current_menu">Accueil</a>
 				<a href="#game" id="bt_game">Jeu</a>
+				<a href="#rules" id="bt_rules">Règles</a>
 			</nav>
 		</header>
  		</nav>
 		<div id="site_content">
-			<p>The objective of this game is to swap one gem with an adjacent gem to form a horizontal or vertical chain of three or more gems. Bonus points are given when more than three identical gems are formed or forms two lines of identical gems in one swap. Gems disappear when chains are formed and gems fall from the top to fill in gaps. Sometimes chain reactions, called cascades, are triggered, where chains are formed by the falling gems. Cascades are awarded with bonus points. There are two variations of the game to choose from.</p><p>Although normally the player gets only 3 in a row for gems, sometimes they can get 4 or 5 in a row. And in rare conditions, they can get 6, 7 and even 8 in a row. However, some versions of the engine do not register it. The player gets more points and sometimes special powerups from more than 3 gems in a row.</p>
-			<button onclick="popup();">ok</button>
+			<h1>Ore</h1>
+			<p>En l'an 3070, les pirates de l'espace sont légion.<br/>Ils vont de planète en planète et pillent pour récupérer la dernière source de richesse dans l'univers&nbsp;: les minerais nucléaires, que l'on ne trouve qu'au coeur de certaines planètes.</p>
+			<p>Vous êtes l'un de ces pirates, membre de l'équipage du Globus.</p>
+			<p style="font-size:18px;"><strong>Votre mission</strong>&nbsp;: récupérer un maximum de pierres précieuses.<br/>Mais attention, une planète minière est très instable, alors dépêchez-vous !</p>
 		</div>
 
 		<div id="game_content">
@@ -29,8 +32,19 @@
 				<p>Niveau</p><div id="level">1</div>
 				<p>Score</p><div id="total_score">0</div>
 				<button id="restart_bt">Recommencer</button>
+				<button id="pause_bt">Pause</button>
 			</div>
 			<div id="grid"></div>
+		</div>
+
+		<div id="rules_content">
+			<p>Ore est un puzzle game qui se présente sous la forme d'une grille de 8 cases sur 8 contenant des pierres de différentes couleurs.<br/>Le but du jeu est de les rassembler par couleur par groupe de 3 ou plus, de manière horizontale ou verticale, en inversant deux gemmes adjacentes à chaque fois.</p>
+			<p>Lorsqu'elles sont alignées, elles disparaissent, et celles qui se trouvaient au-dessus tombent, faisant apparaître de nouvelles gemmes.<br/>Vous gagnerez des points bonus si vous réussisez à aligner plus de 3 pierres identiques.</p>
+			<p>Lors de la chute, il est possible que des gemmes de même couleur s'alignent, provoquant ainsi une réaction en chaîne, qui vous donnera également des points bonus. Plus il y a de chaînes à la suite, et plus vous gagnerez de points.</p>
+			<p>Au bout d'un certain nombre de chaînes, vous pourrez voir apparaître sur votre grille un objet bonus, une bombe <img src="images/sprites/bomb.png" alt="(Bombe)"> qui vous permettra de détruire toutes les gemmes alentour.</p>
+			<p><br/>Vous avez 3 minutes pour atteindre le nombre de points requis à chaque niveau.</p>
+			<p>Vous aurez perdu la partie si vous ne parvenez pas à terminer le niveau dans le temps imparti, ou si plus aucune combinaison n'est possible sur votre grille.</p>
+			<p style="margin-top:30px;"><strong>Besoin d'aide ?</strong> Si vous êtes bloqués à un niveau, ne paniquez pas, un indice vous sera proposé au bout d'un certain temps d'inactivité.</p>
 		</div>
 	</div>
 
@@ -50,10 +64,5 @@
 	<script type="text/javascript" src="js/game/classes/Bomb.js"></script>
 	<script type="text/javascript" src="js/game/classes/Popup.js"></script>
 	<script type="text/javascript" src="js/game/main.js"></script>
-	<script type="text/javascript">
-		function popup() {
-			var test = Popup.alert('testtest');
-		}
-	</script>
 </body>
 </html>
