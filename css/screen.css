@@ -26,8 +26,14 @@ body{
 	color: #FFFFFF;
 }
 
-#site_content{
+#site_content, #rules_content{
 	padding: 50px;
+	font-size: 16px;
+	color: #DEDEDE;
+}
+
+#rules_content{
+	display: none;
 }
 
 a {

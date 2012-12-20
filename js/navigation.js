@@ -20,6 +20,8 @@ Site.onMenuClick = function(event) {
 
 	if (target.getAttribute('href') == '#game')
 		window.location.hash = 'game';
+	else if (target.getAttribute('href') == '#rules')
+		window.location.hash = 'rules';
 	else
 		window.location.hash = '';
 
@@ -34,7 +36,8 @@ Site.changePageFromHash = function () {
 	var links = get('nav a');
 
 	get("#site_content").style.display = window.location.hash === '' ? 'block' : 'none';
-	get("#game_content").style.display = window.location.hash === '' ? 'none' : 'block';
+	get("#game_content").style.display = window.location.hash === '#game' ? 'block' : 'none';
+	get("#rules_content").style.display = window.location.hash === '#rules' ? 'block' : 'none';
 	
 	for (var i = 0; i < links.length; i++) {
 		links[i].setAttribute('class', '');

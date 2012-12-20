@@ -27,7 +27,7 @@ Game.checkHint = function() {
 	if (hint != null && hint.length > 0) {
 		Game.hint = {
 			gems: hint,		// We keep the hint for the player
-			timer: setTimeout(Game.showHint, 3000)	// We will show it in 3 seconds if the player is stuck
+			timer: setTimeout(Game.showHint, 15000)	// We will show it in 15 seconds if the player is stuck
 		};
 	}
 	return (hint != null);
