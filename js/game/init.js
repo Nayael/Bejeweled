@@ -15,8 +15,8 @@ Game.init = function () {
 	Game.moving = false;	// Are the gems moving or not ?
 	Game.score = {
 		goal: 15000,
-		current: 14000,
-		total: 14000
+		current: 14700,
+		total: 14700
 	};
 	Game.timer = {			// The timer is initialized at 5 minutes
 		minutes: 5,

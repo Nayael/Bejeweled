@@ -107,11 +107,13 @@ Game.showHint = function() {
 			timer2 = null;
 			timer1 = null;
 			remove(arrow);	// We remove the arrow if it is displayed
-			// if (reset !== false) {
-			// 	Game.hint.timer = setTimeout(Game.showHint, 3000);	// We restart the timer to re-display it in 3 seconds
-			// }
 		}
 	};
 };
 
-Game.removeHint = function() {};
+Game.removeHint = function() {
+	if (Game.hint != undefined) {
+		clearTimeout(Game.hint.timer);
+		delete Game.timer;
+	}
+};

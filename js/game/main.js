@@ -147,17 +147,7 @@ Game.restart = function() {
  * Displays a coinfirm popup to restart the game
  */
 Game.confirmRestart = function() {
-	if (confirm('Êtes-vous sûr(e) de vouloir recommencer ?')){
-		Game.restart();
-	}
-	// var popup = new Popup('Voulez-vous recommencer le jeu ?', [
-	// 	{
-	// 		text: 'Oui',
-	// 		callback: Game.restart
-	// 	},{
-	// 		text: 'Non'
-	// 	}, '300px', '200px'
-	// ]);
+	Popup.confirm('Êtes-vous sûr(e) de vouloir recommencer ?', null, Game.restart);
 };
 
 /**
@@ -201,9 +191,7 @@ Game.checkGameOver = function() {
  * When the game is over : displays a popup to make the player restart
  */
 Game.gameOver = function() {
-	if (confirm('Il n\'y a plus de mouvements possibles.\nVous avez perdu.\n\nVoulez-vous recommencer ?')){
-		Game.restart();
-	}
+	Popup.confirm('Il n\'y a plus de mouvements possibles.<br/>Vous avez perdu.<br/><br/>Voulez-vous recommencer ?', {height: '170px'}, Game.restart);
 };
 
 window.onload = Game.init();
