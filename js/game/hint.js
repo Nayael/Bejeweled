@@ -114,6 +114,6 @@ Game.showHint = function() {
 Game.removeHint = function() {
 	if (Game.hint != undefined) {
 		clearTimeout(Game.hint.timer);
-		delete Game.timer;
+		delete Game.hint.timer;
 	}
 };

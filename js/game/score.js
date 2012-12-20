@@ -53,10 +53,10 @@ Game.updateScore = function(destroyedGems) {
 		gainSpan.style.top = (y+yShift) + 'px';
 	}, 60);
 
-	gaugeSize = (Game.score.current/Game.score.goal * 100);
-	if (Game.score.current >= Game.score.goal) {
-		gaugeSize = 100;
-	}
+	// gaugeSize = (Game.score.current/Game.score.goal * 100);
+	// if (Game.score.current >= Game.score.goal) {
+	// 	gaugeSize = 100;
+	// }
 	get('#total_score').innerHTML = Game.score.total;
-	get('#current_gauge').style.height = gaugeSize + '%';
+	// get('#current_gauge').style.height = gaugeSize + '%';
 };

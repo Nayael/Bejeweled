@@ -70,10 +70,6 @@ nav a:first-child{
 	-moz-border-radius-bottomleft: 20px;
 }
 
-footer{
-	padding: 15px;
-}
-
 #content button{
 	cursor:pointer;
 	height: 30px;
