@@ -25,8 +25,6 @@ Game.addBombCapabilities = function(bomb) {
 	bomb.explode = function(event) {
 		if (!bomb.active)
 			return;
-		if (Game.removeHint)
-			Game.removeHint();
 		bomb.active = false;
 		var gemsToRemove = [],
 			x = bomb.x(),

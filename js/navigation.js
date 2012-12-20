@@ -16,9 +16,7 @@ Site.onMenuClick = function(event) {
 	var target = event.target || event.srcElement,
 		hash = window.location.hash;
 
-	if (Game.removeHint) {
-		Game.removeHint();
-	}
+	Game.removeHint();
 
 	if (target.getAttribute('href') == '#game')
 		window.location.hash = 'game';

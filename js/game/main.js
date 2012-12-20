@@ -21,7 +21,6 @@ Game.mainLoop = setInterval(function() {
  * Triggers when all the animations of a movement are done
  */
 Game.onMoveComplete = function(gems) {
-	console.log('onMoveComplete');
 	for (var i = 0; i < gems.length; i++) {
 		gems[i].removeEventListener('click', Game.onGemClick, false);	// We remove all the previous listeners, just in case
 		gems[i].addEventListener('click', Game.onGemClick, false);
@@ -42,7 +41,7 @@ Game.onMoveComplete = function(gems) {
 
 	// If the goal has been reached, we go to the next level
 	if (Game.score.current >= Game.score.goal) {
-		Game.nextLevel();
+		Game.endLevel();
 		return;
 	}
 
@@ -139,9 +138,7 @@ Game.emptyGrid = function() {
  * Restarts the game
  */
 Game.restart = function() {
-	if (Game.removeHint) {
-		Game.removeHint();
-	}
+	Game.removeHint();
 	Game.emptyGrid();
 	Game.init();
 };
@@ -164,10 +161,16 @@ Game.confirmRestart = function() {
 };
 
 /**
+ * Notices the player of the end of the level
+ */
+Game.endLevel = function() {
+	Popup.alert('Niveau ' + Game.level + ' terminé !', Game.nextLevel);
+}
+
+/**
  * Goes to the next level
  */
 Game.nextLevel = function() {
-	alert('Niveau ' + Game.level + ' terminé !');
 	Game.level++;
 	if (Game.bonus.bomb != undefined) {
 		delete Game.bonus.bomb;

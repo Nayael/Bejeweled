@@ -7,6 +7,11 @@
 Game.checkHint = function() {
 	var gems = get('.gem'),
 		hint = null;
+	
+	if (Game.hint != undefined) {
+		clearTimeout(Game.hint.timer);
+		delete Game.hint;
+	}
 
 	for (var i = gems.length - 1; i >= 0; i--) {
 		// If there is at least one gem can be moved to make a streak
@@ -17,15 +22,12 @@ Game.checkHint = function() {
 			break;
 		}
 	};
-
-	if (Game.hint != undefined && !Array.equals(Game.hint.gems, hint)) {
-		clearTimeout(Game.hint.timer);
-	}
-	// We set the hint (only if it differs from the previous)
-	if (hint != null && hint.length > 0 && (Game.hint == undefined || !Array.equals(Game.hint.gems, hint))) {
+	
+	// We set the hint
+	if (hint != null && hint.length > 0) {
 		Game.hint = {
 			gems: hint,		// We keep the hint for the player
-			timer: setTimeout(Game.showHint, 15000)	// We will show it in 15 seconds if the player is stuck
+			timer: setTimeout(Game.showHint, 3000)	// We will show it in 3 seconds if the player is stuck
 		};
 	}
 	return (hint != null);
@@ -86,9 +88,7 @@ Game.showHint = function() {
 				grid.appendChild(arrow);
 				// Game.playSound('hint.wav');
 			}else {
-				if (arrow.parentNode) {
-					grid.removeChild(arrow);
-				}
+				remove(arrow);
 			}
 			i++;
 		}, 200);
@@ -103,18 +103,15 @@ Game.showHint = function() {
 		if (timer1 != null) {
 			// We stop the blinking
 			clearInterval(timer2);
-			timer2 = null;
 			clearInterval(timer1);
+			timer2 = null;
 			timer1 = null;
-			if (arrow.parentNode) {
-				grid.removeChild(arrow);	// We remove the arrow if it is displayed
-			}
-			if (reset !== false) {
-				Game.hint.timer = setTimeout(Game.showHint, 15000);	// We restart the timer to re-display it in 15 seconds
-			}
+			remove(arrow);	// We remove the arrow if it is displayed
+			// if (reset !== false) {
+			// 	Game.hint.timer = setTimeout(Game.showHint, 3000);	// We restart the timer to re-display it in 3 seconds
+			// }
 		}
 	};
 };
 
-Game.removeHint = function() {	
-};
+Game.removeHint = function() {};

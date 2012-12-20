@@ -12,7 +12,9 @@ function get(id) {
  * Removes an element from the page
  */
 function remove (elem) {
-	elem.parentNode.removeChild(elem);
+	if (elem.parentNode) {
+		elem.parentNode.removeChild(elem);
+	}
 }
 
 /**
