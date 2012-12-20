@@ -9,6 +9,7 @@ body{
 	position: relative;
 	margin: 0;
 	padding: 0;
+	height: 100%;
 	background: #000000;
 	font-family: 'Electrolize', 'Segoe UI', Helvetica, Arial, 'Trebuchet MS', sans-serif;
 	font-size: 14px;
@@ -18,7 +19,7 @@ body{
 #content{
 	position: relative;
 	width: 1000px;
-	min-height: 660px;
+	min-height: 640px;
 	margin: auto;
 	background-image: url('../images/background_hover.png'), url('../images/background1.jpg');
 	background-repeat: no-repeat;

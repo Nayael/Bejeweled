@@ -47,6 +47,10 @@ function Popup (args) {
 	box.style.top = '50%';
 	box.style.left = '50%';
 
+	window.onscroll = function() {
+		that.container.style.top = window.pageYOffset + 'px';
+	}
+
 	// If style properties were passed, we set the popup CSS with them
 	if (args.style != undefined && args.style != null) {
 		box.style = args.style;
@@ -143,7 +147,7 @@ Popup.confirm = function(text, style, trueCallback, falseCallback) {
 	// We create a popup with two buttons
 	var popup = new Popup({
 		type: 'html',
-		content: '<h3>' + text + '</h3>',
+		content: '<h3>' + text + '</h3><br/>',
 		buttons: [
 			{
 				text: 'Oui',
@@ -157,39 +161,4 @@ Popup.confirm = function(text, style, trueCallback, falseCallback) {
 		style: style || null
 	});
 	popup.show();
-};
-
-/**
- * A prompt popup with a text field
- */
-Popup.prompt = function(text, callback) {
-	var input = document.createElement('input'),
-		value = '';
-	input.setAttribute('type', 'text');
-	input.onchange = function() {
-		value = input.value;
-		console.log('value: ', value);
-	}
-
-	var html = '<h3>' + text + '</h3><p>' + input.outerHTML + '</p>',
-
-		popup = new Popup({
-		type: 'html',
-		content: html,
-		buttons: [
-			{
-				text: 'Ok',
-				callback: function () {
-					console.log('input: ', document.getElementById('prompt_input'));
-					console.log('value: ', value);
-					callback();
-					console.log('input.value: ', input.value);
-					return input.value;
-				}
-			}
-		]
-	});
-	popup.show();
-
-	return value;
 };

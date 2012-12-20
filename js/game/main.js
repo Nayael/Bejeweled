@@ -191,7 +191,7 @@ Game.checkGameOver = function() {
  * When the game is over : displays a popup to make the player restart
  */
 Game.gameOver = function() {
-	Popup.confirm('Il n\'y a plus de mouvements possibles.<br/>Vous avez perdu.<br/><br/>Voulez-vous recommencer ?', {height: '170px'}, Game.restart);
+	Popup.confirm('Il n\'y a plus de mouvements possibles.<br/>Vous avez perdu.<br/><br/>Voulez-vous recommencer ?', {height: '200px'}, Game.restart);
 };
 
 window.onload = Game.init();
