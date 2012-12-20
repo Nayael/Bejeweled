@@ -1,5 +1,5 @@
 /**
- * A bonus item for Ore : the Bomb
+ * A bonus item for Ore : the Bomb (destoys all the immediatly surrounding gems)
  */
 Game.Bomb = function() {
 	if (this == window) {
@@ -9,6 +9,7 @@ Game.Bomb = function() {
 	Game.addBombCapabilities(bomb);
 
 	bomb.className = 'bomb item';
+	bomb.style.backgroundImage = 'url("./images/sprites/bomb.png")';
 	bomb.addEventListener('click', bomb.explode, false);
 	bomb.active = false;
 	bomb.isGem = false;
@@ -24,6 +25,8 @@ Game.addBombCapabilities = function(bomb) {
 	bomb.explode = function(event) {
 		if (!bomb.active)
 			return;
+		if (Game.removeHint)
+			Game.removeHint();
 		bomb.active = false;
 		var gemsToRemove = [],
 			x = bomb.x(),

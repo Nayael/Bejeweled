@@ -1,3 +1,5 @@
+// Audio related functions
+
 /**
  * Plays a sound in the game
  */

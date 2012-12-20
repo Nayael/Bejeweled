@@ -1,3 +1,6 @@
+/**
+ * Adds some methods to a given item to make it a displayable and movable item on the game grid
+ */
 function addItemCapabilities(item) {
 	/**
 	 * Returns (and sets, if a value is passed as an argument) the gem's "left" CSS property in px
@@ -10,7 +13,6 @@ function addItemCapabilities(item) {
 				item.style.left = value;
 			return value;
 		}
-			
 		return item.style.left;
 	};
 
@@ -25,7 +27,6 @@ function addItemCapabilities(item) {
 				item.style.top = value;
 			return value;
 		}
-
 		return item.style.top;
 	};
 
@@ -131,9 +132,7 @@ function addItemCapabilities(item) {
 	 * Trggiers everytime the item's fall is finished
 	 */
 	item.onFallComplete = function() {
-		var items = get('.item');
 		item.falling = false;
-
 		if (get('#tile' + (item.y() + 1) + '_' + item.x()) == null && (item.y() + 1) != Game.GRID_SIZE) {	// If there is still an empty slot below the item
 			item.fall();		// We make it fall again
 		}else if(item.className == 'gem item') {				// Otherwise, the fall is over

@@ -1,3 +1,5 @@
+// Game initialisation
+
 var Game = {};	// The game instance
 Game.GRID_SIZE = 8;
 Game.TILE_SIZE = 65;
@@ -13,8 +15,13 @@ Game.init = function () {
 	Game.moving = false;	// Are the gems moving or not ?
 	Game.score = {
 		goal: 15000,
-		total: 0,
-		current: 0
+		current: 14000,
+		total: 14000
+	};
+	Game.timer = {			// The timer is initialized at 5 minutes
+		minutes: 5,
+		seconds: 0,
+		real: (5 * 60 * 1000)
 	};
 	Game.bonus = {};
 
@@ -31,7 +38,7 @@ Game.init = function () {
  * Created the game's grid
  */
 Game.createGrid = function() {
-	var grid = get('#grid'), map = [], row, vGems = [], hGems = [];
+	var grid = get('#grid'), map = [], row, vGems = [], hGems = [], bg;
 
 	for (var i = 0, j = 0; i < Game.GRID_SIZE; i++) {
 		row = [];
@@ -52,6 +59,13 @@ Game.createGrid = function() {
 			hGems = [];
 		};
 	};
+
+	// We choose a random background
+	do {
+		bg = Math.floor(1 + Math.random() * 3);
+		get('#content').style.backgroundImage = 'url("./images/background_hover.png"), url("./images/background' + bg + '.jpg")';
+	} while (bg === Game.background);
+	Game.background = bg;
 
 	// var map = [	// The level's map (coordinates are: map[y][x])
 	// 	[0, 2, 0, 1, 0, 1, 0, 1],

@@ -1,5 +1,5 @@
 /**
- * Creates an gem from its coordinates and tile value
+ * Creates an gem from its coordinates and value
  */
 Game.Gem = function(x, y, value) {
 	if (this == window) {

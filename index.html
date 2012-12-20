@@ -7,20 +7,48 @@
 
 	<link rel="icon" type="image/x-icon" href="images/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="css/screen.css" />
-	<link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" href="css/game.css" />
+	<!-- <link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'> -->
 </head>
 <body>
 	<div id="content">
 		<header>
 			<nav>
-				<a href="#" class="current_menu">Accueil</a>
-				<a href="game.html">Jeu</a>
+				<a href="#" id="bt_index" class="current_menu">Accueil</a>
+				<a href="#game" id="bt_game">Jeu</a>
+				<!-- <a href="#" class="current_menu">Accueil</a> -->
+				<!-- <a href="game.html">Jeu</a> -->
 			</nav>
 		</header>
+ 		</nav>
 		<div id="site_content">
 			<p>The objective of this game is to swap one gem with an adjacent gem to form a horizontal or vertical chain of three or more gems. Bonus points are given when more than three identical gems are formed or forms two lines of identical gems in one swap. Gems disappear when chains are formed and gems fall from the top to fill in gaps. Sometimes chain reactions, called cascades, are triggered, where chains are formed by the falling gems. Cascades are awarded with bonus points. There are two variations of the game to choose from.</p><p>Although normally the player gets only 3 in a row for gems, sometimes they can get 4 or 5 in a row. And in rare conditions, they can get 6, 7 and even 8 in a row. However, some versions of the engine do not register it. The player gets more points and sometimes special powerups from more than 3 gems in a row.</p>
 		</div>
-		<footer>Conception et développement - 2012 Nicolas Vannier</footer>
+
+		<div id="game_content">
+			<div id="player_info">
+				<div id="score_gauge"><div id="current_gauge"></div></div>
+				<p>Niveau</p><div id="level">1</div>
+				<p>Score</p><div id="total_score">0</div>
+				<button id="restart_bt">Recommencer</button>
+			</div>
+			<div id="grid"></div>
+		</div>
+		<!-- <footer>Conception et développement - 2012 Nicolas Vannier</footer> -->
 	</div>
+
+	<script type="text/javascript" src="js/util.js"></script>
+	<script type="text/javascript" src="js/navigation.js"></script>
+	<script type="text/javascript" src="js/game/capabilities/item.js"></script>
+	<script type="text/javascript" src="js/game/init.js"></script>
+	<script type="text/javascript" src="js/game/timer.js"></script>
+	<script type="text/javascript" src="js/game/hint.js"></script>
+	<script type="text/javascript" src="js/game/score.js"></script>
+	<script type="text/javascript" src="js/game/streak.js"></script>
+	<script type="text/javascript" src="js/game/bonus.js"></script>
+	<script type="text/javascript" src="js/game/audio.js"></script>
+	<script type="text/javascript" src="js/game/classes/Gem.js"></script>
+	<script type="text/javascript" src="js/game/classes/Bomb.js"></script>
+	<script type="text/javascript" src="js/game/main.js"></script>
 </body>
 </html>

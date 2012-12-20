@@ -1,3 +1,5 @@
+// Bonus related functions
+
 /**
  * Adds a bonus item : the bomb
  */

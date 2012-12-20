@@ -1,3 +1,5 @@
+// Hint related functions (Possible streaks parsing, etc.)
+
 /**
  * Checks if the player still has a possibility to make a streak
  * @return {Array} An array containing the gems to swap if it is possible, null otherwise
@@ -23,10 +25,9 @@ Game.checkHint = function() {
 	if (hint != null && hint.length > 0 && (Game.hint == undefined || !Array.equals(Game.hint.gems, hint))) {
 		Game.hint = {
 			gems: hint,		// We keep the hint for the player
-			timer: setTimeout(Game.showHint, 3000)	// We will show it in 3 seconds if the player is stuck
+			timer: setTimeout(Game.showHint, 15000)	// We will show it in 15 seconds if the player is stuck
 		};
 	}
-	// console.log('hint: ', hint[0], hint[1]);
 	return (hint != null);
 };
 
@@ -34,9 +35,9 @@ Game.checkHint = function() {
  * Displays an animation to give the player a hint on which gem to move if he is stuck
  */
 Game.showHint = function() {
-	if (Game.hint == undefined)
+	if (Game.hint == undefined || Game.hint.gems == undefined)
 	    return;
-	if (Game.hint.timer && Game.removeHint) {
+	if (Game.hint.timer) {
 		Game.removeHint(false);	// We remove the previous hint, and don't restart it, just in case
 	}
 	var arrow = document.createElement('span'),
@@ -76,7 +77,6 @@ Game.showHint = function() {
 	timer1 = setInterval(function() {
 		var blinks = 3, i = 0;	// The arrow blinks 3 times
 		timer2 = setInterval(function() {
-			// Game.hint.displayed = true;
 			if (i == blinks * 2) {
 				clearInterval(timer2);
 				return;
@@ -98,19 +98,23 @@ Game.showHint = function() {
 	 * Removes the hint animation once the player has clicked on a gem
 	 */
 	Game.removeHint = function(reset) {
+		clearTimeout(Game.hint.timer);
+		Game.hint.timer = null;
 		if (timer1 != null) {
 			// We stop the blinking
 			clearInterval(timer2);
 			timer2 = null;
 			clearInterval(timer1);
 			timer1 = null;
-			clearTimeout(Game.hint.timer);
 			if (arrow.parentNode) {
 				grid.removeChild(arrow);	// We remove the arrow if it is displayed
 			}
 			if (reset !== false) {
-				Game.hint.timer = setTimeout(Game.showHint, 3000);	// We restart the timer to re-display it in 3 seconds
+				Game.hint.timer = setTimeout(Game.showHint, 15000);	// We restart the timer to re-display it in 15 seconds
 			}
 		}
 	};
+};
+
+Game.removeHint = function() {	
 };

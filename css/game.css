@@ -1,17 +1,18 @@
 @charset "UTF-8";
 
 #game_content{
+	display: none;
 	width: 750px;
 	height: 520px;
 	margin: auto;
-	background-color: #333355;
+	background-color: rgba(51, 51, 85, 0.4);
 }
 
 #grid{
 	position: relative;
-	width: 520px;
+	width: 525px;
 	height: 520px;
-	background-color: #222;
+	background-color: rgba(32, 32, 32, 0.4);
 }
 
 #player_info{
@@ -24,37 +25,35 @@
 
 #player_info p, #game_level{
 	font-size: 18px;
-}
-
-#level{
-	margin-bottom: 60px;
-	font-weight: bold;
-	font-size: 20px;
-}
-
-#player_score{
-	margin-bottom: 25px;
-	font-size: 20px;
-	font-weight: bold;
-}
-
-#total_score{
-	padding: 20px 0 20px 0;
-	font-size: 20px;
-	font-weight: bold;
-}
-
-.score_gain{
-	position: absolute;
-	left: 102px;
-	font-size: 15px;
+	margin-left: 30px;
 	color: #22AA22;
 }
 
+#level{
+	margin-left: 30px;
+	margin-bottom: 60px;
+	font-weight: bold;
+	font-size: 20px;
+	color: #22AA22;
+}
+
+#total_score{
+	padding: 70px 0 20px 0;
+	margin-left: 30px;
+	margin-top: -70px;
+	font-size: 20px;
+	height: 150px;
+	font-weight: bold;
+	color: #22AA22;
+	background-image: url('../images/vert.png');
+	background-repeat: no-repeat;
+	background-position: top center;
+}
+
 #score_gauge{
-	position: relative;
-	float: left;
+	position: absolute;
 	left: 30px;
+	top: 15px;
 	width: 15px;
 	height: 400px;
 	background-color: #666;
@@ -69,17 +68,19 @@
 	background-color: #00F000;
 }
 
+.score_gain{
+	position: absolute;
+	left: 112px;
+	font-size: 15px;
+	color: #222;
+}
+
 .gem, .bomb{
 	position: absolute;
 	width: 60px;
 	height: 60px;
 	background-position: center center;
 	background-repeat: no-repeat;
-}
-
-.bomb{
-	background-image: url('../images/sprites/bomb.png');
-	background-color: #FFFFFF;
 }
 
 #restart_bt{
