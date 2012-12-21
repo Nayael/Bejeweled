@@ -6,7 +6,8 @@
  */
 Game.checkHint = function() {
 	var gems = get('.gem'),
-		hint = null;
+		hint = null,
+		oneHint = false;	// Is there at least one hint found
 	
 	if (Game.hint != undefined) {
 		clearTimeout(Game.hint.timer);
@@ -16,6 +17,7 @@ Game.checkHint = function() {
 	for (var i = gems.length - 1; i >= 0; i--) {
 		// If there is at least one gem can be moved to make a streak
 		if ((hint = gems[i].getPossibleMove()) != null) {
+			oneHint = true;
 			if (hint.length == 0) {
 				continue;
 			}
@@ -31,7 +33,7 @@ Game.checkHint = function() {
 			start: new Date()
 		};
 	}
-	return (hint != null);
+	return oneHint;
 };
 
 /**
@@ -141,7 +143,7 @@ Game.pauseHint = function() {
 		if (remaningTime <= 0) {	// If the hint timer was already finished, we look for another hint
 			Game.removeHint();
 			Game.checkGameOver();
-		}else {
+		}else if (Game.hint) {
 			Game.hint.start = new Date();	// We set a new starting moment
 			Game.hint.timer = setTimeout(Game.showHint, remaningTime);	// We start the timer again, for the remaining time
 		}

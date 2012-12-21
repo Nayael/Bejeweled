@@ -35,27 +35,51 @@ Game.init = function () {
  * Created the game's grid
  */
 Game.createGrid = function() {
-	var grid = get('#grid'), map = [], row, vGems = [], hGems = [], bg;
+	// var grid = get('#grid'), map = [], row, vGems = [], hGems = [], bg;
 
-	for (var i = 0, j = 0; i < Game.GRID_SIZE; i++) {
-		row = [];
-		map.push(row);	// We create a row in the map
+	// for (var i = 0, j = 0; i < Game.GRID_SIZE; i++) {
+	// 	row = [];
+	// 	map.push(row);	// We create a row in the map
 
-		for (j = 0; j < Game.GRID_SIZE; j++) {
-			do {
-				gem = new Game.Gem(j, i, parseInt(Math.random() * Game.gemRange));
-				if (i > 0)
-					vGems = gem.parseNeighbours(true, -1);
-				if (j > 0)
-					hGems = gem.parseNeighbours(false, -1);
-			}while (vGems.length >= 2 || hGems.length >= 2);
+	// 	for (j = 0; j < Game.GRID_SIZE; j++) {
+	// 		do {
+	// 			gem = new Game.Gem(j, i, parseInt(Math.random() * Game.gemRange));
+	// 			if (i > 0)
+	// 				vGems = gem.parseNeighbours(true, -1);
+	// 			if (j > 0)
+	// 				hGems = gem.parseNeighbours(false, -1);
+	// 		}while (vGems.length >= 2 || hGems.length >= 2);
 
+	// 		gem.addEventListener('click', Game.onGemClick, false);	// We add the mouse event listener
+	// 		gem.pop(grid);
+	// 		vGems = [];
+	// 		hGems = [];
+	// 	};
+	// };
+
+	var map = [	// The level's map (coordinates are: map[y][x])
+		[0, 1, 0, 3, 0, 3, 0, 3],
+		[1, 6, 1, 2, 1, 2, 1, 2],
+		[0, 1, 0, 3, 0, 3, 0, 3],
+		[1, 5, 1, 2, 1, 2, 1, 3],
+		[0, 6, 0, 3, 0, 3, 0, 3],
+		[1, 3, 1, 2, 1, 2, 1, 2],
+		[0, 4, 0, 3, 0, 3, 0, 3],
+		[1, 4, 1, 2, 1, 2, 1, 2]
+	];
+
+	var grid = get('#grid'), row, value;
+
+	for (var i = 0; i < map.length; i++) {
+		row = map[i];
+		for (var j = 0; j < row.length; j++) {
+			value = row[j];
+			gem = new Game.Gem(j, i, value);
 			gem.addEventListener('click', Game.onGemClick, false);	// We add the mouse event listener
 			gem.pop(grid);
-			vGems = [];
-			hGems = [];
 		};
 	};
+
 
 	// We choose a random background
 	do {
