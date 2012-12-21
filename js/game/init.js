@@ -63,29 +63,6 @@ Game.createGrid = function() {
 		get('#content').style.backgroundImage = 'url("./images/background_hover.png"), url("./images/background' + bg + '.jpg")';
 	} while (bg === Game.background);
 	Game.background = bg;
-
-	// var map = [	// The level's map (coordinates are: map[y][x])
-	// 	[0, 3, 0, 3, 0, 3, 0, 3],
-	// 	[1, 2, 1, 2, 1, 2, 1, 2],
-	// 	[0, 3, 0, 3, 0, 3, 0, 3],
-	// 	[1, 2, 1, 2, 1, 2, 1, 2],
-	// 	[0, 3, 0, 3, 0, 3, 0, 3],
-	// 	[1, 2, 1, 2, 1, 2, 1, 2],
-	// 	[0, 3, 0, 3, 0, 3, 0, 3],
-	// 	[1, 2, 1, 2, 1, 2, 1, 2]
-	// ];
-
-	// var grid = get('#grid'), row, value;
-
-	// for (var i = 0; i < map.length; i++) {
-	// 	row = map[i];
-	// 	for (var j = 0; j < row.length; j++) {
-	// 		value = row[j];
-	// 		gem = new Game.Gem(j, i, value);
-	// 		gem.addEventListener('click', Game.onGemClick, false);	// We add the mouse event listener
-	// 		gem.pop(grid);
-	// 	};
-	// };
 	// We check if there is at least one possible move
 	Game.checkGameOver();
 

@@ -1,7 +1,6 @@
 @charset "UTF-8";
 
 #game_content{
-	/*display: none;*/
 	width: 750px;
 	height: 520px;
 	margin: auto;
@@ -101,9 +100,7 @@
 	cursor:pointer;
 	height: 30px;
 	margin: 0px -5px 15px 0px;
-	padding-left: 0 9px 0 9px;
-	background-color: #F3F3F3;
-	border: solid 1px #DCDCDC;
+	padding: 0 9px 0 9px;
 }
 
 #content button:hover{
