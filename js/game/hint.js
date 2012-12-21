@@ -27,7 +27,8 @@ Game.checkHint = function() {
 	if (hint != null && hint.length > 0) {
 		Game.hint = {
 			gems: hint,		// We keep the hint for the player
-			timer: setTimeout(Game.showHint, 15000)	// We will show it in 15 seconds if the player is stuck
+			timer: setTimeout(Game.showHint, 15000),	// We will show it in 15 seconds if the player is stuck
+			start: new Date()
 		};
 	}
 	return (hint != null);
@@ -40,7 +41,7 @@ Game.showHint = function() {
 	if (Game.hint == undefined || Game.hint.gems == undefined)
 	    return;
 	if (Game.hint.timer) {
-		Game.removeHint(false);	// We remove the previous hint, and don't restart it, just in case
+		Game.removeHint();	// We remove the previous hint
 	}
 	var arrow = document.createElement('span'),
 		gems = Game.hint.gems,
@@ -86,7 +87,6 @@ Game.showHint = function() {
 			// Once every two, we display and remove the arrow
 			if (i % 2 == 0) {
 				grid.appendChild(arrow);
-				// Game.playSound('hint.wav');
 			}else {
 				remove(arrow);
 			}
@@ -98,8 +98,10 @@ Game.showHint = function() {
 	 * Removes the hint animation once the player has clicked on a gem
 	 */
 	Game.removeHint = function(reset) {
-		clearTimeout(Game.hint.timer);
-		Game.hint.timer = null;
+		if (Game.hint.timer != undefined) {
+			clearTimeout(Game.hint.timer);
+			delete Game.hint.timer;
+		}
 		if (timer1 != null) {
 			// We stop the blinking
 			clearInterval(timer2);
@@ -111,9 +113,39 @@ Game.showHint = function() {
 	};
 };
 
+/**
+ * Removes the hint animation once the player has clicked on a gem
+ */
 Game.removeHint = function() {
 	if (Game.hint != undefined) {
 		clearTimeout(Game.hint.timer);
 		delete Game.hint.timer;
 	}
 };
+
+/**
+ * Pauses the hint timeout, so that it doesn't show up if the user is on another tab from his browser
+ */
+Game.pauseHint = function() {
+	var remaningTime = 15000;
+	if (Game.hint != undefined) {
+		remaningTime -= (new Date() - Game.hint.start);	// We calculate the hint's timer remaining time to resume it later
+		clearTimeout(Game.hint.timer);
+		delete Game.hint.timer;
+	}
+
+	/**
+	 * Resumes the hint timeout
+	 */
+	Game.resumeHint = function() {
+		if (remaningTime <= 0) {	// If the hint timer was already finished, we look for another hint
+			Game.removeHint();
+			Game.checkGameOver();
+		}else {
+			Game.hint.start = new Date();	// We set a new starting moment
+			Game.hint.timer = setTimeout(Game.showHint, remaningTime);	// We start the timer again, for the remaining time
+		}
+	};
+};
+
+Game.resumeHint = function() {};

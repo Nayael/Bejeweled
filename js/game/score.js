@@ -9,7 +9,7 @@ Game.updateScore = function(destroyedGems) {
 		gain = destroyedGems * perGem,
 		gaugeSize = 0,
 		gainSpan = document.createElement('span'),
-		yOrigin = 160,
+		yOrigin = 215,
 		yShift = 5;
 	
 	// For a streak bigger than 3, the player gets a bonus	
@@ -20,7 +20,7 @@ Game.updateScore = function(destroyedGems) {
 	}
 
 	Game.score.current += gain;
-	Game.score.total += gain;
+	// Game.score.total += gain;
 	
 	// If there is already a gain displayed, we sum the gains
 	var existingGain = get('.score_gain');
@@ -53,5 +53,15 @@ Game.updateScore = function(destroyedGems) {
 		gainSpan.style.top = (y+yShift) + 'px';
 	}, 60);
 
-	get('#total_score').innerHTML = Game.score.total;
+	get('#current_score').innerHTML = Game.score.current;
 };
+
+/**
+ * Resets the score between the levels
+ */
+Game.resetScore = function() {
+	Game.score.current = 0;
+	Game.score.goal *= 1.5;
+	get('#current_score').innerHTML = Game.score.current;
+	get('#goal_score').innerHTML = Game.score.goal;
+}

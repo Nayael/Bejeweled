@@ -7,15 +7,19 @@
 
 	<link rel="icon" type="image/x-icon" href="images/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="css/screen.css" />
-	<link rel="stylesheet" type="text/css" href="css/game.css" />
+	<!-- <link rel="stylesheet" type="text/css" href="css/game.css" /> -->
 	<link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'>
 </head>
-<body><div id="content">
+<body>
+	<div id="content">
 		<header>
 			<nav>
-				<a href="#" id="bt_index" class="current_menu">Accueil</a>
+				<!-- <a href="#" id="bt_index" class="current_menu">Accueil</a>
 				<a href="#game" id="bt_game">Jeu</a>
-				<a href="#rules" id="bt_rules">Règles</a>
+				<a href="#rules" id="bt_rules">Règles</a> -->
+				<a href="index.html" class="current_menu">Accueil</a>
+				<a href="game.html">Jeu</a>
+				<a href="rules.html">Règles</a>
 			</nav>
 		</header>
  		</nav>
@@ -26,11 +30,11 @@
 			<p style="font-size:18px;"><strong>Votre mission</strong>&nbsp;: récupérer un maximum de pierres précieuses.<br/>Mais attention, une planète minière est très instable, alors dépêchez-vous !</p>
 		</div>
 
-		<div id="game_content">
+		<!-- <div id="game_content">
 			<div id="player_info">
 				<div id="time_gauge"><div id="current_gauge"></div></div>
-				<p>Niveau</p><div id="level">1</div>
-				<p>Score</p><div id="total_score">0</div>
+				<p id="level_text">Niveau</p><div id="level">1</div>
+				<p>Score</p><div id="total_score"><span id="current_score">0</span><br/>/<span id="goal_score">5000</span></div>
 				<button id="restart_bt">Recommencer</button>
 				<button id="pause_bt">Pause</button>
 			</div>
@@ -45,24 +49,7 @@
 			<p><br/>Vous avez 3 minutes pour atteindre le nombre de points requis à chaque niveau.</p>
 			<p>Vous aurez perdu la partie si vous ne parvenez pas à terminer le niveau dans le temps imparti, ou si plus aucune combinaison n'est possible sur votre grille.</p>
 			<p style="margin-top:30px;"><strong>Besoin d'aide ?</strong> Si vous êtes bloqués à un niveau, ne paniquez pas, un indice vous sera proposé au bout d'un certain temps d'inactivité.</p>
-		</div>
+		</div> -->
 	</div>
-
-
-	<script type="text/javascript" src="js/util.js"></script>
-	<script type="text/javascript" src="js/navigation.js"></script>
-	<script type="text/javascript" src="js/game/capabilities/item.js"></script>
-	<script type="text/javascript" src="js/game/init.js"></script>
-	<script type="text/javascript" src="js/game/timer.js"></script>
-	<script type="text/javascript" src="js/game/level.js"></script>
-	<script type="text/javascript" src="js/game/hint.js"></script>
-	<script type="text/javascript" src="js/game/score.js"></script>
-	<script type="text/javascript" src="js/game/streak.js"></script>
-	<script type="text/javascript" src="js/game/bonus.js"></script>
-	<script type="text/javascript" src="js/game/audio.js"></script>
-	<script type="text/javascript" src="js/game/classes/Gem.js"></script>
-	<script type="text/javascript" src="js/game/classes/Bomb.js"></script>
-	<script type="text/javascript" src="js/game/classes/Popup.js"></script>
-	<script type="text/javascript" src="js/game/main.js"></script>
 </body>
 </html>

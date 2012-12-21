@@ -17,7 +17,7 @@ Game.checkStreak = function(gem) {
 		if (Game.gem == null) {
 			Game.combo = (Game.combo == undefined ? 1 : Game.combo + 1);
 		}
-		
+
 		gem.inStreak = true;
 		Game.removeStreak(streak);
 	}else if (Game.gem != null && Game.gem.id !== gem.id && !Game.gem.inStreak) {	// If there is a selected gem, and it is not in a streak, we will have to reverse the swap
@@ -35,17 +35,7 @@ Game.checkStreak = function(gem) {
  * @param {Array} gemsToRemove	An array containing the gems that are in a streak
  */
 Game.removeStreak = function(gemsToRemove) {
-	var file = 'streak.wav';
-	
 	Game.removeHint();	// We delete the gem hint
-
-	// If there is more than 1 combo streak
-	if (Game.combo != undefined && Game.combo > 0) {
-		file = 'combo.wav';
-	}
-	// We play a sound for the gem destruction
-	// Game.playSound(file);
-
 	var totalGems = 0, nbGems = 0, fallAfter = false;
 
 	for (var column in gemsToRemove) {

@@ -5,6 +5,7 @@
  */
 Game.confirmRestart = function() {
 	Popup.confirm('Êtes-vous sûr(e) de vouloir recommencer ?', null, Game.restart);
+	Game.removeHint();
 };
 
 /**
@@ -22,6 +23,7 @@ Game.restart = function() {
  */
 Game.endLevel = function() {
 	Popup.alert('Niveau ' + Game.level + ' terminé !', Game.nextLevel);
+	Game.removeHint();
 }
 
 /**
@@ -32,8 +34,6 @@ Game.nextLevel = function() {
 	if (Game.bonus.bomb != undefined) {
 		delete Game.bonus.bomb;
 	}
-	Game.score.current = 0;
-	Game.score.goal *= 1.5;
 
 	if (Game.level == 5) {
 		Game.gemRange++;
@@ -41,6 +41,7 @@ Game.nextLevel = function() {
 
 	get('#current_gauge').style.height = '100%';
 	get('#level').innerHTML = Game.level;
+	Game.resetScore();
 	Game.resetTimer();
 	Game.emptyGrid();
 	Game.createGrid();
@@ -59,5 +60,6 @@ Game.checkGameOver = function() {
  * When the game is over : displays a popup to make the player restart
  */
 Game.gameOver = function() {
-	Popup.confirm('Il n\'y a plus de mouvements possibles.<br/>Vous avez perdu.<br/><br/>Voulez-vous recommencer ?', {height: '200px'}, Game.restart);
+	Popup.confirm('Il n\'y a plus de mouvements possibles.<br/>Voulez-vous recommencer ?', null, Game.restart);
+	Game.paused = true;
 };

@@ -15,8 +15,7 @@ Game.init = function () {
 	Game.moving = false;	// Are the gems moving or not ?
 	Game.score = {
 		goal: 5000,
-		current: 0,
-		total: 0
+		current: 0
 	};
 	Game.bonus = {};
 	Game.pauses = false;
@@ -24,7 +23,8 @@ Game.init = function () {
 
 	// We initialize the UI
 	get('#level').innerHTML = Game.level;
-	get('#total_score').innerHTML = Game.score.total;
+	get('#current_score').innerHTML = Game.score.current;
+	get('#goal_score').innerHTML = Game.score.goal;
 	get('#restart_bt').onclick = Game.confirmRestart;
 	get('#pause_bt').onclick = Game.pause;
 
@@ -88,6 +88,16 @@ Game.createGrid = function() {
 	// };
 	// We check if there is at least one possible move
 	Game.checkGameOver();
+
+	// If the player leaves the page, we stop the timer to display the hint after 15 seconds
+	window.onblur = function(){
+		Game.pauseHint();
+	}
+
+	// When he returns on the page, we resume the hint timer
+	window.onfocus = function(){
+		Game.resumeHint();
+	}
 };
 
 /**

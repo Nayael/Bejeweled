@@ -4,7 +4,6 @@
 Game.mainLoop = setInterval(function() {
 	// We consider the game in pause if there is a popup or if we are on another page
 	if (Game.paused || get('#game_content').style.display === 'none' || get('.popup') != null) {
-		Game.removeHint();
 		return;
 	}
 	Game.updateTimer();
@@ -33,7 +32,7 @@ Game.onMoveComplete = function(gems) {
 		gems[i].addEventListener('click', Game.onGemClick, false);
 	};
 
-	if (Game.level >= 5 && Game.combo >= 2 && Game.bonus.bomb == undefined) {	// The player earns a bomb is he makes more than 1 combo
+	if (Game.combo >= 2 && Game.bonus.bomb == undefined) {	// The player earns a bomb is he makes more than 1 combo
 		Game.winBomb();
 	}
 
@@ -138,16 +137,21 @@ Game.pause = function() {
 	if (Game.moving) {
 		return;
 	}
-	var pause;
+	var pause, items = get('.item');
 
 	/**
 	 * Resumes the game
 	 */
 	Game.resume = function() {
+		for (var i = 0; i < items.length; i++) {
+			items[i].style.visibility = 'visible';
+		};
 		remove(pause);
 		Game.paused = false;
+		Game.checkGameOver();
 	};
 
+	// We create a popup
 	pause = new Popup({
 		type: 'html',
 		content: '<h3>Jeu en pause</h3><br/>',
@@ -158,10 +162,14 @@ Game.pause = function() {
 			}
 		]
 	});
+
+	// We hide all the gems to avoid cheating
+	for (var i = 0; i < items.length; i++) {
+		items[i].style.visibility = 'hidden';
+	};
 	Game.removeHint();
 	pause.show();
 	Game.paused = true;
 };
-
 
 window.onload = Game.init();
