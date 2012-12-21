@@ -20,7 +20,6 @@ Game.updateScore = function(destroyedGems) {
 	}
 
 	Game.score.current += gain;
-	// Game.score.total += gain;
 	
 	// If there is already a gain displayed, we sum the gains
 	var existingGain = get('.score_gain');

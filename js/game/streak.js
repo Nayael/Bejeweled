@@ -106,7 +106,7 @@ Game.onStreakRemoved = function(streak) {		// We continue after the streak disap
 	};
 	Game.deselectGem();
 };
-
+var check = true;
 /**
  * Generates random gems above the grid after a streak disappeared
  * @param {Array} streak	An array containing the gems that are in a streak
@@ -120,9 +120,11 @@ Game.generateGems = function(x) {
 			quantity++;
 
 			value = parseInt(Math.random() * Game.gemRange);
+			if (check) value = 0;
 			y = -1 * quantity;
 			gem = new Game.Gem(parseInt(x), y, value);
 			grid.appendChild(gem);
 		}
 	};
+	check = false
 };

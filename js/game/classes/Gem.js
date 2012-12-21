@@ -44,10 +44,7 @@ Game.addGemCapabilities = function(gem) {
 	 * Makes the gem pop on the grid
 	 */
 	gem.pop = function(grid) {
-		// gem.style.visibility = 'hidden';
-		// gem.style.opacity = 0;
 		grid.appendChild(gem);
-		// gem.style.webkitTransition = 'visibility 0s linear 0.5s,opacity 0.5s linear';
 	};
 
 	/**
