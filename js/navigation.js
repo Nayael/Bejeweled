@@ -16,7 +16,7 @@ Site.onMenuClick = function(event) {
 	var target = event.target || event.srcElement,
 		hash = window.location.hash;
 
-	Game.removeHint();
+	Game.pauseHint();	// We pause the hint timer
 
 	if (target.getAttribute('href') == '#game')
 		window.location.hash = 'game';
@@ -38,6 +38,14 @@ Site.changePageFromHash = function () {
 	get("#site_content").style.display = window.location.hash === '' ? 'block' : 'none';
 	get("#game_content").style.display = window.location.hash === '#game' ? 'block' : 'none';
 	get("#rules_content").style.display = window.location.hash === '#rules' ? 'block' : 'none';
+
+	if (window.location.hash === '#game') {
+		if (Game.paused == undefined) {	// If the game hasn't been initialized yet, we do so
+			Game.init();
+		}else{
+			Game.resumeHint();
+		}
+	}
 	
 	for (var i = 0; i < links.length; i++) {
 		links[i].setAttribute('class', '');

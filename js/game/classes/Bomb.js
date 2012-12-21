@@ -41,7 +41,6 @@ Game.addBombCapabilities = function(bomb) {
 		};
 		get('#grid').removeChild(bomb);
 		Game.removeStreak(gemsToRemove);
-		// Game.playSound('bomb.wav');
 		delete Game.bonus.bomb;
 	};
 };
